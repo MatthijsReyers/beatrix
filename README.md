@@ -1,2 +1,3 @@
-# beatrix
-A robot arm worthy of a royal name 
+# Beatrix
+A robot arm worthy of a royal name.
+
