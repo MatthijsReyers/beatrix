@@ -22,7 +22,12 @@ camera = Camera(debug_mode=args.no_debug)
 robotarm = RobotArm(debug_mode=args.no_debug)
 controller = Controller(camera, robotarm)
 
-# Note the connditional import so that the control software can be run without the 
+# Start debug window if needed. (Note the connditional import so that the control software can be 
+# run without the GTK module installed).
 if not args.no_debug:
     from debugwindow import DebugWindow
+    from gi.repository import Gtk
     debugwindow = DebugWindow()
+    debugwindow.connect("destroy", Gtk.main_quit)
+    debugwindow.show_all()
+    Gtk.main()
