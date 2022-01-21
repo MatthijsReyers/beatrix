@@ -15,8 +15,19 @@ class ServerSocket():
         self._connections = []
 
         self.port = port
+        self.running = False
+
+    def start(self):
+        """ Makes the socket listen for incoming connections on the provided port, this happens on a 
+        separate thread so the start function is not blocking. """
+        self.running = True
+        self.conn_thread = Thread(target=self.__connection_thread, args=())   
+        self.conn_thread.setDaemon(True)
+        self.conn_thread.start()
 
     def stop(self):
+        """ Stops the socket from listening on the provided port and gracefully closes all currently 
+        active network connections and running threads. """
         self.running = False
         for (conn, _) in self._connections:
             conn.close()
@@ -28,23 +39,33 @@ class ServerSocket():
             if thread.is_alive():
                 thread.join()
 
-    def start(self):
-        self.running = True
-        self.conn_thread = Thread(target=self.__connection_thread, args=())   
-        self.conn_thread.setDaemon(True)
-        self.conn_thread.start()
-
-    def send(self, data:bytes):
+    def send(self, data:bytes, ip:str=None):
+        """ Tries to send the given data to either all connected clients or the one with the given IP 
+        address, note that this happens on the calling thread and will block until all connections have 
+        either received the data or timed out. 
+        
+        Arguments:
+            data (bytes): Data to send, should be a bytestring but regular strings will be automatically
+                converted to bytestrings.
+            ip (str): Optional Ip address to send to, all clients will receive data if none is provided.
+        """
         for (conn, addr) in self._connections:
             try:
-                conn.send(data)
+                if ip != None or addr[1] == ip:
+                    conn.send(data)
             except BrokenPipeError:
                 if (conn, addr) in self._connections:
                     self._connections.remove((conn, addr))
             except Exception as e:
                 print(f'[!] Encountered unexpected exception while sending:\n', type(e), e)
 
-    def recieve(self, callback:callable):
+    def on_receive(self, callback:callable):
+        """ Adds a callback function to the socket that will be called whenever one of the clients sends
+        something to this server socket. 
+        
+        Arguments:
+            callback: Function/callable with parameters (data:bytes, client:(ip,port)).
+        """
         self._receive_callbacks.append(callback)
 
     def __connection_thread(self):
@@ -54,14 +75,14 @@ class ServerSocket():
                 conn, addr = self._socket.accept()
                 print(f'[*] Opened connection from: {addr}')
                 self._connections.append((conn, addr))
-                thread = Thread(target=self.__recieve_thread, args=(conn, addr))
+                thread = Thread(target=self.__receive_thread, args=(conn, addr))
                 thread.start() 
                 self._receive_threads.append(thread)
             except timeout: pass
             except Exception as e:
                 print('[!] Encountered unexpected exception while connecting:\n', type(e), e) 
 
-    def __recieve_thread(self, conn, addr):
+    def __receive_thread(self, conn, addr):
         def conn_end():
             if (conn, addr) in self._connections:
                 conn.close()
@@ -74,20 +95,8 @@ class ServerSocket():
                     conn_end()
                     break
                 for callback in self._receive_callbacks:
-                    callback(data)
+                    callback(data, addr)
             except ConnectionResetError as e:
                 conn_end()
             except Exception as e:
                 print('[!] Encountered unexpected exception while receiving:\n', type(e), e) 
-                
-
-
-if __name__ == '__main__':
-    import time
-    socket = ServerSocket(6060)
-    socket.start()
-    socket.recieve(print)
-    while True:
-        print([x[1] for x in socket._connections])
-        socket.send(b'hey!')
-        time.sleep(2)

@@ -16,7 +16,7 @@ class ClientSocket():
         
         self.reconnecting = False
         self.connected    = False
-        self.on_connected = Condition()
+        self._on_connected = Condition()
         
         self._socket_mutex = Lock()
         self._socket = socket(AF_INET, SOCK_STREAM)
@@ -53,9 +53,9 @@ class ClientSocket():
         """
         try: 
             if not self.connected:
-                self.on_connected.acquire()
-                self.on_connected.wait(timeout=SEND_TIMEOUT)
-                self.on_connected.release()
+                self._on_connected.acquire()
+                self._on_connected.wait(timeout=SEND_TIMEOUT)
+                self._on_connected.release()
             if self.connected:
                 self._socket_mutex.acquire()
                 self._socket.sendall(data)
@@ -75,7 +75,7 @@ class ClientSocket():
         either through an error or timeout it will return `False` and an empty byte array.
 
         Arguments:
-            buffer_size (int): The maximum amount of bytes to recieve (defaults to 1024).
+            buffer_size (int): The maximum amount of bytes to receive (defaults to 1024).
 
         Returns:
             (True, data) when data was successfully sent and (False, '') when not.
@@ -97,12 +97,12 @@ class ClientSocket():
             self._socket_mutex.release()
         return (False, b'')
 
-    def on_change(self, callback):
+    def on_change(self, callback:callable):
         """ Adds a callback function to the socket that will be called whenever the connection state of 
         the socket changes. """
         self._callbacks.append(callback)
 
-    def __set_connected(self, state):
+    def __set_connected(self, state:bool):
         """ Updates the `self.connected` parameter and does all of the necessary bookkeeping like 
         starting the auto reconnect thread and calling any registered callbacks. """
         if state != self.connected:
@@ -112,9 +112,9 @@ class ClientSocket():
             self.logger.warn(f'Socket {self.ip_addr}:{self.port} disconnected.')
         elif not self.connected and state:
             self.logger.log(f'Socket {self.ip_addr}:{self.port} connected.')
-            self.on_connected.acquire()
-            self.on_connected.notify_all()
-            self.on_connected.release()
+            self._on_connected.acquire()
+            self._on_connected.notify_all()
+            self._on_connected.release()
         self.connected = state
         if not self.connected and not self.reconnecting:
             self.reconnect_thread = Thread(
