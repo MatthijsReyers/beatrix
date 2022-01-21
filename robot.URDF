@@ -1,0 +1,177 @@
+<robot name="robotarm">
+
+    <!-- Base link:
+        Represents the origin of the coordinate system. -->
+    <link name="base_link">
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="0.144396264939993" />
+        <inertia
+            ixx="0.000143518614192769"
+            ixy="-3.10732239576783E-12"
+            ixz="-6.67605359934269E-06"
+            iyy="0.000155552709433615"
+            iyz="-3.29481748801136E-12"
+            izz="0.000258792041913219" />
+    </link>
+
+    <!-- Ground bone:
+        Represents the ground/bottom of the base platform. -->
+    <link name="ground">
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="0.144396264939993" />
+        <inertia
+            ixx="0.000143518614192769"
+            ixy="-3.10732239576783E-12"
+            ixz="-6.67605359934269E-06"
+            iyy="0.000155552709433615"
+            iyz="-3.29481748801136E-12"
+            izz="0.000258792041913219" />
+    </link>
+
+    <!-- Floor joint:
+        Represents the connection between the bottom of the rotating base platform and the ground and 
+        provides the rotation of the base platform. -->
+    <joint name="floor" type="revolute">
+        <limit lower="0.0" upper="270.0" effort="0.0" velocity="0.0"/>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="ground" />
+        <axis xyz="0 0 1" />
+    </joint>
+
+    <!-- Platform bone:
+        Represents the rotating base platform. -->
+    <link name="platform">
+        <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="0.144396264939993" />
+        <inertia
+            ixx="0.000143518614192769"
+            ixy="-3.10732239576783E-12"
+            ixz="-6.67605359934269E-06"
+            iyy="0.000155552709433615"
+            iyz="-3.29481748801136E-12"
+            izz="0.000258792041913219" />
+        </inertial>
+    </link>
+
+    <!-- Platform bottom joint:
+        Represents the connection between the bottom of the rotating base platform and the ground and 
+        provides the height of the base platform. -->
+    <joint name="platform" type="revolute">
+        <limit lower="0.0" upper="0.0" effort="0.0" velocity="0.0"/>
+        <!-- <limit lower="0.0" upper="270.0" effort="0.0" velocity="0.0"/> -->
+        <origin xyz="0 0 10" rpy="0 0 0" />
+        <parent link="ground" />
+        <child link="platform" />
+        <axis xyz="0 1 0" />
+    </joint>
+
+    <!-- Bone A -->
+    <link name="bone_a">
+        <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.00558464092794276" />
+        <inertia
+            ixx="1.34906671319978E-06"
+            ixy="-6.75990848930974E-15"
+            ixz="-9.2900996309437E-10"
+            iyy="2.56110628664785E-06"
+            iyz="2.75193579105881E-11"
+            izz="2.08267318891963E-06" />
+        </inertial>
+        <visual>
+            <origin xyz="0 10 0" rpy="0 0 0"/>
+            <geometry>
+                <!-- <mesh filename="package://Poppy_Ergo/meshes/bone_a.STL" /> -->
+                <cylinder radius="0.1" length="10.0"/>
+            </geometry>
+            <material name="">
+                <color rgba="0 1 0 1" />
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <!-- <mesh filename="package://Poppy_Ergo/meshes/bone_a.STL"/> -->
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Shoulder joint:
+        Represents the joint between the platform and bone A. -->
+    <joint name="shoulder" type="revolute">
+        <origin xyz="22 0 0" rpy="0 0 0"/>
+        <parent link="platform" />
+        <child link="bone_a" />
+        <axis xyz="0 1 0" />
+    </joint>
+
+        <!-- Bone B -->
+    <link name="bone_b">
+        <inertial>
+        <origin
+            xyz="6.66582621695788E-05 0.0136707153902851 1.6650272712763E-09"
+            rpy="0 0 0" />
+        <mass value="0.0828710129889412" />
+        <inertia
+            ixx="2.88062730000748E-05"
+            ixy="-4.09554328793376E-07"
+            ixz="6.38110786400718E-13"
+            iyy="1.69994170120842E-05"
+            iyz="-3.08410026385581E-12"
+            izz="3.50518702024955E-05" />
+        </inertial>
+        <visual>
+        <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+        <geometry>
+            <mesh filename="package://Poppy_Ergo/meshes/bone_b.STL" />
+        </geometry>
+        <material name="">
+            <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+        </material>
+        </visual>
+        <collision>
+        <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+        <geometry>
+            <mesh filename="package://Poppy_Ergo/meshes/bone_b.STL" />
+        </geometry>
+        </collision>
+    </link>
+
+    <!-- Elbow joint -->
+    <joint name="elbow" type="revolute">
+        <origin xyz="15 0 0" rpy="0 0 0" />
+        <parent link="bone_a" />
+        <child link="bone_b" />
+        <axis xyz="0 1 0" />
+    </joint>
+
+
+    <!-- Bone C -->
+    <link name="bone_c">
+        <inertial>
+        <origin xyz="6.95288959172179E-05 0.0119296679383337 -3.16466375568961E-08" rpy="0 0 0" />
+        <mass value="0.0801745189910368" />
+        <inertia
+            ixx="2.09487833891956E-05"
+            ixy="-3.96948279691612E-07"
+            ixz="1.02565194835031E-12"
+            iyy="1.52176900602456E-05"
+            iyz="-7.79389983932002E-11"
+            izz="2.6045998949051E-05" />
+        </inertial>
+    </link>
+    
+    <!-- Wrist joint -->
+    <joint name="wrist" type="revolute">
+        <origin xyz="8 0 0" rpy="0 0 0" />
+        <parent link="bone_b" />
+        <child link="bone_c" />
+        <axis xyz="0 1 0" />
+    </joint>
+</robot>
