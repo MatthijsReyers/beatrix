@@ -8,8 +8,10 @@ N_SERVOS = 6  # Total number of servos
 
 """ UPDATE
     Dennis: moved the servo actuation to the main RobotArm class. Idea is to insert the set_angle_smooth
-    into the RobotArm class and remove the SingleServo class.
+    into the RobotArm class and remove the SingleServo class. For now/ testing purposes cosine smooth
+    is implemented.
 """
+
 
 class SingleServo:
     def __init__(self, parameters, port, angle, debug_mode:bool=False):
@@ -24,9 +26,9 @@ class SingleServo:
         self.joint = ServoKit(channels=16)
         self.joint.servo[port].set_pulse_width_range(500, 2500)
 
-    def set_angle(self, angle):
-        self.angle = self.bound_angle(angle)
-        self.joint.servo[self.port].angle = self.angle
+    # def set_angle(self, angle):
+    #     self.angle = self.bound_angle(angle)
+    #     self.joint.servo[self.port].angle = self.angle
 
     def set_angle_smooth(self, angle, seconds):
         elapsed = 0
@@ -35,6 +37,7 @@ class SingleServo:
         moving_angle = abs(start_angle - end_angle)
         current_angle = start_angle
         dt = .01
+        # amound of pos x shift correction
         correction = 1 / (1 - (1 - sigmoid(6)) * 2)
         while elapsed < seconds:
             t = (elapsed / seconds)*12 - 6
@@ -75,9 +78,9 @@ class RobotArm:
             [0:base, 1:shoulder, 2:shoulder mirror, 3:elbow, 4:wrist, 5:grabber]
 
         parameters
+            Shoulder parameters are defined once
             [base, shoulder, elbow, wrist, grabber]
             - angle_bounds: list(5) of dict(2) with 'min angle' and 'max angle'
-                Shoulder parameters are defined once
             - init_pos: list(5) of initial angles
 
         methods
@@ -112,17 +115,17 @@ class RobotArm:
         # duplicate the first shoulder angle for the second one
         old_angle = old_angle.insert(2, angle[1])
         angle = angle.insert(2, angle[1])
+        old_angle = np.array(old_angle)
+        angle = np.array(angle)
+        velocity = abs(old_angle - angle) / duration
 
         # bound the input angles to the min and max angles
         for i in range(N_SERVOS):
             angle[i] = self.bound_angle(i, angle[i])
 
-        old_angle = np.array(old_angle)
-        angle = np.array(angle)
-        velocity = abs(old_angle - angle) / duration
-        # todo: test for each joint a max velocity
         if (velocity > MAX_VELOCITY).any():
-            print("Currently no implementation for movement that is too fast")
+            print("Currently no implementation for movement that is too fast\n")
+            print(f"Velocities: {velocity} degrees/s")
         else:
             # make the steps courser, reducing execution time
             dtime = 0.02  # 50Hz
@@ -134,8 +137,7 @@ class RobotArm:
             # for each step adjust for each servo the angle
             for i in range(steps):
                 for port in range(6):
-                    new_angle = (angle[port] - old_angle[port]) / steps * i
-                    # todo: replace angle calculation by the sigmoid implementation
+                    new_angle = cosine(old_angle[port], angle[port], duration, steps)
                     self._set_servo(port, new_angle)
 
     def _set_servo(self, port, angle):
@@ -168,8 +170,15 @@ def sigmoid(x):
     sigmoid = 1 / (1 + math.exp(-x))
     return sigmoid
 
+
 def derivative_sigmoid(x):
     sigmoid = sigmoid(x)
     derivative = sigmoid * (1-sigmoid)
     return derivative
 
+
+def cosine(old_angle, new_angle, duration, step):
+    a = old_angle
+    b = new_angle
+    period = 1/duration
+    return a + b - b*math.cos(period*3.1415*step)
