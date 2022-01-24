@@ -1,18 +1,16 @@
-from socket import socket, AF_INET, SOCK_STREAM, SOCK_DGRAM, SO_SNDBUF, SOL_SOCKET, SHUT_RDWR
+from socket import socket, AF_INET, SOCK_STREAM, SOCK_DGRAM, SO_SNDBUF, SOL_SOCKET, SHUT_RDWR, timeout
 from threading import Thread, Condition, Lock
-from logger import Logger
 import time
 
 SEND_TIMEOUT = 0.8
 RECV_TIMEOUT = 1.5
 RECONNECT_TIME = 0.5
+VIDEO_PORT = 37020
 
 class ClientSocket():
     def __init__(self, ip_addr:str, port:int, logger=None):
         self.ip_addr = ip_addr
         self.port    = port
-
-        self.logger = Logger() if logger == None else logger
         
         self.reconnecting = False
         self.connected    = False
@@ -25,14 +23,24 @@ class ClientSocket():
         self.closed_by_user = False
         self._callbacks = []
 
-    def connect(self):
+        self.logger = logger
+        if logger == None:
+            try: from lib.logger import Logger
+            except: from logger import Logger
+            self.logger = Logger()
+
+    def start(self):
         """ Opens the socket and enables automatic reconnection. """
         self.reconnect_thread = Thread(
             target=self.__reconnect_thread, 
             args=(), daemon=True)
         self.reconnect_thread.start()
 
-    def close(self):
+    def is_connected(self) -> bool:
+        """ Checks if the given socket is currently connected. """
+        return not self.closed_by_user and self.connected
+
+    def stop(self):
         """ Closes the socket and stops any automatic reconnection attempts.  """
         self.closed_by_user = True
         self._socket.shutdown(SHUT_RDWR)
@@ -63,7 +71,7 @@ class ClientSocket():
         except BrokenPipeError:
             self.__set_connected(False)
         except Exception as e:
-            print('[!] Found unexpected exception:\n', type(e), e)
+            self.logger.exception(e, 'ClientSocket.send')
         finally:
             if self._socket_mutex.locked():
                 self._socket_mutex.release()
@@ -87,12 +95,14 @@ class ClientSocket():
                 raise ConnectionResetError()
             else:
                 return (True, data)
-        except ConnectionResetError:
+        except timeout:
+            return (False, b'')
+        except ConnectionResetError as e:
             self.__set_connected(False)
-        except OSError:
+        except OSError as e:
             self.__set_connected(False)
         except Exception as e:
-            self.logger.warn('Found unexpected exception: '+type(e))
+            self.logger.exception(e, 'ClientSocket.receive')
         finally:
             self._socket_mutex.release()
         return (False, b'')
@@ -137,17 +147,9 @@ class ClientSocket():
                 time.sleep(RECONNECT_TIME)
                 self._socket_mutex.acquire()
             except Exception as e:
-                print('Could not connect:', type(e), e)
+                self.logger.exception(e, 'ClientSocket.__reconnect_thread')
                 self._socket_mutex.release()
                 time.sleep(RECONNECT_TIME)
                 self._socket_mutex.acquire()
             finally:
                 self._socket_mutex.release()
-
-if __name__ == '__main__':
-    sock = ClientSocket('127.0.0.1',6060)
-    sock.send(b'I\'m here!')
-    while True:
-        res = sock.receive()
-        print(res)
-        time.sleep(2)
