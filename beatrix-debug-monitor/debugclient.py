@@ -1,4 +1,5 @@
 from lib.clientsock import ClientSocket
+from lib.logger import Logger
 import pickle, cv2, json
 
 VIDEO_BUFFER_SIZE = 1000000
@@ -9,17 +10,19 @@ RASP_IP = '127.0.0.1'
 # RASP_IP = '192.168.23.211'
 
 class DebugClient():
-    def __init__(self):
+    def __init__(self, logger=None):
         self.control_socket = ClientSocket(RASP_IP, CONTROL_PORT)
         self.video_socket = ClientSocket(RASP_IP, VIDEO_PORT)
 
+        self.logger = logger if logger != None else Logger()
+
     def start(self):
-        print('[*] Connecting to control server.')
+        logger.log('Connecting to control server.')
         self.control_socket.start()
         self.video_socket.start()
 
     def stop(self, event):
-        print('[*] Exiting, closing sockets.')
+        logger.log('Exiting, closing sockets.')
         self.control_socket.close()
         self.video_socket.close()
 
@@ -30,22 +33,21 @@ class DebugClient():
         okay, data = self.video_socket.receive(buffer_size=1000000)
         if okay:
             data = pickle.loads(data)
-            print('got video...')
             return (True, cv2.imdecode(data, cv2.IMREAD_COLOR))
         return (False, None)
         
-    def recieve_command(self):
+    def receive_command(self) -> (bool, object):
+        """ Tries to receive a command from the server. """
         try:
-            cmd = self.control_socket.recv(1024*4)
-            cmd = json.loads(cmd)
-            if cmd['type'] != None:
-                return cmd
-            else:
-                print('Received invalid command')
-                return {}
-
+            okay, cmd = self.control_socket.receive(buffer_size=1024*4)
+            if okay:
+                cmd = json.loads(cmd)
+                if cmd['type'] != None: return (True, cmd)
+                else:
+                    self.logger.warn('Received invalid command')
         except Exception as e:
-            print(e)
+            self.logger.exception(e, 'DebugClient.receive_command')
+        return (False, {})
 
     def send_set_position_cmd(self, position: (float, float, float)):
         """ Sends a command to set the position of the robot arm. """
@@ -77,4 +79,4 @@ class DebugClient():
             packet = json.dumps(cmd)
             self.control_socket.send(packet)
         except Exception as e:
-            print(e)
+            self.logger.exception(e, 'DebugClient._send_cmd')
