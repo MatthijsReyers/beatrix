@@ -1,5 +1,4 @@
-from socket import socket, AF_INET, SOCK_STREAM, SOCK_DGRAM, SO_SNDBUF, SOL_SOCKET, \
-    SO_BROADCAST, SO_REUSEPORT, AF_INET6
+from lib.serversock import ServerSocket
 from threading import Thread
 import pickle, struct, cv2
 
@@ -9,73 +8,24 @@ CONTROL_PORT = 4400
 
 class DebugServer():
     def __init__(self):
-        self.control_socket = socket(AF_INET, SOCK_STREAM)
-        self.control_socket.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
-        self.control_socket.bind(('', CONTROL_PORT))
-        self.control_socket.settimeout(0.2)
-
-        self.video_socket = socket(AF_INET, SOCK_DGRAM)
-        self.video_socket.setsockopt(SOL_SOCKET, SO_SNDBUF,VIDEO_BUFFER_SIZE)
-
-        self.conn_thread = None
-        self.control_conns = dict()
-
-        self.running = False
-        self.video_thread = None
-        self.sending_frame = False
-        self.frame_counter = 0
-
-    def stop(self):
-        self.running = False
-
-        # Close all socket connections.
-        for conn in self.control_conns.values():
-            conn.close()
-
-        # Close all sockets
-        self.control_socket.close()
+        self.video_socket = ServerSocket(VIDEO_PORT, buffer_size=VIDEO_BUFFER_SIZE)
+        self.control_socket = ServerSocket(CONTROL_PORT)
 
     def start(self):
-        self.running = True
+        self.video_socket.start()
+        self.control_socket.start()
 
-        self.conn_thread = Thread(
-            target=self.__connection_thread, 
-            args=(self.control_socket, self.control_conns))   
-        self.conn_thread.setDaemon(True)
-        self.conn_thread.start()
-
-    def __connection_thread(self, sock, conns):
-        sock.listen(10)
-        while self.running:
-            try:
-                # Accept incomming connections.
-                conn, addr = sock.accept()
-                # Close old connections if we already had them.
-                if addr in conns:
-                    conns[addr].close()
-                conns[addr] = conn
-                print(f'[*] Opened connection from: {addr}')
-            except: pass
+    def stop(self):
+        self.video_socket.stop()
+        self.control_socket.stop()
 
     def send_video_frame(self, frame):
-        if not self.sending_frame:
-            self.sending_frame = True
-            if self.video_thread:
-                self.video_thread.join()
-            self.video_thread = Thread(target=self.__sending_thread, args=(frame,))
-            self.video_thread.start()
-
-    def __sending_thread(self, frame):
-        _, frame = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
-        frame_bytes = pickle.dumps(frame)
-        for (ip, _) in self.control_conns.keys():
-            self.video_socket.sendto(frame_bytes, (ip, VIDEO_PORT))
-        self.sending_frame = False
-
-
-
-
-
+        try:
+            _, frame = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 30])
+            frame_bytes = pickle.dumps(frame)
+            self.video_socket.send(frame_bytes)
+        except Exception as e:
+            print(e)
 
 if __name__ == '__main__':
     server = DebugServer()
@@ -91,4 +41,3 @@ if __name__ == '__main__':
         cam.release()
     finally:
         server.stop()
-        server.control_socket.close()
