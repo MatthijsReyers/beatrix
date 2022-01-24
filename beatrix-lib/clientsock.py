@@ -133,6 +133,7 @@ class ClientSocket():
             self.reconnect_thread.start()
 
     def __reconnect_thread(self):
+        """ Automatically reconnects the socket when the connection is lost. """
         self.reconnecting = True
         while not self.connected and not self.closed_by_user:
             try:
