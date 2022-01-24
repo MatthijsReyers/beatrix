@@ -24,7 +24,6 @@ class DebugServer():
             _, frame = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 30])
             frame_bytes = pickle.dumps(frame)
             self.video_socket.send(frame_bytes)
-            print(self.video_socket._connections)
         except Exception as e:
             print(e)
 
@@ -39,8 +38,6 @@ if __name__ == '__main__':
             okay, frame = cam.read()
             if okay:
                 server.send_video_frame(frame)
-            else:
-                print('video frame not okay!')
         cam.release()
     finally:
         server.stop()
