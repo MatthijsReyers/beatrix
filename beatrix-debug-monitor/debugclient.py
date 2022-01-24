@@ -78,18 +78,3 @@ class DebugClient():
             self.control_socket.send(packet)
         except Exception as e:
             print(e)
-
-
-if __name__ == '__main__':
-    
-    client = DebugClient()
-    client.start()
-
-    while True:
-        okay, frame = client.recieve_video()
-        if okay:
-            cv2.imshow('server', frame)
-            if cv2.waitKey(10) == 13:
-                exit(0)
-        else:
-            print('not okay!')
