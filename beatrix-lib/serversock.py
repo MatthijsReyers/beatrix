@@ -1,12 +1,14 @@
-from socket import socket, timeout, AF_INET, SOCK_STREAM, SO_REUSEPORT, SOL_SOCKET, SHUT_RDWR
+from socket import socket, timeout, AF_INET, SOCK_STREAM, SO_REUSEPORT, SOL_SOCKET, SHUT_RDWR, SO_SNDBUF
 from threading import Thread
 
 BACKLOG_SIZE = 10
 
 class ServerSocket():
-    def __init__(self, port:int):
+    def __init__(self, port:int, buffer_size:int=None):
         self._socket = socket(AF_INET, SOCK_STREAM)
         self._socket.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
+        if buffer_size != None:
+            self._socket.setsockopt(SOL_SOCKET, SO_SNDBUF, buffer_size)
         self._socket.bind(('', port))
         self._socket.settimeout(0.2)
 
@@ -51,7 +53,8 @@ class ServerSocket():
         """
         for (conn, addr) in self._connections:
             try:
-                if ip != None or addr[1] == ip:
+                print(len(data))
+                if ip == None or addr[1] == ip:
                     conn.send(data)
             except BrokenPipeError:
                 if (conn, addr) in self._connections:
@@ -97,6 +100,7 @@ class ServerSocket():
                 for callback in self._receive_callbacks:
                     callback(data, addr)
             except ConnectionResetError as e:
+                print(e)
                 conn_end()
             except Exception as e:
                 print('[!] Encountered unexpected exception while receiving:\n', type(e), e) 
