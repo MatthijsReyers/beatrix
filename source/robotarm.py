@@ -137,15 +137,16 @@ class RobotArm:
             # for each step adjust for each servo the angle
             for i in range(steps):
                 for port in range(6):
-                    new_angle = cosine(old_angle[port], angle[port], duration, steps)
+                    new_angle = get_angle_smooth(start_angle = old_angle[port], end_angle = angle[port], seconds = duration, elapsed = (i+1)*dtime, scalar_bounds=1)
+                    # new_angle = cosine(old_angle[port], angle[port], duration, steps)
                     self._set_servo(port, new_angle)
 
     def _set_servo(self, port, angle):
         if port != 2:
-            self.kit.servo[port].angle = angle
+            self.kit.servo[port].angle = self.bound_angle(port, angle)
         # exception for the second shoulder servo
         else:
-            self.kit.servo[port].angle = self.mirror(angle)
+            self.kit.servo[port].angle = self.mirror(self.bound_angle(port, angle))
 
     def bound_angle(self, port, angle):
         if self.angle_bounds[port]['min angle'] <= angle <= self.angle_bounds[port]['max angle']:
@@ -182,3 +183,25 @@ def cosine(old_angle, new_angle, duration, step):
     b = new_angle
     period = 1/duration
     return a + b - b*math.cos(period*3.1415*step)
+
+def get_angle_smooth(start_angle, end_angle, seconds, elapsed, scalar_bounds):
+    """
+        Go to a different angle in a smooth motion
+        Arguments:
+            start_angle: the angle of the servo before this function was called
+            end_angle: the angle we want the servo to go too
+            seconds: how long the motion should last
+            elapsed: how much time has passed
+            scalar_bounds: how aggressively it should accelerate/decelerate, should be in (0,1], else it will default to 1
+        Returns: new angle given the elapsed time
+    """
+    moving_angle = abs(start_angle - end_angle)  # the degrees the servo has to move
+    bound = 6*scalar_bounds  # the interval of the sigmoid, [-bound, bound]
+    if scalar_bounds > 1 or scalar_bounds <= 0:
+        bound=6
+    correction = 1/(1 - (1 - sigmoid(bound))*2) # correction scalar so that the sigmoid will go from 0 to 1 on the interval
+    time = ((elapsed) / seconds)*bound*2 - bound
+    if end_angle > start_angle:
+        return start_angle + correction*(sigmoid(time)-sigmoid(-bound))*moving_angle
+    if end_angle < start_angle:
+        return start_angle - correction*(sigmoid(time)-sigmoid(-bound))*moving_angle
