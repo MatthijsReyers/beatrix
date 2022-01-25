@@ -1,190 +1,246 @@
-from adafruit_servokit import ServoKit
 import time
 import math
 import numpy as np
 
 MAX_VELOCITY = 90  # Fastest speed of arm in degrees/s
-N_SERVOS = 6  # Total number of servos
 
-""" UPDATE
-    Dennis: moved the servo actuation to the main RobotArm class. Idea is to insert the set_angle_smooth
-    into the RobotArm class and remove the SingleServo class. For now/ testing purposes cosine smooth
-    is implemented.
-"""
+# False if running with robot arm, true otherwise.
+VIRTUAL_RUN = True
+
+# Only instantiate servos and other physical components when ran with the robot arm
+if not VIRTUAL_RUN:
+    from board import SCL, SDA
+    import busio
+    from adafruit_motor import servo
+    from adafruit_pca9685 import PCA9685
+    I2C = busio.I2C(SCL, SDA)
+    PCA = PCA9685(I2C)
+    PCA.frequency = 50
+if VIRTUAL_RUN:
+    PCA = None
+
+# Default parameters, only thing that should be edited is min angle and max angle,
+# or if the shoulder is reversed, mirrored for the shoulder
+DEFAULT_PARAMETERS = [{"servo": "single", "min angle": 70, "max angle":110, "actuation range": 270,
+                       "mirrored": False, "port": 0},  # base
+                    {"servo": "dual", "min angle": 70, "max angle":110, "actuation range": 180,
+                     "mirrored": [False, True], "port": [1, 2]},  # shoulder
+                    {"servo": "single", "min angle": 70, "max angle":110, "actuation range": 180,
+                     "mirrored": False, "port": 3},  # elbow
+                    {"servo": "single", "min angle": 70, "max angle":110, "actuation range": 180,
+                     "mirrored": False, "port": 4},  # wrist
+                    {"servo": "single", "min angle": 70, "max angle":110, "actuation range": 180,
+                     "mirrored": False, "port": 5}]  # grabber
 
 
 class SingleServo:
-    def __init__(self, parameters, port, angle, debug_mode:bool=False):
+    """
+        Main class to control a servo, represents a single servo joint,
+        however it is also used by the DualServo class to control the individual servos
+
+        ARGUMENTS
+        - parameters: dict(5)
+            - servo: type of servo single/dual
+            - min angle: in degrees
+            - max angle: in degrees
+            - actuation range: total range of servo in degrees
+            - mirrored: bool, for one of the shoulder joints
+            - port: int of input on the PCA9685
+        - PCA9685
+        _ angle: in degrees, the initial position of the servo
+            {base: 0, shoulder: 90, elbow: 90, wrist: 90, grabber: 0}
+        - debug_mode: bool
+
+        METHODS
+        - set_angle: lineally at max speed
+
+        PARAMETERS
+        - old_angle: previous angle ordered
+        - new_angle: current angle ordered
+        - current_angle: updated every step when moving
+    """
+
+    def __init__(self, parameters, pca9685, angle, debug_mode:bool=False):
+        """Initialization of the servo."""
         self.debug_mode = debug_mode
-        self.port = port
-        self.angle = angle
-        # todo: actually move the servo to the angle?
+        self.current_angle = angle
+        self.old_angle = angle
+        self.new_angle = angle
 
-        self.minangle = parameters["minangle"]
-        self.maxangle = parameters["maxangle"]
+        self.port = parameters["port"]
+        self.min_angle = parameters["min angle"]
+        self.max_angle = parameters["max angle"]
+        self.actuation_range = parameters["actuation range"]
+        self.mirrored = False
+        if parameters["mirrored"]:
+            self.mirrored = parameters["mirrored"]
 
-        self.joint = ServoKit(channels=16)
-        self.joint.servo[port].set_pulse_width_range(500, 2500)
+        self.pca = pca9685
+        if not VIRTUAL_RUN:
+            self.servo = servo.Servo(pca9685.channels[self.port], min_pulse=500, max_pulse=2500,
+                                     actuation_range=self.actuation_range)
 
-    # def set_angle(self, angle):
-    #     self.angle = self.bound_angle(angle)
-    #     self.joint.servo[self.port].angle = self.angle
-
-    def set_angle_smooth(self, angle, seconds):
-        elapsed = 0
-        start_angle = self.angle()
-        end_angle = self.bound_angle(angle)
-        moving_angle = abs(start_angle - end_angle)
-        current_angle = start_angle
-        dt = .01
-        # amound of pos x shift correction
-        correction = 1 / (1 - (1 - sigmoid(6)) * 2)
-        while elapsed < seconds:
-            t = (elapsed / seconds)*12 - 6
-            step_size = moving_angle * derivative_sigmoid(t) * ((dt/seconds)*12) * correction
-            if end_angle > start_angle:
-                current_angle += step_size
-                current_angle = min(current_angle, end_angle)
-            if end_angle < start_angle:
-                current_angle -= step_size
-                current_angle = max(current_angle, end_angle)
-            self.angle = self.bound_angle(current_angle)
-            self.joint.servo[self.port].angle = self.bound_angle(current_angle)
-            elapsed += dt
-            time.sleep(dt)
-        self.angle = self.bound_angle(angle)
-        self.joint.servo[self.port].angle = self.bound_angle(angle)
+    def set_angle(self, angle, new_angle):
+        self.new_angle = self.bound_angle(new_angle)
+        self.current_angle = self.bound_angle(angle)
+        if self.new_angle == self.current_angle:
+            self.old_angle = self.new_angle
+        if not VIRTUAL_RUN:
+            if not self.mirrored:
+                self.servo.angle = self.current_angle
+            if self.mirrored:
+                self.servo.angle = self.actuation_range - self.current_angle
 
     def bound_angle(self, angle):
-        if self.minangle <= angle <= self.maxangle:
+        """Bound the angle with the min and max angle parameters of the servo"""
+        if self.min_angle <= angle <= self.max_angle:
             return angle
-        elif angle < self.minangle:
-            return self.minangle
-        elif angle > self.maxangle:
-            return self.maxangle
+        elif angle < self.min_angle:
+            return self.min_angle
+        elif angle > self.max_angle:
+            return self.max_angle
+
+
+class DualServo:
+    """
+        Class to control dual-servos/shoulder, same functionality as single servo
+    """
+    def __init__(self, parameters, pca9685, angle, debug_mode:bool=False):
+        self.debug_mode = debug_mode
+
+        self.current_angle = angle
+        self.old_angle = angle
+        self.new_angle = angle
+
+        self.min_angle = parameters["min angle"]
+        self.max_angle = parameters["max angle"]
+        self.actuation_range = parameters["actuation range"]
+        self.mirrored_left = False
+        self.mirrored_right = True
+        if parameters["mirrored"]:
+            self.mirrored_left = parameters["mirrored"][0]
+            self.mirrored_right = parameters["mirrored"][1]
+        self.port_left = parameters["port"][0]
+        self.port_right = parameters["port"][1]
+        parameters_left = {"min angle": self.min_angle, "max angle": self.max_angle,
+                           "actuation range": self.actuation_range, "mirrored": self.mirrored_left,
+                           "port": self.port_left}
+        parameters_right = {"min angle": self.min_angle, "max angle": self.max_angle,
+                            "actuation range": self.actuation_range, "mirrored": self.mirrored_right,
+                            "port": self.port_right}
+
+        self.pca = pca9685
+        self.SingleServo_left = SingleServo(parameters_left, pca9685, angle, debug_mode)
+        self.SingleServo_right = SingleServo(parameters_right, pca9685, angle, debug_mode)
+
+    def set_angle(self, angle, new_angle):
+        self.new_angle = self.bound_angle(new_angle)
+        self.current_angle = self.bound_angle(angle)
+        if self.new_angle == self.current_angle:
+            self.old_angle = self.new_angle
+        self.SingleServo_left.set_angle(self.current_angle, self.new_angle)
+        self.SingleServo_right.set_angle(self.current_angle, self.new_angle)
+    
+    def bound_angle(self, angle):
+        if self.min_angle <= angle <= self.max_angle:
+            return angle
+        elif angle < self.min_angle:
+            return self.min_angle
+        elif angle > self.max_angle:
+            return self.max_angle
 
     def get_angle(self):
-        # temp fix for shoulder joint
-        if self.port != 2:
-            return self.angle
-        else:
-            return 180 - self.angle
+        return self.curent_angle
 
 
 class RobotArm:
     """
         Main class to initialise and control the robot arm
-        port allocation
+        - port allocation
             [0:base, 1:shoulder, 2:shoulder mirror, 3:elbow, 4:wrist, 5:grabber]
 
-        parameters
+        ARGUMENTS
+        - parameters
             Shoulder parameters are defined once
             [base, shoulder, elbow, wrist, grabber]
-            - angle_bounds: list(5) of dict(2) with 'min angle' and 'max angle'
+            - parameters: list(5) of dict(3) with 'min angle' and 'max angle', 'actuation range'
             - init_pos: list(5) of initial angles
 
-        methods
-            - set_angle
-            - get_angle
+        METHODS
+            - set_arm
+            - bound_angle
+
+        PARAMETERS
+        - old_angle: previous angle ordered
+        - new_angle: current angle ordered
+        - current_angle: updated every step when moving
     """
 
-    def __init__(self, angle_bounds, init_pos):
-        self.kit = ServoKit(channels=16)
-        self.cur_angle = [0, 0, 0, 0, 0]
+    def __init__(self, parameters, init_pos):
+        self.N = min(len(parameters), len(init_pos))
+        self.joints = list()
+        self.current_angle = list()
+        self.bounds = list()
+        for i in range(self.N):
+            self.bounds.append({"min angle": parameters[i]["min angle"],
+                                "max angle": parameters[i]["max angle"]})
+            if parameters[i]["servo"] == "single":
+                self.joints.append(SingleServo(parameters[i], PCA, 90))
+            if parameters[i]["servo"] == "dual":
+                self.joints.append(DualServo(parameters[i], PCA, 90))        
+            self.current_angle.append(90)
+        self.set_arm(init_pos, 1)
 
-        # duplicate shoulder parameters for the second shoulder servo
-        self.init_pos = init_pos.insert(2, init_pos[1])
-        self.angle_bounds = angle_bounds.insert(2, init_pos[1])
-
-        for i in range(N_SERVOS):
-            self.kit.servo[N_SERVOS].set_pulse_width_range(500, 2500)
-            self.kit.servo[N_SERVOS].angle = init_pos[N_SERVOS]
-
-    def set_arm(self, old_angle, angle, duration):
+    def set_arm(self, new_angle, duration):
         """
-        Sets the angle of all servos over period of time
+        Sets the angle of all servos smoothly over period of time
         parameters
             - old_angle: list(5) of angles, shoulder ports 1 and 2 share angle
             - angle: list(5) of angles, shoulder ports 1 and 2 share angle
             - duration: float time in seconds
         """
         # todo: update the get_angle with the sensor output
-
-        self.cur_angle = angle
-
-        # duplicate the first shoulder angle for the second one
-        old_angle = old_angle.insert(2, angle[1])
-        angle = angle.insert(2, angle[1])
+        new_angle = self.bound_angle(new_angle)
+        old_angle = self.bound_angle(self.current_angle)
+        self.current_angle = old_angle
         old_angle = np.array(old_angle)
-        angle = np.array(angle)
-        velocity = abs(old_angle - angle) / duration
-
-        # bound the input angles to the min and max angles
-        for i in range(N_SERVOS):
-            angle[i] = self.bound_angle(i, angle[i])
+        new_angle = np.array(new_angle)
+        velocity = abs(old_angle - new_angle) / duration
 
         if (velocity > MAX_VELOCITY).any():
             print("Currently no implementation for movement that is too fast\n")
             print(f"Velocities: {velocity} degrees/s")
         else:
-            # make the steps courser, reducing execution time
             dtime = 0.02  # 50Hz
             steps = int(duration / dtime)
-            if steps > 30:
-                dtime = 0.04
-                steps = int(duration / dtime)
 
             # for each step adjust for each servo the angle
-            for i in range(steps):
-                for port in range(6):
-                    new_angle = get_angle_smooth(start_angle = old_angle[port], end_angle = angle[port], seconds = duration, elapsed = (i+1)*dtime, scalar_bounds=1)
-                    # new_angle = cosine(old_angle[port], angle[port], duration, steps)
-                    self._set_servo(port, new_angle)
-
-    def _set_servo(self, port, angle):
-        if port != 2:
-            self.kit.servo[port].angle = self.bound_angle(port, angle)
-        # exception for the second shoulder servo
-        else:
-            self.kit.servo[port].angle = self.mirror(self.bound_angle(port, angle))
-
-    def bound_angle(self, port, angle):
-        if self.angle_bounds[port]['min angle'] <= angle <= self.angle_bounds[port]['max angle']:
-            return angle
-        elif angle < self.angle_bounds[port]['min angle']:
-            return self.angle_bounds[port]['min angle']
-        elif angle > self.angle_bounds[port]['max angle']:
-            return self.angle_bounds[port]['max angle']
-
-    def get_angle(self):
-        return self.cur_angle
+            for step in range(steps):
+                for i in range(self.N):
+                    self.current_angle[i] = get_angle_smooth(start_angle=old_angle[i],
+                                                             end_angle=new_angle[i],
+                                                             seconds=duration,
+                                                             elapsed=(step+1)*dtime)
+                    self._set_servo(self.joints[i], self.current_angle[i], new_angle[i])
+                time.sleep(dtime)
 
     @staticmethod
-    def mirror(angle):
-        return 180 - angle
+    def _set_servo(joint, angle, new_angle):
+        joint.set_angle(angle, new_angle)
+
+    def bound_angle(self, angle):
+        bound_angle = list()
+        for i in range(self.N):
+            if self.bounds[i]['min angle'] <= angle[i] <= self.bounds[i]['max angle']:
+                bound_angle.append(angle[i])
+            elif angle[i] < self.bounds[i]['min angle']:
+                bound_angle.append(self.bounds[i]['min angle'])
+            elif angle[i] > self.bounds[i]['max angle']:
+                bound_angle.append(self.bounds[i]['max angle'])
+        return bound_angle
 
 
-def sigmoid(x):
-    """
-        Basic implementation of the sigmoid function, may not work well with large negative numbers.
-    """
-    sigmoid = 1 / (1 + math.exp(-x))
-    return sigmoid
-
-
-def derivative_sigmoid(x):
-    sigmoid = sigmoid(x)
-    derivative = sigmoid * (1-sigmoid)
-    return derivative
-
-
-def cosine(old_angle, new_angle, duration, step):
-    a = old_angle
-    b = new_angle
-    period = 1/duration
-    return a + b - b*math.cos(period*3.1415*step)
-
-def get_angle_smooth(start_angle, end_angle, seconds, elapsed, scalar_bounds):
+def get_angle_smooth(start_angle, end_angle, seconds, elapsed):
     """
         Go to a different angle in a smooth motion
         Arguments:
@@ -192,16 +248,21 @@ def get_angle_smooth(start_angle, end_angle, seconds, elapsed, scalar_bounds):
             end_angle: the angle we want the servo to go too
             seconds: how long the motion should last
             elapsed: how much time has passed
-            scalar_bounds: how aggressively it should accelerate/decelerate, should be in (0,1], else it will default to 1
         Returns: new angle given the elapsed time
     """
-    moving_angle = abs(start_angle - end_angle)  # the degrees the servo has to move
-    bound = 6*scalar_bounds  # the interval of the sigmoid, [-bound, bound]
-    if scalar_bounds > 1 or scalar_bounds <= 0:
-        bound=6
-    correction = 1/(1 - (1 - sigmoid(bound))*2) # correction scalar so that the sigmoid will go from 0 to 1 on the interval
-    time = ((elapsed) / seconds)*bound*2 - bound
-    if end_angle > start_angle:
-        return start_angle + correction*(sigmoid(time)-sigmoid(-bound))*moving_angle
-    if end_angle < start_angle:
-        return start_angle - correction*(sigmoid(time)-sigmoid(-bound))*moving_angle
+    moving_angle = abs(start_angle - end_angle)  # degrees the servo has to move
+    time = (elapsed / seconds)*np.pi
+    if elapsed < seconds:
+        if end_angle > start_angle:
+            return start_angle + (-.5*math.cos(time)+.5)*moving_angle
+        if end_angle < start_angle:
+            return start_angle - (-.5*math.cos(time)+.5)*moving_angle
+    return end_angle
+
+
+if __name__ == "__main__":
+    print(math.cos(np.pi))
+    init_pos = [90, 80, 90, 70, 90]
+    robotarm = RobotArm(DEFAULT_PARAMETERS, init_pos)
+    # new_pos = [40, 30, 40, 30, 50]
+    # robotarm.set_arm(new_pos, 3)
