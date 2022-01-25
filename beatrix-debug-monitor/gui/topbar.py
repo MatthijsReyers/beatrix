@@ -1,103 +1,102 @@
-import gi
+from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QPushButton, 
+    QButtonGroup, QRadioButton, QSpacerItem, QSizePolicy)
 
-gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
+LOCALHOST = 'Localhost'
+RASPBERRY_PI = 'Raspberry Pi'
 
-class TopBar(Gtk.Box):
+class TopBar(QWidget):
     def __init__(self, client, config):
-        super().__init__(self)
-        self.set_spacing(10)
-        self.set_orientation(Gtk.Orientation.HORIZONTAL)
-        self.set_homogeneous(False)
+        super(QWidget, self).__init__()
+        # self.set_spacing(10)
+        # self.set_orientation(Gtk.Orientation.HORIZONTAL)
+        # self.set_homogeneous(False)
+        self.layout = QHBoxLayout(self)
 
         self.client = client
         self.config = config
 
-        # Raspberry pi IP address entry box
-        # ===========================================================================
-        self.ip_select = Gtk.Box()
-        self.ip_select.set_orientation(Gtk.Orientation.VERTICAL)
-        self.ip_select.set_spacing(3)
-
-        label = Gtk.Label('Raspberry Pi:')
-        label.set_hexpand(True)
-        label.set_justify(Gtk.Justification.LEFT)
-        self.ip_select.add(label)
-
-        box = Gtk.Box()
-        box.set_orientation(Gtk.Orientation.HORIZONTAL)
-        box.set_spacing(3)
-        
-        self.ip = self.config.raspberry_ip
-        ip_entry = Gtk.Entry()
-        ip_entry.set_text(self.ip)
-        ip_entry.connect('changed', self.__on_ip_entry)
-        box.add(ip_entry)
-
-        self.ip_btn = Gtk.Button()
-        self.ip_btn.set_label('OK')
-        self.ip_btn.connect('button-press-event', self.__on_ip_save)
-        self.ip_btn.set_sensitive(False)
-        box.add(self.ip_btn)
-        
-        self.ip_select.add(box)
 
         # Server source select
         # ===========================================================================
-        source_select = Gtk.Box()
-        source_select.set_homogeneous(False)
-        source_select.set_orientation(Gtk.Orientation.VERTICAL)
-        source_select.set_spacing(3)
-        source_select.set_hexpand(False)
+        self.source_select = QWidget()
+        layout = QVBoxLayout(self.source_select)
+        layout.addWidget(QLabel('Connect to:'))
+        self.layout.addWidget(self.source_select)
 
-        source_select.add(Gtk.Label('Connect to:'))
+        box = QWidget()
+        layout2 = QHBoxLayout(box)
+        layout.addWidget(box)
 
-        self.localhost = Gtk.Label('')
+        self.local_btn = QRadioButton(LOCALHOST)
+        self.remote_btn = QRadioButton(RASPBERRY_PI)
 
-        self.stack = Gtk.Stack()
-        if self.config.local_server:
-            self.stack.add_titled(self.localhost, 'Localhost', 'Localhost')
-            self.stack.add_titled(self.ip_select, 'Raspberry Pi', 'Raspberry Pi')
-        else:
-            self.stack.add_titled(self.ip_select, 'Raspberry Pi', 'Raspberry Pi')
-            self.stack.add_titled(self.localhost, 'Localhost', 'Localhost')
-        self.stack.connect('notify::visible-child', self.__on_source_select)
+        self.local_btn.setChecked(self.config.local_server)
+        self.remote_btn.setChecked(not self.config.local_server)
 
-        switcher = Gtk.StackSwitcher()
-        switcher.set_stack(self.stack)
-        switcher.set_hexpand(False)
-        source_select.add(switcher)
+        self.local_btn.toggled.connect(self.__on_source_select(LOCALHOST))
+        self.remote_btn.toggled.connect(self.__on_source_select(RASPBERRY_PI))
 
-        self.add(source_select)
-        self.add(self.stack)
+        buttons = QButtonGroup()
+        buttons.setExclusive(True)
+        buttons.addButton(self.local_btn, 1)
+        buttons.addButton(self.remote_btn, 2)
 
-        # Padding
+        layout2.addWidget(self.local_btn)
+        layout2.addWidget(self.remote_btn)
+
+
+        # Raspberry pi IP address entry box
         # ===========================================================================
-        padding = Gtk.Box()
-        padding.set_hexpand(True)
-        self.add(padding)
-        self.set_child_packing(padding, True, True, True, Gtk.PackType.START)
+        self.ip_select = QWidget()
+        self.ip_select.setVisible(not self.config.local_server)
+        layout = QVBoxLayout(self.ip_select)
+        layout.addWidget(QLabel('Raspberry Pi:'))
 
-    def __on_source_select(self, event, param):
-        local = True
-        if self.stack.props.visible_child not in [self.localhost,  self.ip_select]:
-            return
-        elif self.stack.props.visible_child == self.ip_select:
-            local = False
-        if self.config.local_server != local:
-            self.config.local_server = local
-            self.client.stop()
-            self.client.connect()
+        box = QWidget()
+        layout2 = QHBoxLayout(box)
+        layout.addWidget(box)
+        
+        self.ip = self.config.raspberry_ip
+        ip_input = QLineEdit()
+        ip_input.setText(self.ip)
+        ip_input.textChanged.connect(self.__on_ip_entry)
+        layout2.addWidget(ip_input)
+
+        self.ip_btn = QPushButton('OK')
+        self.ip_btn.clicked.connect(self.__on_ip_save)
+        self.ip_btn.setEnabled(False)
+        layout2.addWidget(self.ip_btn)
+        
+        self.layout.addWidget(self.ip_select)
+
+
+        # Spacer to keep everything to the left.
+        # ===========================================================================
+        verticalSpacer = QSpacerItem(300, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        layout.addItem(verticalSpacer)
+
+
+    def __on_source_select(self, btn_name):
+        def select(state):
+            local = (btn_name == LOCALHOST and state == True)
+
+            if btn_name == RASPBERRY_PI and state:
+                self.ip_select.setVisible(True)
+            else: self.ip_select.setVisible(False)
+
+            if self.config.local_server != local:
+                self.config.local_server = local
+                self.client.stop()
+                self.client.connect()
+        return select
 
     def __on_ip_entry(self, entry):
-        self.ip = entry.get_text().replace(' ', '')
-        if self.ip == self.config.raspberry_ip:
-            self.ip_btn.set_sensitive(False)
-        else: self.ip_btn.set_sensitive(True)
+        self.ip = entry.replace(' ', '')
+        self.ip_btn.setEnabled(not (self.ip == self.config.raspberry_ip))
 
-    def __on_ip_save(self, x, y):
+    def __on_ip_save(self, x):
         self.config.raspberry_ip = self.ip
         if not self.config.local_server:
             self.client.stop()
             self.client.connect()
-        self.ip_btn.set_sensitive(False)
+        self.ip_btn.setEnabled(False)
