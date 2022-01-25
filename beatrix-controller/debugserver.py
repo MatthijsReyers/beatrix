@@ -1,10 +1,7 @@
+from lib.consts import VIDEO_PORT, CONTROL_PORT, VIDEO_BUFFER_SIZE
 from lib.serversock import ServerSocket
 from threading import Thread
 import pickle, struct, cv2
-
-VIDEO_BUFFER_SIZE = 1000000
-VIDEO_PORT = 37020
-CONTROL_PORT = 4400
 
 class DebugServer():
     def __init__(self):
@@ -24,6 +21,8 @@ class DebugServer():
             _, frame = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 30])
             frame_bytes = pickle.dumps(frame)
             self.video_socket.send(frame_bytes)
+        except UnpicklingError as e:
+            print('Video decode error.')
         except Exception as e:
             print(e)
 
