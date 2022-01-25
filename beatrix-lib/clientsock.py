@@ -3,7 +3,7 @@ from threading import Thread, Condition, Lock
 import time
 
 SEND_TIMEOUT = 0.8
-RECV_TIMEOUT = 1.5
+RECV_TIMEOUT = 0.6
 RECONNECT_TIME = 0.5
 VIDEO_PORT = 37020
 
@@ -43,9 +43,12 @@ class ClientSocket():
     def stop(self):
         """ Closes the socket and stops any automatic reconnection attempts.  """
         self.closed_by_user = True
-        self._socket.shutdown(SHUT_RDWR)
+        self._socket_mutex.acquire()
+        try: self._socket.shutdown(SHUT_RDWR)
+        except: pass
         self._socket.close()
-        if self.reconnect_thread and self.reconnect_thread.is_alive():
+        self._socket_mutex.release()
+        if self.reconnect_thread:
             self.reconnect_thread.join()
 
     def send(self, data) -> bool:
@@ -143,6 +146,10 @@ class ClientSocket():
                 self._socket.connect((self.ip_addr, self.port))
                 self.__set_connected(True)
                 self.reconnecting = False
+            except timeout:
+                self._socket_mutex.release()
+                time.sleep(RECONNECT_TIME)
+                self._socket_mutex.acquire()
             except ConnectionRefusedError:
                 self._socket_mutex.release()
                 time.sleep(RECONNECT_TIME)
