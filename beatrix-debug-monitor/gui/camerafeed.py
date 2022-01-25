@@ -1,24 +1,20 @@
-from matplotlib.backends.backend_gtk3agg import (FigureCanvasGTK3Agg as FigureCanvas)
+from PyQt5.QtWidgets import QLabel, QGroupBox, QBoxLayout
+from PyQt5.QtGui import QPixmap
 from threading import Thread
 from pickle import UnpicklingError
-import gi, cv2, time
+import cv2, time, qimage2ndarray 
 
-gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
-
-
-class CameraFeed(Gtk.Frame):
+class CameraFeed(QGroupBox):
     def __init__(self, client, logger):
-        super().__init__()
-        self.set_label("Camera feed")
-        self.set_size_request(400, 300)
-        self.set_hexpand(True)
+        super(QGroupBox, self).__init__()
+        self.setTitle("Camera feed")
+        self.layout = QBoxLayout(QBoxLayout.Direction.Up)
+        self.setLayout(self.layout)
+        self.camera_image = QLabel('Camera stream not connected')
+        self.layout.addWidget(self.camera_image)
 
         self.client = client
         self.logger = logger
-        self.camera_image = Gtk.Image()
-        self.add(self.camera_image)
-
         self.running = False
 
     def start(self):
@@ -34,22 +30,13 @@ class CameraFeed(Gtk.Frame):
         print('[*] Started camera thread.')
         while self.running:
             try:
-                okay, frame = self.client.recieve_video()
+                okay, frame = self.client.receive_video()
                 if okay:
                     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    print(frame.shape)
-                    pb = GdkPixbuf.Pixbuf.new_from_data(
-                        frame.tostring(),
-                        GdkPixbuf.Colorspace.RGB,
-                        False,
-                        8,
-                        frame.shape[1],
-                        frame.shape[0],
-                        frame.shape[2]*frame.shape[1])
-                    GLib.idle_add(self.camera_image.set_from_pixbuf, pb.copy())
+                    image = qimage2ndarray.array2qimage(frame)
+                    self.camera_image.setPixmap(QPixmap.fromImage(image))
             except UnpicklingError as e:
-                # print(e
-                pass
+                print(e)
             except Exception as e:
                 self.logger.exception(e, 'CameraFeed.__camera_thread')
                 time.sleep(0.8)
