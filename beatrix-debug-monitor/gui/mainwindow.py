@@ -1,55 +1,56 @@
 from lib.consts import HOME_POSITION
-from gui.visualizer import Visualizer
+# from gui.visualizer import Visualizer
 from gui.camerafeed import CameraFeed
 from gui.topbar import TopBar
 from threading import Thread
-import gi, cv2, time
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QSplitter
 
-gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
-
-class MainWindow(Gtk.Window):
+class MainWindow(QMainWindow):
     def __init__(self, client, logger, config):
-        super().__init__(title="Beatrix debug monitor")
-        self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
-        self.set_default_size(1200,800)
+        super(QMainWindow, self).__init__()
+        self.setWindowTitle("Beatrix debug monitor")
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
+        self.layout = QVBoxLayout()
+        self.central_widget.setLayout(self.layout)
+        # self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+        # self.set_default_size(1200,800)
         
         self.logger = logger
         self.config = config
         self.client = client
 
-        self.box = Gtk.Box()
-        self.box.set_orientation(Gtk.Orientation.VERTICAL)
-        self.add(self.box)
-
         self.topbar = TopBar(client, config)
-        self.box.add(self.topbar)
+        self.layout.addWidget(self.topbar)
 
-        v_bar = Gtk.VPaned()
+        # Splitter with resizeable things.
+        self.splitter = QSplitter()
+        self.layout.addWidget(self.splitter)
 
         # Main bar with visualizer and camera feed.
-        main_bar = Gtk.HPaned()
+        main_bar = QSplitter()
         self.camera_feed = CameraFeed(client, logger)
-        main_bar.add(self.camera_feed)
-        self.visualizer = Visualizer()
-        main_bar.add(self.visualizer)
-        v_bar.add(main_bar)
+        main_bar.addWidget(self.camera_feed)
+        # self.visualizer = Visualizer()
+        # main_bar.add(self.visualizer)
+        # v_bar.add(main_bar)
+        self.layout.addWidget(main_bar)
 
-        # 
-        self.box.add(v_bar)
+        # # 
+        # self.box.add(v_bar)
 
-        self.position = [53.0, 40.0, 50.0]
-        # self.__init_position_frame()
+        # self.position = [53.0, 40.0, 50.0]
+        # # self.__init_position_frame()
         
-        # self.angles = [45,45,45,45,45,45]
-        # self.__init_angles_frame()
+        # # self.angles = [45,45,45,45,45,45]
+        # # self.__init_angles_frame()
 
-        # self.grid = Gtk.Grid()
-        # self.grid.set_vexpand(True)
-        # self.grid.set_hexpand(True)
-        # self.add(self.grid)
-        self.connect('destroy', self.stop)
-        # self.update_position(self.position)
+        # # self.grid = Gtk.Grid()
+        # # self.grid.set_vexpand(True)
+        # # self.grid.set_hexpand(True)
+        # # self.add(self.grid)
+        # self.connect('destroy', self.stop)
+        # # self.update_position(self.position)
 
     def start(self):
         self.running = True
@@ -63,7 +64,7 @@ class MainWindow(Gtk.Window):
         self.camera_feed.stop()
         self.command_thread.join()
 
-    def update_position(self, position: (float, float, float)):
+    def update_position(self, position):
         self.position = position
         self.visualizer.update_position(position)
         for i in range(3):
