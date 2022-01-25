@@ -1,17 +1,14 @@
-from matplotlib.backends.backend_gtk3agg import (FigureCanvasGTK3Agg as FigureCanvas)
+from PyQt5.QtWidgets import QLabel, QGroupBox, QBoxLayout
+from matplotlib.backends.qt_compat import QtWidgets
+from matplotlib.backends.backend_qtagg import FigureCanvas
 from matplotlib.figure import Figure
 from ikpy.chain import Chain
-import gi, cv2
 
-gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
-
-class Visualizer(Gtk.Frame):
+class Visualizer(QGroupBox):
     def __init__(self):
-        super().__init__()
-        self.set_label("Visualizer")
-        self.set_size_request(400, 100)
-        self.set_hexpand(True)
+        super(QGroupBox, self).__init__()
+        self.setTitle("Visualizer")
+        self.layout = QBoxLayout(QBoxLayout.Direction.Up, self)
 
         self.position = (5.0, 5.0, 5.0)
 
@@ -24,13 +21,11 @@ class Visualizer(Gtk.Frame):
         self.chain.plot(solution, self.ax)
         
         self.canvas = FigureCanvas(self.figure)
-        self.canvas.set_size_request(400, 300)
-        self.canvas.set_vexpand(True)
-        self.add(self.canvas)
+        self.layout.addWidget(self.canvas)
 
         self.update_graph()
 
-    def update_position(self, position: (float, float, float)):
+    def update_position(self, position):
         self.position = position
         self.update_graph()
 

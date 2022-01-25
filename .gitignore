@@ -8,3 +8,5 @@ __pycache__/
 
 beatrix-debug-monitor/lib
 beatrix-controller/lib
+
+test.py

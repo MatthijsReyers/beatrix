@@ -1,5 +1,7 @@
 from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QPushButton, 
     QButtonGroup, QRadioButton, QSpacerItem, QSizePolicy)
+# from PyQt5.QtCore import WA_StyledBackground
+from PyQt5 import QtCore
 
 LOCALHOST = 'Localhost'
 RASPBERRY_PI = 'Raspberry Pi'
@@ -7,21 +9,40 @@ RASPBERRY_PI = 'Raspberry Pi'
 class TopBar(QWidget):
     def __init__(self, client, config):
         super(QWidget, self).__init__()
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.setMaximumHeight(40)
         self.layout = QHBoxLayout(self)
+        self.layout.setSpacing(10)
+        self.layout.setContentsMargins(0, 0, 0, 0)
 
         self.client = client
         self.config = config
+
+        # self.setAttribute(WA_StyledBackground, True)
+        # self.setStyleSheet("""
+        #     background-color: red;
+        # """)
 
 
         # Server source select
         # ===========================================================================
         self.source_select = QWidget()
         layout = QVBoxLayout(self.source_select)
-        layout.addWidget(QLabel('Connect to:'))
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(2)
+        
+        label = QLabel('Connect to:')
+        label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        label.setAlignment(QtCore.Qt.AlignCenter)
+        label.setMinimumHeight(20)
+        layout.addWidget(label)
+
         self.layout.addWidget(self.source_select)
 
         box = QWidget()
         layout2 = QHBoxLayout(box)
+        layout2.setContentsMargins(0, 0, 0, 0)
+        layout2.setSpacing(0)
         layout.addWidget(box)
 
         self.local_btn = QRadioButton(LOCALHOST)
@@ -47,10 +68,21 @@ class TopBar(QWidget):
         self.ip_select = QWidget()
         self.ip_select.setVisible(not self.config.local_server)
         layout = QVBoxLayout(self.ip_select)
-        layout.addWidget(QLabel('Raspberry Pi:'))
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(2)
+
+        label = QLabel('Raspberry Pi:')
+        label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        label.setAlignment(QtCore.Qt.AlignCenter)
+        label.setMinimumHeight(20)
+        layout.addWidget(label)
 
         box = QWidget()
         layout2 = QHBoxLayout(box)
+        layout2.setContentsMargins(0, 0, 0, 0)
+        # box.setStyleSheet("""
+        #     background-color: red;
+        # """)
         layout.addWidget(box)
         
         self.ip = self.config.raspberry_ip
@@ -69,8 +101,8 @@ class TopBar(QWidget):
 
         # Spacer to keep everything to the left.
         # ===========================================================================
-        verticalSpacer = QSpacerItem(300, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        layout.addItem(verticalSpacer)
+        verticalSpacer = QSpacerItem(5, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.layout.addItem(verticalSpacer)
 
 
     def __on_source_select(self, btn_name):

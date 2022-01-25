@@ -1,5 +1,5 @@
 from lib.consts import HOME_POSITION
-# from gui.visualizer import Visualizer
+from gui.visualizer import Visualizer
 from gui.camerafeed import CameraFeed
 from gui.topbar import TopBar
 from threading import Thread
@@ -12,9 +12,8 @@ class MainWindow(QMainWindow):
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         self.layout = QVBoxLayout()
+        self.layout.setSpacing(5)
         self.central_widget.setLayout(self.layout)
-        # self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
-        # self.set_default_size(1200,800)
         
         self.logger = logger
         self.config = config
@@ -31,9 +30,8 @@ class MainWindow(QMainWindow):
         main_bar = QSplitter()
         self.camera_feed = CameraFeed(client, logger)
         main_bar.addWidget(self.camera_feed)
-        # self.visualizer = Visualizer()
-        # main_bar.add(self.visualizer)
-        # v_bar.add(main_bar)
+        self.visualizer = Visualizer()
+        main_bar.addWidget(self.visualizer)
         self.layout.addWidget(main_bar)
 
         # # 
