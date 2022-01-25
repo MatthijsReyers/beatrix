@@ -1,2 +1,3 @@
 ikpy==3.2.2
 matplotlib==3.5.0
+PyQt5==5.15.4
