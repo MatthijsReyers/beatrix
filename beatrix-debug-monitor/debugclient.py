@@ -25,7 +25,7 @@ class DebugClient():
     def is_connected(self):
         return self.control_socket.is_connected() and self.video_socket.is_connected()
 
-    def recieve_video(self) -> (bool, any):
+    def receive_video(self) -> (bool, any):
         start_t = time.time()
         okay, raw_size = self.video_socket.receive(buffer_size=4)
         if okay:
