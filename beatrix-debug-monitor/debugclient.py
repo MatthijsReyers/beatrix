@@ -1,41 +1,47 @@
+from lib.consts import VIDEO_BUFFER_SIZE, VIDEO_PORT, CONTROL_PORT
 from lib.clientsock import ClientSocket
-from lib.logger import Logger
-import pickle, cv2, json
+import pickle, cv2, json, struct, time
 
-VIDEO_BUFFER_SIZE = 1000000
-VIDEO_PORT = 37020
-CONTROL_PORT = 4400
-
-RASP_IP = '127.0.0.1'
-# RASP_IP = '192.168.23.211'
+FRAME_TIMEOUT = 2
 
 class DebugClient():
-    def __init__(self, logger=None):
-        self.control_socket = ClientSocket(RASP_IP, CONTROL_PORT)
-        self.video_socket = ClientSocket(RASP_IP, VIDEO_PORT)
+    def __init__(self, logger, config):
+        self.logger = logger
+        self.config = config
 
-        self.logger = logger if logger != None else Logger()
-
-    def start(self):
-        logger.log('Connecting to control server.')
+    def connect(self):
+        self.logger.log('Connecting to control server.')
+        ip = '127.0.0.1' if self.config.local_server else self.config.raspberry_ip
+        self.control_socket = ClientSocket(ip, CONTROL_PORT)
+        self.video_socket = ClientSocket(ip, VIDEO_PORT)
         self.control_socket.start()
         self.video_socket.start()
 
-    def stop(self, event):
-        logger.log('Exiting, closing sockets.')
-        self.control_socket.close()
-        self.video_socket.close()
+    def stop(self):
+        self.logger.log('Exiting, closing sockets.')
+        self.control_socket.stop()
+        self.video_socket.stop()
 
     def is_connected(self):
         return self.control_socket.is_connected() and self.video_socket.is_connected()
 
     def recieve_video(self) -> (bool, any):
-        okay, data = self.video_socket.receive(buffer_size=1000000)
+        start_t = time.time()
+        okay, raw_size = self.video_socket.receive(buffer_size=4)
         if okay:
-            data = pickle.loads(data)
+            frame_size = struct.unpack('>I', raw_size)[0]
+            frame = b""
+            print(frame_size)
+            while len(frame) < frame_size and abs(start_t - time.time()) < FRAME_TIMEOUT:
+                okay, data = self.video_socket.receive(buffer_size=frame_size-len(frame))
+                frame += data
+            if len(frame) < frame_size:
+                print('frame timed out')
+                return (False, None)
+            data = pickle.loads(frame)
             return (True, cv2.imdecode(data, cv2.IMREAD_COLOR))
         return (False, None)
-        
+
     def receive_command(self) -> (bool, object):
         """ Tries to receive a command from the server. """
         try:
