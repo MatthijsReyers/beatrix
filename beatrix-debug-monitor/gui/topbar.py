@@ -7,9 +7,6 @@ RASPBERRY_PI = 'Raspberry Pi'
 class TopBar(QWidget):
     def __init__(self, client, config):
         super(QWidget, self).__init__()
-        # self.set_spacing(10)
-        # self.set_orientation(Gtk.Orientation.HORIZONTAL)
-        # self.set_homogeneous(False)
         self.layout = QHBoxLayout(self)
 
         self.client = client
