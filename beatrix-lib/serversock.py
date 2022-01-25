@@ -1,5 +1,6 @@
 from socket import socket, timeout, AF_INET, SOCK_STREAM, SO_REUSEPORT, SOL_SOCKET, SHUT_RDWR, SO_SNDBUF
 from threading import Thread
+import struct
 
 BACKLOG_SIZE = 10
 
@@ -51,10 +52,11 @@ class ServerSocket():
                 converted to bytestrings.
             ip (str): Optional Ip address to send to, all clients will receive data if none is provided.
         """
+        length = struct.pack('>I', len(data))
         for (conn, addr) in self._connections:
             try:
-                print(len(data))
                 if ip == None or addr[1] == ip:
+                    conn.send(length)
                     conn.send(data)
             except BrokenPipeError:
                 if (conn, addr) in self._connections:
