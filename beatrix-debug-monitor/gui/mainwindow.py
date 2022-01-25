@@ -1,43 +1,66 @@
+from lib.consts import HOME_POSITION
+from gui.visualizer import Visualizer
+from gui.camerafeed import CameraFeed
+from gui.topbar import TopBar
 from threading import Thread
-from visualizer import Visualizer
 import gi, cv2, time
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
+from gi.repository import Gtk
 
 class MainWindow(Gtk.Window):
-    def __init__(self, client):
+    def __init__(self, client, logger, config):
         super().__init__(title="Beatrix debug monitor")
         self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
         self.set_default_size(1200,800)
-
-        self.client = client
-        self.position = [50.0, 50.0, 50.0]
         
-        self.grid = Gtk.Grid()
-        self.grid.set_vexpand(True)
-        self.grid.set_hexpand(True)
-        self.add(self.grid)
+        self.logger = logger
+        self.config = config
+        self.client = client
 
+        self.box = Gtk.Box()
+        self.box.set_orientation(Gtk.Orientation.VERTICAL)
+        self.add(self.box)
+
+        self.topbar = TopBar(client, config)
+        self.box.add(self.topbar)
+
+        v_bar = Gtk.VPaned()
+
+        # Main bar with visualizer and camera feed.
+        main_bar = Gtk.HPaned()
+        self.camera_feed = CameraFeed(client, logger)
+        main_bar.add(self.camera_feed)
         self.visualizer = Visualizer()
-        self.grid.attach(self.visualizer, 4, 0, 3, 1)
+        main_bar.add(self.visualizer)
+        v_bar.add(main_bar)
 
-        self.__init_camera_frame()
-        self.__init_position_frame()
+        # 
+        self.box.add(v_bar)
 
+        self.position = [53.0, 40.0, 50.0]
+        # self.__init_position_frame()
+        
+        # self.angles = [45,45,45,45,45,45]
+        # self.__init_angles_frame()
+
+        # self.grid = Gtk.Grid()
+        # self.grid.set_vexpand(True)
+        # self.grid.set_hexpand(True)
+        # self.add(self.grid)
         self.connect('destroy', self.stop)
+        # self.update_position(self.position)
 
     def start(self):
         self.running = True
-        self.camera_thread = Thread(target=self.__camera_thread, args=(), daemon=True)
-        self.camera_thread.start()
+        self.camera_feed.start()
         self.command_thread = Thread(target=self.__command_thread, args=(), daemon=True)
         self.command_thread.start()
 
     def stop(self, event):
         print('[*] Exiting, joining threads.')
         self.running = False
-        self.camera_thread.join()
+        self.camera_feed.stop()
         self.command_thread.join()
 
     def update_position(self, position: (float, float, float)):
@@ -73,43 +96,18 @@ class MainWindow(Gtk.Window):
         self.position_frame.add(scales_frame)
         self.grid.attach(self.position_frame, 4, 4, 1, 1)
 
-    def __init_camera_frame(self):
-        self.camera_frame = Gtk.Frame()
-        self.camera_frame.set_label("Camera feed")
-        self.camera_frame.set_size_request(400, 300)
-        self.camera_frame.set_hexpand(True)
-
-        self.camera_image = Gtk.Image()
-        self.camera_frame.add(self.camera_image)
-
-        self.grid.attach(self.camera_frame, 0, 0, 3, 1)
-
-    def __camera_thread(self):
-        print('[*] Started camera thread.')
-        while self.running:
-            try:
-                frame = self.client.recieve_video()
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                pb = GdkPixbuf.Pixbuf.new_from_data(
-                    frame.tostring(),
-                    GdkPixbuf.Colorspace.RGB,
-                    False,
-                    8,
-                    frame.shape[1],
-                    frame.shape[0],
-                    frame.shape[2]*frame.shape[1])
-                GLib.idle_add(self.camera_image.set_from_pixbuf, pb.copy())
-            except Exception as e:
-                print('Got exception: ', type(e), e)
-                time.sleep(0.8)
+    def __init_angles_frame(self):
+        pass
 
     def __command_thread(self):
         print('[*] Started command thread.')
 
     def __on_slider_move(self, axis):
         def update(thing):
-            print('moving')
             self.position[axis] = thing.get_value()
             self.update_position(self.position)
         return update
 
+    def __on_go_home(self):
+        self.update_position(HOME_POSITION)
+        self.send_go_home_cmd()
