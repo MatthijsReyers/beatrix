@@ -243,8 +243,6 @@ class RobotArm:
         """
         self.N = N_JOINTS
         self.joints = dict()
-        # self.current_angle = dict()
-        # self.bounds = dict()
 
         self.grabber = Grabber(GRABBER_PARAMETERS, PCA, 90, False)
 
@@ -254,9 +252,11 @@ class RobotArm:
                                          actuation_range=ACTUATION_RANGE[id], init_angle=INITIAL_ANGLES[id])
 
             if JOINT_TYPE[id]["duality"] == "single":
-                self.joints[id] = (SingleServo(parameters=parameters, pca9685=PCA, angle=parameters.initial_angle))
+                self.joints[id] = (SingleServo(parameters=parameters, pca9685=PCA,
+                                               angle=parameters.initial_angle))
             elif JOINT_TYPE[id]["duality"] == "dual":
-                self.joints[id] = (DualServo(parameters=parameters, pca9685=PCA, angle=parameters.initial_angle))
+                self.joints[id] = (DualServo(parameters=parameters, pca9685=PCA,
+                                             angle=parameters.initial_angle))
 
         self.set_arm(INITIAL_ANGLES, 1)
 
@@ -292,11 +292,18 @@ class RobotArm:
 
         # for each step adjust for each servo the angle
         for step in range(steps):
+            current_ptime = time.process_time()
             for j_id, joint in self.joints:
                 calculated_angle = get_angle_smooth(start_angle=old_angles[j_id], end_angle=new_angles[j_id],
                                                          seconds=duration, elapsed=(step + 1) * dtime)
                 self._set_servo(self.joints[j_id], calculated_angle, new_angles[j_id])
-            time.sleep(dtime)
+
+            time_elapsed = time.process_time() - current_ptime
+            if time_elapsed >= dtime:
+                print("!!!! Process took longer than control loop time !!!!")
+                print("time elapsed = {}".format(time_elapsed))
+            else:
+                time.sleep(dtime - time_elapsed)
 
     @staticmethod
     def _set_servo(joint, angle, new_angle):
