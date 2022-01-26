@@ -272,7 +272,7 @@ class RobotArm:
             - v_max: float time in seconds
         """
 
-        new_angles = self.bound_angle(new_angles)
+        new_angles = self.bound_angles(new_angles)
         old_angles = self.get_current_angles()
 
         old_angle_arr = np.array(old_angles.values())
