@@ -2,7 +2,10 @@ from PyQt5.QtWidgets import QLabel, QGroupBox, QBoxLayout
 from PyQt5.QtGui import QPixmap
 from threading import Thread
 from pickle import UnpicklingError
-import cv2, time, qimage2ndarray 
+from lib.utils import safe_import_cv
+import time, qimage2ndarray 
+
+cv2 = safe_import_cv()
 
 class CameraFeed(QGroupBox):
     def __init__(self, client, logger):

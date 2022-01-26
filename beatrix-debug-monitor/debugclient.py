@@ -1,6 +1,9 @@
 from lib.consts import VIDEO_BUFFER_SIZE, VIDEO_PORT, CONTROL_PORT
 from lib.clientsock import ClientSocket
-import pickle, cv2, json, struct, time
+from lib.utils import safe_import_cv
+import pickle, json, struct, time
+
+cv2 = safe_import_cv()
 
 FRAME_TIMEOUT = 2
 
@@ -31,12 +34,11 @@ class DebugClient():
         if okay:
             frame_size = struct.unpack('>I', raw_size)[0]
             frame = b""
-            print(frame_size)
             while len(frame) < frame_size and abs(start_t - time.time()) < FRAME_TIMEOUT:
                 okay, data = self.video_socket.receive(buffer_size=frame_size-len(frame))
                 frame += data
             if len(frame) < frame_size:
-                print('frame timed out')
+                self.logger.warn('Video frame receiving timed out.')
                 return (False, None)
             data = pickle.loads(frame)
             return (True, cv2.imdecode(data, cv2.IMREAD_COLOR))
