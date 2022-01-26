@@ -83,7 +83,13 @@ class ServerSocket():
                 thread = Thread(target=self.__receive_thread, args=(conn, addr))
                 thread.start() 
                 self._receive_threads.append(thread)
-            except timeout: pass
+            except timeout: 
+                pass
+            except OSError as e:
+                if not self.running: 
+                    break
+                else:
+                    print('[!] Encountered unexpected exception while connecting:\n', type(e), e) 
             except Exception as e:
                 print('[!] Encountered unexpected exception while connecting:\n', type(e), e) 
 
