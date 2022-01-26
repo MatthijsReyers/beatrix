@@ -1,9 +1,11 @@
-from lib.consts import HOME_POSITION
+from lib.constants import HOME_POSITION
 from gui.visualizer import Visualizer
 from gui.camerafeed import CameraFeed
 from gui.topbar import TopBar
 from threading import Thread
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QSplitter
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (QMainWindow, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout, QSplitter, 
+    QLabel, QSlider)
 
 class MainWindow(QMainWindow):
     def __init__(self, client, logger, config):
@@ -15,6 +17,8 @@ class MainWindow(QMainWindow):
         self.layout.setSpacing(5)
         self.central_widget.setLayout(self.layout)
         
+        self.position = [40.0, 0.0, 10.0]
+
         self.logger = logger
         self.config = config
         self.client = client
@@ -24,6 +28,7 @@ class MainWindow(QMainWindow):
 
         # Splitter with resizeable things.
         self.splitter = QSplitter()
+        self.splitter.setOrientation(Qt.Orientation.Vertical)
         self.layout.addWidget(self.splitter)
 
         # Main bar with visualizer and camera feed.
@@ -31,13 +36,20 @@ class MainWindow(QMainWindow):
         self.camera_feed = CameraFeed(client, logger)
         main_bar.addWidget(self.camera_feed)
         self.visualizer = Visualizer()
+        self.visualizer.update_position(self.position)
         main_bar.addWidget(self.visualizer)
-        self.layout.addWidget(main_bar)
+        self.splitter.addWidget(main_bar)
 
-        # # 
+        # Second bar with logs and position options
+        base_splitter = QSplitter()
+        self.splitter.addWidget(base_splitter)
+
+        self.__init_position_frame()
+        base_splitter.addWidget(self.position_frame)  
+        self.update_position(self.position)      
+
         # self.box.add(v_bar)
 
-        # self.position = [53.0, 40.0, 50.0]
         # # self.__init_position_frame()
         
         # # self.angles = [45,45,45,45,45,45]
@@ -66,34 +78,25 @@ class MainWindow(QMainWindow):
         self.position = position
         self.visualizer.update_position(position)
         for i in range(3):
-            self.position_scales[i].set_value(position[i])
+            self.position_sliders[i].setValue(position[i])
 
     def __init_position_frame(self):
-        self.position_frame = Gtk.Frame()
-        self.position_frame.set_label("Position")
-        self.position_frame.set_vexpand(True)
-        self.position_scales = []
+        self.position_frame = QGroupBox()
+        self.position_frame.setTitle("Position")
 
-        scales = Gtk.Box(spacing=6)
-        scales.set_orientation(Gtk.Orientation.VERTICAL)
+        self.position_sliders = []
+
+        sliders = QHBoxLayout(self.position_frame)
+        # sliders.set_orientation(Gtk.Orientation.VERTICAL)
 
         for axis in range(3):
-            # scale = Gtk.Range()
-            scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, -50, 50, 0.1)
-            scale.set_value_pos(Gtk.PositionType.RIGHT)
-            scale.set_hexpand(True)
-            scale.set_has_origin(False)
-            scale.set_value(0.0)
-            # scale.set_inverted(True)
-
-            scale.connect('value-changed', self.__on_slider_move(axis))
-            scales.add(scale)
-            self.position_scales.append(scale)
-
-        scales_frame = Gtk.Frame()
-        scales_frame.add(scales)
-        self.position_frame.add(scales_frame)
-        self.grid.attach(self.position_frame, 4, 4, 1, 1)
+            slider = QSlider(Qt.Orientation.Horizontal, self.position_frame)
+            slider.setMinimum(-50)
+            slider.setMaximum(50)
+            slider.valueChanged.connect(self.__on_slider_move(axis))
+            sliders.addWidget(slider)
+            self.position_sliders.append(slider)
+        
 
     def __init_angles_frame(self):
         pass
@@ -102,8 +105,8 @@ class MainWindow(QMainWindow):
         print('[*] Started command thread.')
 
     def __on_slider_move(self, axis):
-        def update(thing):
-            self.position[axis] = thing.get_value()
+        def update(value):
+            self.position[axis] = value
             self.update_position(self.position)
         return update
 

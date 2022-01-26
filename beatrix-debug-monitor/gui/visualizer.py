@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QLabel, QGroupBox, QBoxLayout
 from matplotlib.backends.qt_compat import QtWidgets
 from matplotlib.backends.backend_qtagg import FigureCanvas
 from matplotlib.figure import Figure
+from lib.chain import ik_chain
 from ikpy.chain import Chain
 
 class Visualizer(QGroupBox):
@@ -14,6 +15,7 @@ class Visualizer(QGroupBox):
 
         # Load robot arm chain from URDF file.
         self.chain = Chain.from_urdf_file("./robot.URDF")
+        self.chain = ik_chain
         solution = self.chain.inverse_kinematics(self.position)
 
         self.figure = Figure(figsize=(5, 4), dpi=100)
@@ -37,9 +39,17 @@ class Visualizer(QGroupBox):
 
         solution = self.chain.inverse_kinematics(self.position)
         self.chain.plot(solution, self.ax)
-        
+        self.print_solution()
+
         self.ax.scatter(
             self.position[0], self.position[1], self.position[2], 
             marker="x", c="red")
 
         self.canvas.draw()
+
+    def print_solution(self):
+        import math
+        solution = self.chain.inverse_kinematics(self.position)
+        for angle in solution:
+            print(' {:.2f} '.format(math.degrees(angle)), end='')
+        print('')

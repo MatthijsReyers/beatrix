@@ -1,4 +1,4 @@
-from lib.consts import VIDEO_BUFFER_SIZE, VIDEO_PORT, CONTROL_PORT
+from lib.constants import VIDEO_BUFFER_SIZE, VIDEO_PORT, CONTROL_PORT
 from lib.clientsock import ClientSocket
 from lib.utils import safe_import_cv
 import pickle, json, struct, time

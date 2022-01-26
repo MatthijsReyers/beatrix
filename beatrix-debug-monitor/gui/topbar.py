@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QPushButton, 
     QButtonGroup, QRadioButton, QSpacerItem, QSizePolicy)
-# from PyQt5.QtCore import WA_StyledBackground
 from PyQt5 import QtCore
 
 LOCALHOST = 'Localhost'

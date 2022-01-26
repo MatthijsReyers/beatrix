@@ -1,0 +1,69 @@
+
+
+        <!-- Bone B -->
+    <link name="bone_b">
+        <inertial>
+        <origin
+            xyz="6.66582621695788E-05 0.0136707153902851 1.6650272712763E-09"
+            rpy="0 0 0" />
+        <mass value="0.0828710129889412" />
+        <inertia
+            ixx="2.88062730000748E-05"
+            ixy="-4.09554328793376E-07"
+            ixz="6.38110786400718E-13"
+            iyy="1.69994170120842E-05"
+            iyz="-3.08410026385581E-12"
+            izz="3.50518702024955E-05" />
+        </inertial>
+        <visual>
+        <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+        <geometry>
+            <mesh filename="package://Poppy_Ergo/meshes/bone_b.STL" />
+        </geometry>
+        <material name="">
+            <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+        </material>
+        </visual>
+        <collision>
+        <origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+        <geometry>
+            <mesh filename="package://Poppy_Ergo/meshes/bone_b.STL" />
+        </geometry>
+        </collision>
+    </link>
+
+    <!-- Elbow joint -->
+    <joint name="elbow" type="revolute">
+        <origin xyz="15 0 0" rpy="0 0 0" />
+        <parent link="bone_a" />
+        <child link="bone_b" />
+        <axis xyz="0 1 0" />
+    </joint>
+
+
+    <!-- Bone C -->
+    <link name="bone_c">
+        <inertial>
+        <origin xyz="6.95288959172179E-05 0.0119296679383337 -3.16466375568961E-08" rpy="0 0 0" />
+        <mass value="0.0801745189910368" />
+        <inertia
+            ixx="2.09487833891956E-05"
+            ixy="-3.96948279691612E-07"
+            ixz="1.02565194835031E-12"
+            iyy="1.52176900602456E-05"
+            iyz="-7.79389983932002E-11"
+            izz="2.6045998949051E-05" />
+        </inertial>
+    </link>
+    
+    <!-- Wrist joint -->
+    <joint name="wrist" type="revolute">
+        <origin xyz="8 0 0" rpy="0 0 0" />
+        <parent link="bone_b" />
+        <child link="bone_c" />
+        <axis xyz="0 1 0" />
+    </joint>
