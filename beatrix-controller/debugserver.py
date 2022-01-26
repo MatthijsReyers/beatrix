@@ -1,6 +1,7 @@
 from lib.consts import VIDEO_PORT, CONTROL_PORT, VIDEO_BUFFER_SIZE
 from lib.serversock import ServerSocket
 from threading import Thread
+from pickle import UnpicklingError
 import pickle, struct, cv2
 
 class DebugServer():
