@@ -21,8 +21,8 @@ class Visualizer(QGroupBox):
 
         # Load robot arm chain from URDF file.
         # self.chain = Chain.from_urdf_file("./robot.URDF")
-        self.chain = ik_chain
-        # self.chain = guus_chain
+        # self.chain = ik_chain
+        self.chain = guus_chain
         print("Length chain = {}".format(len(self.chain)))
         print(repr(self.chain))
         for l in self.chain.links:

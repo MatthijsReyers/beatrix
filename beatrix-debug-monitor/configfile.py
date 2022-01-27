@@ -1,6 +1,7 @@
 from os.path import expanduser
 import json
 
+
 class ConfigFile():
     def __init__(self, logger):
         self.logger = logger
