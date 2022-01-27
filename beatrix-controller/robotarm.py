@@ -93,7 +93,7 @@ class SingleServo:
                                      actuation_range=self.actuation_range)
 
         # Update angle of servo
-        self.set_angle(angle)
+        self.set_angle(angle, angle)
 
     def set_angle(self, angle, new_angle):
         self.new_angle = self.bound_angle(new_angle)
@@ -288,7 +288,7 @@ class RobotArm:
 
         old_angle_arr = np.array(list(old_angles.values()))
         new_angle_arr = np.array(list(new_angles.values()))
-        total_angle_arr = new_angle_arr - old_angle_arr
+        total_angle_arr = abs(new_angle_arr - old_angle_arr)
 
         if v_max > MAX_VELOCITY:
             print("Currently no implementation for movement that is too fast\n")

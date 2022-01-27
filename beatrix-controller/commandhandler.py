@@ -48,7 +48,6 @@ class CommandHandler:
             if self.autopilot.running:
                 print('Autopilot is running, ignoring command.')
             else:
-                print(angles)
                 self.controller.move_angles(angles)
         except Exception as e:
             print(e)
