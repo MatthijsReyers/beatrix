@@ -92,6 +92,9 @@ class SingleServo:
             self.servo = servo.Servo(pca9685.channels[self.port], min_pulse=500, max_pulse=2500,
                                      actuation_range=self.actuation_range)
 
+        # Update angle of servo
+        self.set_angle(angle)
+
     def set_angle(self, angle, new_angle):
         self.new_angle = self.bound_angle(new_angle)
         self.current_angle = self.bound_angle(angle)
@@ -252,17 +255,17 @@ class RobotArm:
                 WRIST_TURN_JOINT_ID
             ]
 
-        for joint_id in joint_ids:
-            parameters = JointParameters(min_angle=ANGLE_BOUNDS[joint_id][0], max_angle=ANGLE_BOUNDS[joint_id][1],
-                                         servo_port=SERVO_PORTS[joint_id], mirrored=JOINT_TYPE[joint_id]['mirrored'],
-                                         actuation_range=ACTUATION_RANGE[joint_id],
-                                         init_angle=INITIAL_ANGLES[joint_id])
+        for j_id in joint_ids:
+            parameters = JointParameters(min_angle=ANGLE_BOUNDS[j_id][0], max_angle=ANGLE_BOUNDS[j_id][1],
+                                         servo_port=SERVO_PORTS[j_id], mirrored=JOINT_TYPE[j_id]['mirrored'],
+                                         actuation_range=ACTUATION_RANGE[j_id],
+                                         init_angle=INITIAL_ANGLES[j_id])
 
-            if JOINT_TYPE[joint_id]["duality"] == "single":
-                self.joints[joint_id] = (SingleServo(parameters=parameters, pca9685=PCA,
+            if JOINT_TYPE[j_id]["duality"] == "single":
+                self.joints[j_id] = (SingleServo(parameters=parameters, pca9685=PCA,
                                                angle=parameters.initial_angle))
-            elif JOINT_TYPE[joint_id]["duality"] == "dual":
-                self.joints[joint_id] = (DualServo(parameters=parameters, pca9685=PCA,
+            elif JOINT_TYPE[j_id]["duality"] == "dual":
+                self.joints[j_id] = (DualServo(parameters=parameters, pca9685=PCA,
                                              angle=parameters.initial_angle))
 
         self.set_arm(INITIAL_ANGLES, 1)
