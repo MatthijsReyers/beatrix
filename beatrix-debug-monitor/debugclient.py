@@ -68,8 +68,10 @@ class DebugClient():
     def send_set_angles_cmd(self, angles:dict):
         """ Sends a command to set the servo angles of the robotarm. """
         self._send_cmd({
-            'type': 'GO_HOME',
-            'data': angles
+            'type': 'SET_ANG',
+            'data': {
+                'angles': angles
+            }
         })
 
     def send_set_position_cmd(self, position: (float, float, float)):
