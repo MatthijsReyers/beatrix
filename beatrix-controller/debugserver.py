@@ -1,4 +1,4 @@
-from lib.consts import VIDEO_PORT, CONTROL_PORT, VIDEO_BUFFER_SIZE
+from lib.constants import VIDEO_PORT, CONTROL_PORT, VIDEO_BUFFER_SIZE
 from lib.serversock import ServerSocket
 from threading import Thread
 from pickle import UnpicklingError
@@ -34,18 +34,3 @@ class DebugServer():
         except Exception as e:
             print('Caught exception:')
             print(e)
-
-if __name__ == '__main__':
-    server = DebugServer()
-    server.start()
-    
-    cam = cv2.VideoCapture(0)
-    
-    try:
-        while(True):
-            okay, frame = cam.read()
-            if okay:
-                server.send_video_frame(frame)
-        cam.release()
-    finally:
-        server.stop()
