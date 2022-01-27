@@ -34,7 +34,7 @@ class CommandHandler:
             print('Caught exception when parsing command:', type(e), '\n', e)
 
     def _cmd_home(self):
-        self.controller.move_angles(INITIAL_ANGLES)
+        self.controller.robotarm.set_arm(INITIAL_ANGLES, 10)
 
     def _cmd_get_pos(self):
         pass
