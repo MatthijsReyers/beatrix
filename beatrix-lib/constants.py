@@ -9,11 +9,16 @@ VIDEO_PORT = 37020
 CONTROL_PORT = 4400
 
 """ Home/start position of the robot arm in x,y,z coordinates. """
-HOME_POSITION = [50,50,50]
+HOME_POSITION = [50, 50, 50]
+HOME_ANGLES = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 
+BASE_HEIGHT = 6.0
+SHOULDER_HEIGHT = 3.0
+SHOULDER_LENGTH = 22
+ELBOW_LENGTH = 15
+WRIST_LENGTH = 10
 
-PLATFORM_HEIGHT = 5.0
 
 """ ID's of the individual joints. """
 BASE_JOINT_ID = 100

@@ -8,7 +8,9 @@ class Controller():
         self.command_funcs = {
             'GO_HOME': self._cmd_home,
             'GET_POS': self._cmd_get_pos,
-            'SET_POS': self._cmd_set_pos
+            'SET_POS': self._cmd_set_pos,
+            'GET_ANG': self._cmd_get_ang,
+            'SET_ANG': self._cmd_set_ang
         }
 
     def exec_cmd(self, cmd):
@@ -27,4 +29,10 @@ class Controller():
         pass
 
     def _cmd_set_pos(self, position: (float, float, float)):
+        pass
+
+    def _cmd_get_ang(self):
+        pass
+
+    def _cmd_set_ang(self, angles: list):
         pass
