@@ -1,4 +1,4 @@
-from lib.constants import HOME_POSITION
+from lib.constants import *
 from gui.position import PositionManager
 from gui.visualizer import Visualizer
 from gui.camerafeed import CameraFeed
@@ -6,7 +6,7 @@ from gui.topbar import TopBar
 from threading import Thread
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QMainWindow, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout, QSplitter, 
-    QLabel, QSlider)
+    QLabel, QSlider, QPushButton)
 
 class MainWindow(QMainWindow):
     def __init__(self, client, kinematics, logger, config):
@@ -34,6 +34,7 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(self.splitter)
 
         # Main bar with visualizer and camera feed.
+        # ===========================================================
         main_bar = QSplitter()
         self.camera_feed = CameraFeed(client, logger)
         main_bar.addWidget(self.camera_feed)
@@ -43,15 +44,24 @@ class MainWindow(QMainWindow):
         self.splitter.addWidget(main_bar)
 
         # Second bar with logs and position options
+        # ===========================================================
         base_splitter = QSplitter()
         self.splitter.addWidget(base_splitter)
+
+        button_row = QWidget()
+        layout = QVBoxLayout(button_row)
+        base_splitter.addWidget(button_row)  
+        
+        btn = QPushButton("Send angles")
+        btn.clicked.connect(self.__on_send_angles)
+        layout.addWidget(btn)
 
         self.position_manager = PositionManager(kinematics)
         self.position_manager.on_position_change(self.visualizer.update_position)
         self.position_manager.on_angles_change(self.visualizer.update_angles)
         base_splitter.addWidget(self.position_manager)  
 
-        # button_row = 
+
 
 
     def start(self):
@@ -78,3 +88,15 @@ class MainWindow(QMainWindow):
     def __on_go_home(self):
         self.update_position(HOME_POSITION)
         self.send_go_home_cmd()
+
+    def __on_send_angles(self):
+        print('[*] Sending angles')
+        angles = self.position_manager.angles
+        self.client.send_set_angles_cmd({
+            BASE_JOINT_ID:       angles[1],
+            SHOULDER_JOINT_ID:   angles[2],
+            ELBOW_JOINT_ID:      angles[3],
+            WRIST_JOINT_ID:      angles[4],
+            WRIST_TURN_JOINT_ID: angles[5],
+        })
+    

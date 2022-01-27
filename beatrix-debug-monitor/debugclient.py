@@ -65,6 +65,13 @@ class DebugClient():
             self.logger.exception(e, 'DebugClient.receive_command')
         return (False, {})
 
+    def send_set_angles_cmd(self, angles:dict):
+        """ Sends a command to set the servo angles of the robotarm. """
+        self._send_cmd({
+            'type': 'GO_HOME',
+            'data': angles
+        })
+
     def send_set_position_cmd(self, position: (float, float, float)):
         """ Sends a command to set the position of the robot arm. """
         self._send_cmd({
@@ -92,7 +99,7 @@ class DebugClient():
 
     def _send_cmd(self, cmd):
         try:
-            packet = json.dumps(cmd)
+            packet = json.dumps(cmd).encode('utf-8')
             self.control_socket.send(packet)
         except Exception as e:
             self.logger.exception(e, 'DebugClient._send_cmd')

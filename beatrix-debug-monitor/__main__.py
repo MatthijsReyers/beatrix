@@ -4,12 +4,13 @@ from debugclient import DebugClient
 from configfile import ConfigFile
 from lib.kinematics import IkPyKinematics
 from lib.logger import Logger
+from lib.chain import beatrix_rep
 import sys
 
 logger = Logger()
 config = ConfigFile(logger)
 client = DebugClient(logger, config)
-kinematics = IkPyKinematics()
+kinematics = IkPyKinematics(beatrix_rep)
 
 # Connect to debug server.
 client.connect()

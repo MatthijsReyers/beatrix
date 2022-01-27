@@ -19,22 +19,11 @@ class Visualizer(QGroupBox):
 
         self.position = (5.0, 5.0, 5.0)
 
-        # Load robot arm chain from URDF file.
-        # self.chain = Chain.from_urdf_file("./robot.URDF")
-        self.chain = beatrix_rep
-        # self.chain = guus_chain
-        print("Length chain = {}".format(len(self.chain)))
-        print(repr(self.chain))
-        for l in self.chain.links:
-            print(repr(l))
-
-        solution = self.chain.inverse_kinematics(self.position)
-
         self.figure = Figure(figsize=(10, 10), dpi=100)
         self.position = HOME_POSITION
         self.angles   = HOME_ANGLES
 
-        self.chain  = ik_chain
+        self.chain  = beatrix_rep
         self.figure = Figure(figsize=(5, 4), dpi=100)
         self.ax = self.figure.add_subplot(111, projection='3d')
 
