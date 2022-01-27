@@ -9,9 +9,10 @@ class DebugServer():
         self.video_socket = ServerSocket(VIDEO_PORT, buffer_size=VIDEO_BUFFER_SIZE)
         self.control_socket = ServerSocket(CONTROL_PORT)
 
-    def start(self):
+    def start(self, command_handler):
         self.video_socket.start()
         self.control_socket.start()
+        self.control_socket.on_receive(command_handler.exec_cmd)
 
     def stop(self):
         self.video_socket.stop()
@@ -29,7 +30,7 @@ class DebugServer():
 
     def send_command(self, cmd):
         try:
-            packet = json.dumps(cmd)
+            packet = json.dumps(cmd).encode('utf-8')
             self.control_socket.send(packet)
         except Exception as e:
             print('Caught exception:')

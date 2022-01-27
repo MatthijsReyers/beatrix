@@ -234,7 +234,7 @@ class RobotArm:
                 list of joints of which this robot arm consists
     """
 
-    def __init__(self, joint_ids: list):
+    def __init__(self, joint_ids:list=None, debug_mode:bool=False):
         """
 
         """
@@ -242,6 +242,15 @@ class RobotArm:
         self.joints = dict()
 
         self.grabber = Grabber(GRABBER_PARAMETERS, PCA, 90, False)
+
+        if joint_ids == None:
+            joint_ids = [
+                BASE_JOINT_ID,
+                SHOULDER_JOINT_ID,
+                ELBOW_JOINT_ID,
+                WRIST_JOINT_ID,
+                WRIST_TURN_JOINT_ID
+            ]
 
         for id in joint_ids:
             parameters = JointParameters(min_angle=ANGLE_BOUNDS[id][0], max_angle=ANGLE_BOUNDS[id][1],

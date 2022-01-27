@@ -1,4 +1,5 @@
 from threading import Thread
+import cv2
 
 class Camera():
     def __init__(self, debug_server):
@@ -10,10 +11,10 @@ class Camera():
         self.running = False
 
     def start(self):
-        self.running = False
+        self.running = True
         self.camera_thread = Thread(
             target=self.__camera_thread, 
-            daemon=True,
+            # daemon=True,
             args=())
         self.camera_thread.start()
 
@@ -28,7 +29,6 @@ class Camera():
                 okay, frame = self.cap.read()
                 if okay:
                     self.debug_server.send_video_frame(frame)
-                self.running = False
         finally:
             self.cap.release()
     

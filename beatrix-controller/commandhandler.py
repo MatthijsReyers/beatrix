@@ -5,9 +5,7 @@ from debugserver import DebugServer
 
 
 class CommandHandler:
-
-    def __init__(self, controller: Controller, debugserver: DebugServer):
-        self.debugserver = debugserver
+    def __init__(self, controller: Controller):
         self.controller = controller
         self.autopilot = AutoPilot(controller=controller)
 
@@ -19,14 +17,19 @@ class CommandHandler:
             'SET_ANG': self._cmd_set_ang
         }
 
-    def exec_cmd(self, cmd):
-        """ Executes a debug controller command. """
-        cmd_type = cmd['type']
-        if cmd_type == self.command_funcs:
-            func = self.command_funcs['__cmd_'+cmd['type']]
-            func(**cmd['data'])
-        else:
-            print('Received invalid command:', cmd)
+    def exec_cmd(self, cmd: bytes):
+        """ Parses and executes a debug controller command. """
+        try:
+            cmd = cmd.decode('utf-8')
+            cmd = json.loads(cmd)
+            cmd_type = cmd['type']
+            if cmd_type == self.command_funcs:
+                func = self.command_funcs['__cmd_'+cmd['type']]
+                func(**cmd['data'])
+            else:
+                print('Received invalid command:', cmd)
+        except Exception as e:
+            print('Caught exception when parsing command:\n', e)
 
     def _cmd_home(self):
         pass
@@ -40,5 +43,5 @@ class CommandHandler:
     def _cmd_get_ang(self):
         pass
 
-    def _cmd_set_ang(self, angles: list):
-        pass
+    def _cmd_set_ang(self, angles: dict):
+        print('Received setting angles command:', angles)

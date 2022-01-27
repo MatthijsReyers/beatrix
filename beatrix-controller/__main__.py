@@ -20,9 +20,16 @@ from robotarm import RobotArm
 from camera import Camera
 from controller import Controller
 from debugserver import DebugServer
+from commandhandler import CommandHandler
 
 # Initialize system components.
-camera = Camera(debug_mode=args.no_pi)
-server = DebugServer()
-# robotarm   = RobotArm(debug_mode=args.no_pi)
-# controller = Controller(camera, robotarm)
+server     = DebugServer()
+camera     = Camera(debug_server=server)
+robotarm   = RobotArm(debug_mode=args.no_io)
+controller = Controller(camera, robotarm)
+handler    = CommandHandler(controller)
+
+# Start threads
+server.start(handler)
+camera.start()
+camera.camera_thread.join()
