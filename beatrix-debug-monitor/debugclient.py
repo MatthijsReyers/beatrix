@@ -99,6 +99,15 @@ class DebugClient():
             'data': {}
         })
 
+    def send_set_grabber(self, closed:bool):
+        """ Sets the state of the grabber """
+        self._send_cmd({
+            'type': 'GRABBER',
+            'data': {
+                'closed':closed
+            }
+        })
+
     def _send_cmd(self, cmd):
         try:
             packet = json.dumps(cmd).encode('utf-8')

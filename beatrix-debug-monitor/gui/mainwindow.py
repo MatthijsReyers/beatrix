@@ -58,6 +58,14 @@ class MainWindow(QMainWindow):
         btn.clicked.connect(self.__on_go_home)
         layout.addWidget(btn)
 
+        btn = QPushButton("Close grabber")
+        btn.clicked.connect(self.__on_close_grabber)
+        layout.addWidget(btn)
+
+        btn = QPushButton("Open grabber")
+        btn.clicked.connect(self.__on_open_grabber)
+        layout.addWidget(btn)
+
         self.position_manager = PositionManager(kinematics)
         self.position_manager.on_position_change(self.visualizer.update_position)
         self.position_manager.on_angles_change(self.visualizer.update_angles)
@@ -94,3 +102,11 @@ class MainWindow(QMainWindow):
         print('[*] Sending go home')
         self.position_manager.set_home()
         self.client.send_go_home_cmd()
+
+    def __on_close_grabber(self):
+        print('[*] Sending go home')
+        self.client.send_set_grabber(closed=True)
+
+    def __on_open_grabber(self):
+        print('[*] Sending go home')
+        self.client.send_set_grabber(closed=False)
