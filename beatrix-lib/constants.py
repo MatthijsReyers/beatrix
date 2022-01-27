@@ -13,13 +13,15 @@ HOME_POSITION = [50, 50, 50]
 
 HOME_ANGLES = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
-
+"Measurements of the physical arm in centimeters"
 BASE_HEIGHT = 6.0
 SHOULDER_HEIGHT = 3.0
 SHOULDER_LENGTH = 22
 ELBOW_LENGTH = 15
 WRIST_LENGTH = 10
 
+
+"Global Identifiers of the different joints"
 BASE_JOINT_ID = 100
 SHOULDER_JOINT_ID = 101
 ELBOW_JOINT_ID = 102
@@ -29,6 +31,7 @@ GRABBER_JOINT_ID = 105
 
 N_JOINTS = 6
 
+"Initial angles of all the joints so that the arm stands vertically"
 INITIAL_ANGLES = {
     BASE_JOINT_ID: 0,  # TODO
     SHOULDER_JOINT_ID: 90,
@@ -38,6 +41,7 @@ INITIAL_ANGLES = {
     # GRABBER_JOINT_ID: 000       # TODO
 }
 
+"The angle bounds (allowed angles) for each joint"
 ANGLE_BOUNDS = {
     BASE_JOINT_ID: (0, 270),
     SHOULDER_JOINT_ID: (38, 90),
@@ -47,6 +51,7 @@ ANGLE_BOUNDS = {
     # GRABBER_JOINT_ID: (80, 100)
 }
 
+"The servo ports for each joint, note that the shoulder has two ports as it consists of two servo motors"
 SERVO_PORTS = {
     BASE_JOINT_ID: 0,
     SHOULDER_JOINT_ID: (1, 2),
@@ -56,6 +61,7 @@ SERVO_PORTS = {
     # GRABBER_JOINT_ID: 6
 }
 
+"Joint type of each joint as used by the single_servo and dual_servo classes"
 JOINT_TYPE = {
     BASE_JOINT_ID: {'duality': 'single',
                     'mirrored': False},
@@ -72,6 +78,7 @@ JOINT_TYPE = {
 
 }
 
+"Upper limits of the actuation range, note that lower limit always is 0 for the servo's"
 ACTUATION_RANGE = {
     BASE_JOINT_ID: 270,
     SHOULDER_JOINT_ID: 180,
