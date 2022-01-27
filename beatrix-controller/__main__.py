@@ -26,10 +26,15 @@ from commandhandler import CommandHandler
 server     = DebugServer()
 camera     = Camera(debug_server=server)
 robotarm   = RobotArm(debug_mode=args.no_io)
-controller = Controller(camera, robotarm)
+controller = Controller(robotarm, camera)
 handler    = CommandHandler(controller)
 
-# Start threads
-server.start(handler)
-camera.start()
-camera.camera_thread.join()
+try:
+    # Start threads
+    server.start(handler)
+    camera.start()
+    camera.camera_thread.join()
+
+except KeyboardInterrupt as e:
+    server.stop()
+    camera.stop()

@@ -252,22 +252,22 @@ class RobotArm:
                 WRIST_TURN_JOINT_ID
             ]
 
-        for id in joint_ids:
-            parameters = JointParameters(min_angle=ANGLE_BOUNDS[id][0], max_angle=ANGLE_BOUNDS[id][1],
-                                         servo_port=SERVO_PORTS[id], mirrored=JOINT_TYPE[id]['mirrored'],
-                                         actuation_range=ACTUATION_RANGE[id],
-                                         init_angle=INITIAL_ANGLES[id])
+        for joint_id in joint_ids:
+            parameters = JointParameters(min_angle=ANGLE_BOUNDS[joint_id][0], max_angle=ANGLE_BOUNDS[joint_id][1],
+                                         servo_port=SERVO_PORTS[joint_id], mirrored=JOINT_TYPE[joint_id]['mirrored'],
+                                         actuation_range=ACTUATION_RANGE[joint_id],
+                                         init_angle=INITIAL_ANGLES[joint_id])
 
-            if JOINT_TYPE[id]["duality"] == "single":
-                self.joints[id] = (SingleServo(parameters=parameters, pca9685=PCA,
+            if JOINT_TYPE[joint_id]["duality"] == "single":
+                self.joints[joint_id] = (SingleServo(parameters=parameters, pca9685=PCA,
                                                angle=parameters.initial_angle))
-            elif JOINT_TYPE[id]["duality"] == "dual":
-                self.joints[id] = (DualServo(parameters=parameters, pca9685=PCA,
+            elif JOINT_TYPE[joint_id]["duality"] == "dual":
+                self.joints[joint_id] = (DualServo(parameters=parameters, pca9685=PCA,
                                              angle=parameters.initial_angle))
 
         self.set_arm(INITIAL_ANGLES, 1)
 
-    def set_arm(self, new_angles: dict, v_max):
+    def set_arm(self, new_angles: dict, v_max:int=5):
         """
         Sets the angle of all servos smoothly over period of time
         ARGUMENTS
@@ -277,7 +277,6 @@ class RobotArm:
         PARAMETERS
             - v_max: float time in seconds
         """
-
         new_angles = self.bound_angles(new_angles)
         old_angles = self.get_current_angles(new_angles.keys())
 
@@ -329,11 +328,11 @@ class RobotArm:
             self.grabber.set_closed()
 
     def bound_angles(self, angles: dict):
-        for id, angle in angles.items():
-            if self.joints[id].min_angle > angle:
-                angles[id] = self.joints[id].min_angle
-            elif self.joints[id].max_angle < angle:
-                angles[id] = self.joints[id].max_angle
+        for angle_id, angle in angles.items():
+            if self.joints[angle_id].min_angle > angle:
+                angles[angle_id] = self.joints[angle_id].min_angle
+            elif self.joints[angle_id].max_angle < angle:
+                angles[angle_id] = self.joints[angle_id].max_angle
 
         return angles
 
