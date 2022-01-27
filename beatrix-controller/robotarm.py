@@ -1,7 +1,7 @@
 import time
 import math
 import numpy as np
-from .constants import *
+from lib.constants import *
 
 MAX_VELOCITY = 30  # Fastest speed of arm in degrees/s
 

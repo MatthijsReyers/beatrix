@@ -9,3 +9,12 @@ class Controller():
         self.kinematics = IkPyKinematics(chain=beatrix_rep)
         self.robotarm = robotarm
         self.camera = camera
+
+
+
+    def _move_arm_to_workspace(self, x, y, z):
+        solution_angles = self.kinematics.inverse(position=(x, y, z))
+
+        new_angles = {
+
+        }
