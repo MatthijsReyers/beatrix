@@ -107,8 +107,8 @@ class ServerSocket():
                     break
                 for callback in self._receive_callbacks:
                     callback(data, addr)
-            except ConnectionResetError as e:
-                print(e)
-                conn_end()
+            except ConnectionResetError: conn_end()
+            except OSError: conn_end()
             except Exception as e:
                 print('[!] Encountered unexpected exception while receiving:\n', type(e), e) 
+                conn_end()

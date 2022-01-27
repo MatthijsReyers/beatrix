@@ -51,6 +51,8 @@ class MainWindow(QMainWindow):
         self.position_manager.on_angles_change(self.visualizer.update_angles)
         base_splitter.addWidget(self.position_manager)  
 
+        # button_row = 
+
 
     def start(self):
         self.running = True

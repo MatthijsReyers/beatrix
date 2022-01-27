@@ -11,12 +11,15 @@ class DebugClient():
     def __init__(self, logger, config):
         self.logger = logger
         self.config = config
+        self._callbacks = []
 
     def connect(self):
         self.logger.log('Connecting to control server.')
         ip = '127.0.0.1' if self.config.local_server else self.config.raspberry_ip
         self.control_socket = ClientSocket(ip, CONTROL_PORT)
         self.video_socket = ClientSocket(ip, VIDEO_PORT)
+        self.control_socket.on_change(self._change_connection_state)
+        self.video_socket.on_change(self._change_connection_state)
         self.control_socket.start()
         self.video_socket.start()
 
@@ -27,6 +30,9 @@ class DebugClient():
 
     def is_connected(self):
         return self.control_socket.is_connected() and self.video_socket.is_connected()
+
+    def on_change(self, callback):
+        self._callbacks.append(callback)
 
     def receive_video(self) -> (bool, any):
         start_t = time.time()
@@ -90,3 +96,7 @@ class DebugClient():
             self.control_socket.send(packet)
         except Exception as e:
             self.logger.exception(e, 'DebugClient._send_cmd')
+
+    def _change_connection_state(self, sock, connected):
+        for callback in self._callbacks:
+            callback(self.is_connected())

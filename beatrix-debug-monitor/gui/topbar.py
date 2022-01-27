@@ -79,6 +79,7 @@ class TopBar(QWidget):
         box = QWidget()
         layout2 = QHBoxLayout(box)
         layout2.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(4)
         # box.setStyleSheet("""
         #     background-color: red;
         # """)
@@ -87,6 +88,8 @@ class TopBar(QWidget):
         self.ip = self.config.raspberry_ip
         ip_input = QLineEdit()
         ip_input.setText(self.ip)
+        ip_input.setMinimumWidth(190)
+        ip_input.setMinimumWidth(200)
         ip_input.textChanged.connect(self.__on_ip_entry)
         layout2.addWidget(ip_input)
 
@@ -100,9 +103,16 @@ class TopBar(QWidget):
 
         # Spacer to keep everything to the left.
         # ===========================================================================
-        verticalSpacer = QSpacerItem(5, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        verticalSpacer = QSpacerItem(800, 1, QSizePolicy.Minimum, QSizePolicy.Expanding)
         self.layout.addItem(verticalSpacer)
 
+
+        # Connection state text in the top right.
+        # ===========================================================================
+        self.connected_label = QLabel('Connecting...')
+        self.layout.addWidget(self.connected_label)
+        self.client.on_change(self.__on_connect)
+        self.__on_connect(self.client.is_connected())
 
     def __on_source_select(self, btn_name):
         def select(state):
@@ -128,3 +138,9 @@ class TopBar(QWidget):
             self.client.stop()
             self.client.connect()
         self.ip_btn.setEnabled(False)
+
+    def __on_connect(self, connected):
+        if connected:
+            self.connected_label.setText('Connected')
+        else:
+            self.connected_label.setText('Not connected')

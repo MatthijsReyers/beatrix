@@ -118,9 +118,7 @@ class ClientSocket():
     def __set_connected(self, state:bool):
         """ Updates the `self.connected` parameter and does all of the necessary bookkeeping like 
         starting the auto reconnect thread and calling any registered callbacks. """
-        if state != self.connected:
-            for callback in self._callbacks:
-                callback(self, state)
+        inform_callbacks = (state != self.connected)
         if self.connected and not state:
             self.logger.warn(f'Socket {self.ip_addr}:{self.port} disconnected.')
         elif not self.connected and state:
@@ -129,6 +127,9 @@ class ClientSocket():
             self._on_connected.notify_all()
             self._on_connected.release()
         self.connected = state
+        if inform_callbacks:
+            for callback in self._callbacks:
+                    callback(self, state)
         if not self.connected and not self.reconnecting:
             self.reconnect_thread = Thread(
                 target=self.__reconnect_thread, 
