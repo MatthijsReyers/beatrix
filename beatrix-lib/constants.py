@@ -10,6 +10,7 @@ CONTROL_PORT = 4400
 
 """ Home/start position of the robot arm in x,y,z coordinates. """
 HOME_POSITION = [50, 50, 50]
+
 HOME_ANGLES = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 
