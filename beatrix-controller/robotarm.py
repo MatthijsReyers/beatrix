@@ -1,7 +1,7 @@
 import time
 import math
 import numpy as np
-from .constants import *
+from lib.constants import *
 
 MAX_VELOCITY = 30  # Fastest speed of arm in degrees/s
 
@@ -142,7 +142,6 @@ class DualServo:
         parameters_right.mirrored = self.mirrored_right
         parameters_right.servo_port = self.port_right
 
-
         self.pca = pca9685
         self.SingleServo_left = SingleServo(parameters_left, pca9685, angle, debug_mode)
         self.SingleServo_right = SingleServo(parameters_right, pca9685, angle, debug_mode)
@@ -229,12 +228,10 @@ class RobotArm:
         METHODS
             - set_arm
             - set_grabber
-            - bound_angle
-
+            - bound_angles
         PARAMETERS
-        - old_angle: previous angle ordered
-        - new_angle: current angle ordered
-        - current_angle: updated every step when moving
+            - joints
+                list of joints of which this robot arm consists
     """
 
     def __init__(self, joint_ids: list):
@@ -247,9 +244,10 @@ class RobotArm:
         self.grabber = Grabber(GRABBER_PARAMETERS, PCA, 90, False)
 
         for id in joint_ids:
-            parameters = JointParameters(min_angle=ANGLE_BOUNDS[id][0], max_angle= ANGLE_BOUNDS[id][1],
+            parameters = JointParameters(min_angle=ANGLE_BOUNDS[id][0], max_angle=ANGLE_BOUNDS[id][1],
                                          servo_port=SERVO_PORTS[id], mirrored=JOINT_TYPE[id]['mirrored'],
-                                         actuation_range=ACTUATION_RANGE[id], init_angle=INITIAL_ANGLES[id])
+                                         actuation_range=ACTUATION_RANGE[id],
+                                         init_angle=INITIAL_ANGLES[id])
 
             if JOINT_TYPE[id]["duality"] == "single":
                 self.joints[id] = (SingleServo(parameters=parameters, pca9685=PCA,
@@ -264,16 +262,18 @@ class RobotArm:
         """
         Sets the angle of all servos smoothly over period of time
         ARGUMENTS
-            - new_angle: dict(4)
-                {'base': N, 'shoulder': N, 'elbow': N, 'wrist': N}
+            - new_angle: dict()
+                {Joint_id_1: desired angle, Joint_id_2: desired angle, etc...}
+                joint id's as in constants file
         PARAMETERS
-            - old_angle: list(5) of angles, shoulder ports 1 and 2 share angle
-            - angle: list(5) of angles, shoulder ports 1 and 2 share angle
             - v_max: float time in seconds
         """
 
         new_angles = self.bound_angles(new_angles)
-        old_angles = self.get_current_angles()
+        old_angles = self.get_current_angles(new_angles.keys())
+
+        if len(new_angles) != len(old_angles):
+            raise ValueError("New angles is not the same size as old angles")
 
         old_angle_arr = np.array(old_angles.values())
         new_angle_arr = np.array(new_angles.values())
@@ -293,9 +293,10 @@ class RobotArm:
         # for each step adjust for each servo the angle
         for step in range(steps):
             current_ptime = time.process_time()
-            for j_id, joint in self.joints:
-                calculated_angle = get_angle_smooth(start_angle=old_angles[j_id], end_angle=new_angles[j_id],
-                                                         seconds=duration, elapsed=(step + 1) * dtime)
+            for j_id, angle in new_angles.items():
+                calculated_angle = get_angle_smooth(start_angle=old_angles[j_id],
+                                                    end_angle=new_angles[j_id],
+                                                    seconds=duration, elapsed=(step + 1) * dtime)
                 self._set_servo(self.joints[j_id], calculated_angle, new_angles[j_id])
 
             time_elapsed = time.process_time() - current_ptime
@@ -319,7 +320,7 @@ class RobotArm:
             self.grabber.set_closed()
 
     def bound_angles(self, angles: dict):
-        for id, angle in angles:
+        for id, angle in angles.items():
             if self.joints[id].min_angle > angle:
                 angles[id] = self.joints[id].min_angle
             elif self.joints[id].max_angle < angle:
@@ -327,11 +328,17 @@ class RobotArm:
 
         return angles
 
-    def get_current_angles(self):
+    def get_current_angles(self, requested_angles=None):
+        if requested_angles is None:
+            to_be_retrieved_angles = self.joints
+        else:
+            to_be_retrieved_angles = requested_angles
+
         angles = dict()
-        for j_id, joint in self.joints:
+        for j_id, joint in to_be_retrieved_angles:
             angles[id] = joint.current_angle
         return angles
+
 
 def get_angle_smooth(start_angle, end_angle, seconds, elapsed):
     """
