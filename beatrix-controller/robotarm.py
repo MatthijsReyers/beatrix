@@ -284,8 +284,8 @@ class RobotArm:
         if len(new_angles) != len(old_angles):
             raise ValueError("New angles is not the same size as old angles")
 
-        old_angle_arr = np.array(old_angles.values())
-        new_angle_arr = np.array(new_angles.values())
+        old_angle_arr = np.array(list(old_angles.values()))
+        new_angle_arr = np.array(list(new_angles.values()))
         total_angle_arr = new_angle_arr - old_angle_arr
 
         if v_max > MAX_VELOCITY:
