@@ -5,9 +5,12 @@ is_pi = platform.system() != 'Windows' and 'MANJARO' not in platform.release()
 
 # Setup commandline arguments parser.
 parser = argparse.ArgumentParser(description='Controller software for the Beatrix robot arm.')
-parser.add_argument('--no-pi', default=is_pi, action='store_true',
+parser.add_argument('--no-io', default=is_pi, action='store_true',
                     help='Don\'t connect to GPIO pins, useful for when you don\'t want to run this\
                         software on a Raspberry Pi.')
+parser.add_argument('--no-cam', default=False, action='store_true',
+                    help='Don\'t try to capture frames from the camera, useful for when you want to\
+                        test the software without a pi camera.')
 
 # Parse arguments (skip first since its the file).
 args = parser.parse_args(sys.argv[1:])
