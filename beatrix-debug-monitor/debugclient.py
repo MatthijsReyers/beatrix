@@ -42,6 +42,8 @@ class DebugClient():
                 return (False, None)
             data = pickle.loads(frame)
             return (True, cv2.imdecode(data, cv2.IMREAD_COLOR))
+        else:
+            time.sleep(0.1)
         return (False, None)
 
     def receive_command(self) -> (bool, object):

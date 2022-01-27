@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (QMainWindow, QGroupBox, QWidget, QVBoxLayout, QHBox
     QLabel, QSlider)
 
 class MainWindow(QMainWindow):
-    def __init__(self, client, logger, config):
+    def __init__(self, client, kinematics, logger, config):
         super(QMainWindow, self).__init__()
         self.setWindowTitle("Beatrix debug monitor")
         self.central_widget = QWidget()
@@ -23,6 +23,7 @@ class MainWindow(QMainWindow):
         self.logger = logger
         self.config = config
         self.client = client
+        self.kinematics = kinematics
 
         self.topbar = TopBar(client, config)
         self.layout.addWidget(self.topbar)
@@ -45,8 +46,9 @@ class MainWindow(QMainWindow):
         base_splitter = QSplitter()
         self.splitter.addWidget(base_splitter)
 
-        self.position_manager = PositionManager(self.visualizer)
+        self.position_manager = PositionManager(kinematics)
         self.position_manager.on_position_change(self.visualizer.update_position)
+        self.position_manager.on_angles_change(self.visualizer.update_angles)
         base_splitter.addWidget(self.position_manager)  
 
 

@@ -1,13 +1,13 @@
 from PyQt5.QtWidgets import QTabWidget, QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QSizePolicy
-from gui.visualizer import Visualizer
 from PyQt5.QtCore import Qt
+import math
 
 POSITION_LIMIT = 50
 
 class PositionManager(QTabWidget):
-    def __init__(self, visualizer:'Visualizer'):
+    def __init__(self, kinematics):
         super(QTabWidget, self).__init__()
-        self.visualizer = visualizer
+        self.kinematics = kinematics
 
         self.position = [0,0,0]
         self.position_callbacks = []
@@ -25,34 +25,45 @@ class PositionManager(QTabWidget):
         self.__init_angles_tab()
         self.addTab(self.angles_tab, 'Angles')
 
-    def on_angle_change(self, callback:callable):
+    def on_angles_change(self, callback:callable):
         """ Registers a callback function to be called whenever the user manually changes one of the 
-        angles via this GUI menu. """"
+        angles via this GUI menu. """
         self.angles_callbacks.append(callback)
 
     def on_position_change(self, callback:callable):
         """ Registers a callback function to be called whenever the user manually changes the position 
-        goal via this GUI menu. """"
+        goal via this GUI menu. """
         self.position_callbacks.append(callback)
 
-    def set_position(self, pos:(int,int,int)):
+    def set_position(self, pos:(int,int,int), update_kin:bool=True):
         """ Sets the position while updating all of the GUI elements and calling the registered callback
         functions. (Note: Do NOT call this within a callback handler to avoid infinite recursion)."""
         self.position = pos
+        if update_kin:
+            self.angles = self.kinematics.inverse(pos)
+            self.set_angles(self.angles, update_kin=False)
         for i in range(3):
-            self.position_sliders[i].setValue(self.position[i])
+            slider = self.position_sliders[i] 
+            slider.blockSignals(True)
+            slider.setValue(self.position[i])
+            slider.blockSignals(False)
             self.position_texts[i].setText(str(self.position[i]))
         for callback in self.position_callbacks:
             callback(pos)
 
-    def set_angles(self, angles:list):
+    def set_angles(self, angles:list, update_kin:bool=True):
         """ Sets the angles while updating all of the GUI elements and calling the registered callback
         functions. (Note: Do NOT call this within a callback handler to avoid infinite recursion)."""
-        print(angles)
         self.angles = angles
+        if update_kin:
+            self.position = self.kinematics.forward(angles)
+            self.set_position(self.position, update_kin=False)
         for (i, angle) in enumerate(self.angles):
-            self.angle_sliders[i].setValue(angle)
-            self.angle_texts[i].setText(str(angle))
+            slider = self.angle_sliders[i]
+            slider.blockSignals(True)
+            slider.setValue(math.degrees(angle))
+            slider.blockSignals(False)
+            self.angle_texts[i].setText('{0:.2f}'.format(math.degrees(angle)))
         for callback in self.angles_callbacks:
             callback(angles)
 
@@ -89,7 +100,7 @@ class PositionManager(QTabWidget):
 
     def __on_pos_slider(self, axis):
         def update(value):
-            self.position[axis] = value
+            self.position[axis] = math.radians(value)
             self.set_position(self.position)
         return update
 
@@ -118,12 +129,13 @@ class PositionManager(QTabWidget):
             line_edit.setAlignment(Qt.AlignCenter)
             line_edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             line_edit.editingFinished.connect(self.__on_angle_text(i))
-            line_edit.setText(str(angle))
+            line_edit.setText('{0:.2f}'.format(math.degrees(angle)))
             self.angle_texts.append(line_edit)
             layout.addWidget(line_edit, 1,i, 1,1)
 
             slider = QSlider(Qt.Orientation.Horizontal)
             slider.valueChanged.connect(self.__on_angle_slider(i))
+            slider.setValue(math.degrees(angle))
             slider.setMinimum(-180)
             slider.setMaximum(180)
             self.angle_sliders.append(slider)
@@ -131,7 +143,7 @@ class PositionManager(QTabWidget):
 
     def __on_angle_slider(self, i):
         def update(value):
-            self.angles[i] = value
+            self.angles[i] = math.radians(value)
             self.set_angles(self.angles)
         return update
 
@@ -141,10 +153,10 @@ class PositionManager(QTabWidget):
             okay, value = self.__text_to_int(inputbox.text())
             if okay:
                 # value = max(-POSITION_LIMIT if axis != 2 else 0, min(POSITION_LIMIT, value))
-                self.angles[i] = value
+                self.angles[i] = math.radians(value)
                 self.set_angles(self.angles)
             else:
-                inputbox.setText(str(self.angles[i]))
+                inputbox.setText('{0:.2f}'.format(math.degrees(self.angles[i])))
         return update
 
     def __text_to_int(self, text) -> (bool, float):
