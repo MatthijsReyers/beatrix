@@ -12,9 +12,6 @@ class Controller:
         self.robotarm = robotarm
         self.camera = camera
 
-    def move_angles(self, angles:dict):
-        self.robotarm.set_arm(angles, 15)
-
     def _move_arm_to_workspace_coordinate(self, x, y, z):
         solution_angles = self.kinematics.inverse(position=(x, y, z))
 
