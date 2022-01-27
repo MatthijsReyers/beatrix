@@ -293,7 +293,7 @@ class RobotArm:
         # for each step adjust for each servo the angle
         for step in range(steps):
             current_ptime = time.process_time()
-            for j_id, angle in new_angles:
+            for j_id, angle in new_angles.items():
                 calculated_angle = get_angle_smooth(start_angle=old_angles[j_id],
                                                     end_angle=new_angles[j_id],
                                                     seconds=duration, elapsed=(step + 1) * dtime)
@@ -320,7 +320,7 @@ class RobotArm:
             self.grabber.set_closed()
 
     def bound_angles(self, angles: dict):
-        for id, angle in angles:
+        for id, angle in angles.items():
             if self.joints[id].min_angle > angle:
                 angles[id] = self.joints[id].min_angle
             elif self.joints[id].max_angle < angle:
