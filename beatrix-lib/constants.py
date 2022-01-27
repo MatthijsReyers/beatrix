@@ -13,6 +13,8 @@ HOME_POSITION = [50, 50, 50]
 
 HOME_ANGLES = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
+""" DT used for calculating steps in set_arm"""
+D_TIME = 1 / 2 # 2Hz
 
 BASE_HEIGHT = 6.0
 SHOULDER_HEIGHT = 3.0

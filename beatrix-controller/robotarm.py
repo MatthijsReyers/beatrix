@@ -3,6 +3,7 @@ import math
 import numpy as np
 from lib.constants import *
 
+
 MAX_VELOCITY = 30  # Fastest speed of arm in degrees/s
 
 # False if running with robot arm, true otherwise.
@@ -298,7 +299,7 @@ class RobotArm:
         duration = (total_angle_arr * math.pi) / (2 * v_max)
         duration = np.max(duration)  # for now, use the max duration of all servos
 
-        dtime = 0.02  # 50Hz
+        dtime = D_TIME  # 50Hz
         steps = int(duration / dtime)
 
         # for each step adjust for each servo the angle
