@@ -1,19 +1,22 @@
 from controller import Controller
 from autopilot import AutoPilot
 from debugserver import DebugServer
+from lib.constants import INITIAL_ANGLES
 import json
 
 class CommandHandler:
-    def __init__(self, controller: Controller):
+    def __init__(self, server, controller: Controller):
         self.controller = controller
         self.autopilot = AutoPilot(controller=controller)
+        self.server = server
 
         self.command_funcs = {
             'GO_HOME': self._cmd_home,
             'GET_POS': self._cmd_get_pos,
             'SET_POS': self._cmd_set_pos,
             'GET_ANG': self._cmd_get_ang,
-            'SET_ANG': self._cmd_set_ang
+            'SET_ANG': self._cmd_set_ang,
+            'GRABBER': self._cmd_grabber,
         }
 
     def exec_cmd(self, cmd: bytes, client:(str,int)):
@@ -31,7 +34,7 @@ class CommandHandler:
             print('Caught exception when parsing command:', type(e), '\n', e)
 
     def _cmd_home(self):
-        pass
+        self.controller.move_angles(INITIAL_ANGLES)
 
     def _cmd_get_pos(self):
         pass
@@ -42,14 +45,16 @@ class CommandHandler:
     def _cmd_get_ang(self):
         pass
 
-    def _cmd_set_ang(self, angles: dict):
-        try:
-            print('Received setting angles command:', angles)
-            if self.autopilot.running:
-                print('Autopilot is running, ignoring command.')
-            else:
-                print(angles)
-                self.controller.move_angles(angles)
-        except Exception as e:
-            print(e)
-            print('Caught exception when parsing command:', type(e), '\n', e)
+    def _cmd_set_ang(self, angles:dict):
+        print('Received setting angles command:', angles)
+        if self.autopilot.running:
+            print('Autopilot is running, ignoring command.')
+        else:
+            self.controller.robotarm.set_arm(angles, 30)
+
+    def _cmd_grabber(self, closed:bool):
+        print('Received grabber command:', 'closed' if closed else 'open')
+        if self.autopilot.running:
+            print('Autopilot is running, ignoring command.')
+        else:
+            self.controller.robotarm.set_grabber(closed)
