@@ -17,11 +17,11 @@ class PositionManager(QTabWidget):
 
         self.angles = [
             0.0,
-            INITIAL_ANGLES[BASE_JOINT_ID],
-            INITIAL_ANGLES[SHOULDER_JOINT_ID],
-            INITIAL_ANGLES[ELBOW_JOINT_ID],
-            INITIAL_ANGLES[WRIST_JOINT_ID],
-            INITIAL_ANGLES[WRIST_TURN_JOINT_ID],
+            math.radians(INITIAL_ANGLES[BASE_JOINT_ID]),
+            math.radians(INITIAL_ANGLES[SHOULDER_JOINT_ID]),
+            math.radians(INITIAL_ANGLES[ELBOW_JOINT_ID]),
+            math.radians(INITIAL_ANGLES[WRIST_JOINT_ID]),
+            math.radians(INITIAL_ANGLES[WRIST_TURN_JOINT_ID]),
         ]
         self.angles_callbacks = []
         self.angle_sliders = []
