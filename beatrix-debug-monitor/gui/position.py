@@ -43,12 +43,12 @@ class PositionManager(QTabWidget):
         if update_kin:
             self.angles = self.kinematics.inverse(pos)
             self.set_angles(self.angles, update_kin=False)
-        for i in range(3):
+        for i in range(len(self.position)):
             slider = self.position_sliders[i] 
             slider.blockSignals(True)
             slider.setValue(self.position[i])
             slider.blockSignals(False)
-            self.position_texts[i].setText(str(self.position[i]))
+            self.position_texts[i].setText('{0:.2f}'.format(self.position[i]))
         for callback in self.position_callbacks:
             callback(pos)
 
@@ -73,7 +73,7 @@ class PositionManager(QTabWidget):
         layout = QGridLayout(self.position_tab)
 
         labels = ['X:', 'Y:', 'Z:']
-        for axis in range(0,3):
+        for axis in range(len(self.position)):
             label = QLabel(labels[axis])
             label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
             label.setMaximumWidth(13)
@@ -89,7 +89,7 @@ class PositionManager(QTabWidget):
             line_edit.setAlignment(Qt.AlignCenter)
             line_edit.setMaximumWidth(50)
             line_edit.editingFinished.connect(self.__on_pos_text(axis))
-            line_edit.setText(str(self.position[axis]))
+            line_edit.setText('{0:.2f}'.format(self.position[axis]))
             self.position_texts.append(line_edit)
 
             layout.addWidget(label, axis,0, 1,1)
@@ -101,7 +101,7 @@ class PositionManager(QTabWidget):
 
     def __on_pos_slider(self, axis):
         def update(value):
-            self.position[axis] = math.radians(value)
+            self.position[axis] = value
             self.set_position(self.position)
         return update
 
