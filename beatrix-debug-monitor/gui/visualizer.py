@@ -20,8 +20,8 @@ class Visualizer(QGroupBox):
 
         # Load robot arm chain from URDF file.
         # self.chain = Chain.from_urdf_file("./robot.URDF")
-        # self.chain = ik_chain
-        self.chain = guus_chain
+        self.chain = ik_chain
+        # self.chain = guus_chain
         print("Length chain = {}".format(len(self.chain)))
         print(repr(self.chain))
         for l in self.chain.links:
@@ -56,7 +56,7 @@ class Visualizer(QGroupBox):
         zeroes = np.array([0, 0, radians(90), radians(10), radians(88), 0])
         test1 = np.array([0, radians(30), radians(70), radians(30), radians(40), 0])
         solution = self.chain.inverse_kinematics(self.position)
-        self.chain.plot(test1, self.ax)
+        self.chain.plot(solution, self.ax)
 
         self.print_solution()
 
@@ -70,7 +70,7 @@ class Visualizer(QGroupBox):
         import math
         solution = self.chain.inverse_kinematics(self.position)
         for angle in solution:
-            print(' {:.2f} '.format(angle), end='')
+            print(' {:.2f} '.format(degrees(angle)), end='')
         print('')
 
 
