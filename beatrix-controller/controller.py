@@ -1,38 +1,11 @@
 from robotarm import RobotArm
 from camera import Camera
+from lib.kinematics import IkPyKinematics
+from lib.chain import beatrix_rep
 
 class Controller():
-    def __init__(self, camera:'Camera', robotarm:'RobotArm'):
-        self.camera = camera
+
+    def __init__(self, robotarm: RobotArm, camera: Camera):
+        self.kinematics = IkPyKinematics(chain=beatrix_rep)
         self.robotarm = robotarm
-        self.command_funcs = {
-            'GO_HOME': self._cmd_home,
-            'GET_POS': self._cmd_get_pos,
-            'SET_POS': self._cmd_set_pos,
-            'GET_ANG': self._cmd_get_ang,
-            'SET_ANG': self._cmd_set_ang
-        }
-
-    def exec_cmd(self, cmd):
-        """ Executes a debug controller command. """
-        cmd_type = cmd['type']
-        if cmd_type == self.command_funcs:
-            func = self.command_funcs['__cmd_'+cmd['type']]
-            func(**cmd['data'])
-        else:
-            print('Received invalid command:', cmd)
-
-    def _cmd_home(self):
-        pass
-
-    def _cmd_get_pos(self):
-        pass
-
-    def _cmd_set_pos(self, position: (float, float, float)):
-        pass
-
-    def _cmd_get_ang(self):
-        pass
-
-    def _cmd_set_ang(self, angles: list):
-        pass
+        self.camera = camera

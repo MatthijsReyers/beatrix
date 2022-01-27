@@ -1,6 +1,7 @@
 import time
 import math
 import numpy as np
+from .constants import *
 
 MAX_VELOCITY = 30  # Fastest speed of arm in degrees/s
 
@@ -13,27 +14,38 @@ if not VIRTUAL_RUN:
     import busio
     from adafruit_motor import servo
     from adafruit_pca9685 import PCA9685
+
     I2C = busio.I2C(SCL, SDA)
     PCA = PCA9685(I2C)
     PCA.frequency = 50
 if VIRTUAL_RUN:
     PCA = None
 
-
 # Default parameters, only thing that should be edited is min angle and max angle,
 # or if the shoulder is reversed, mirrored for the shoulder
-DEFAULT_PARAMETERS = [{"servo": "single", "min angle": 0, "max angle":270, "actuation range": 270,
+DEFAULT_PARAMETERS = [{"servo": "single", "min angle": 0, "max angle": 270, "actuation range": 270,
                        "mirrored": False, "port": 0},  # base
-                    {"servo": "dual", "min angle": 38, "max angle":90, "actuation range": 180,
-                     "mirrored": [True, False], "port": [1, 2]},  # shoulder
-                    {"servo": "single", "min angle": 10, "max angle":150, "actuation range": 180,
-                     "mirrored": False, "port": 3},  # elbow
-                    {"servo": "single", "min angle": 0, "max angle":180, "actuation range": 180,
-                     "mirrored": False, "port": 4},  # wrist
-                    {"servo": "single", "min angle": 0, "max angle": 180, "actuation range": 180,
-                     "mirrored": False, "port": 5}]  # wrist turn
+                      {"servo": "dual", "min angle": 38, "max angle": 90, "actuation range": 180,
+                       "mirrored": [True, False], "port": [1, 2]},  # shoulder
+                      {"servo": "single", "min angle": 10, "max angle": 150, "actuation range": 180,
+                       "mirrored": False, "port": 3},  # elbow
+                      {"servo": "single", "min angle": 0, "max angle": 180, "actuation range": 180,
+                       "mirrored": False, "port": 4},  # wrist
+                      {"servo": "single", "min angle": 0, "max angle": 180, "actuation range": 180,
+                       "mirrored": False, "port": 5}]  # wrist turn
 GRABBER_PARAMETERS = {"min angle": 80, "max angle": 100, "actuation range": 180,
                       "open": 89, "closed": 91, "port": 6}
+
+
+class JointParameters:
+
+    def __init__(self, init_angle, min_angle, max_angle, servo_port, actuation_range, mirrored=False):
+        self.initial_angle = init_angle
+        self.min_angle = min_angle
+        self.max_angle = max_angle
+        self.servo_port = servo_port
+        self.actuation_range = actuation_range
+        self.mirrored = mirrored
 
 
 class SingleServo:
@@ -63,19 +75,17 @@ class SingleServo:
         - current_angle: updated every step when moving
     """
 
-    def __init__(self, parameters, pca9685, angle, debug_mode:bool=False):
+    def __init__(self, parameters: JointParameters, pca9685, angle, debug_mode: bool = False):
         self.debug_mode = debug_mode
         self.current_angle = angle
         self.old_angle = angle
         self.new_angle = angle
 
-        self.port = parameters["port"]
-        self.min_angle = parameters["min angle"]
-        self.max_angle = parameters["max angle"]
-        self.actuation_range = parameters["actuation range"]
-        self.mirrored = False
-        if parameters["mirrored"]:
-            self.mirrored = parameters["mirrored"]
+        self.port = parameters.servo_port
+        self.min_angle = parameters.min_angle
+        self.max_angle = parameters.max_angle
+        self.actuation_range = parameters.actuation_range
+        self.mirrored = parameters.mirrored
 
         self.pca = pca9685
         if not VIRTUAL_RUN:
@@ -107,29 +117,31 @@ class DualServo:
     """
         Class to control dual-servos/shoulder, same functionality as single servo
     """
-    def __init__(self, parameters, pca9685, angle, debug_mode:bool=False):
+
+    def __init__(self, parameters: JointParameters, pca9685, angle, debug_mode: bool = False):
         self.debug_mode = debug_mode
 
         self.current_angle = angle
         self.old_angle = angle
         self.new_angle = angle
 
-        self.min_angle = parameters["min angle"]
-        self.max_angle = parameters["max angle"]
-        self.actuation_range = parameters["actuation range"]
-        self.mirrored_left = False
-        self.mirrored_right = True
-        if parameters["mirrored"]:
-            self.mirrored_left = parameters["mirrored"][0]
-            self.mirrored_right = parameters["mirrored"][1]
-        self.port_left = parameters["port"][0]
-        self.port_right = parameters["port"][1]
-        parameters_left = {"min angle": self.min_angle, "max angle": self.max_angle,
-                           "actuation range": self.actuation_range, "mirrored": self.mirrored_left,
-                           "port": self.port_left}
-        parameters_right = {"min angle": self.min_angle, "max angle": self.max_angle,
-                            "actuation range": self.actuation_range, "mirrored": self.mirrored_right,
-                            "port": self.port_right}
+        self.min_angle = parameters.min_angle
+        self.max_angle = parameters.max_angle
+        self.actuation_range = parameters.actuation_range
+        self.mirrored_left = parameters.mirrored[0]
+        self.mirrored_right = parameters.mirrored[1]
+
+        self.port_left = parameters.servo_port[0]
+        self.port_right = parameters.servo_port[1]
+
+        parameters_left = parameters
+        parameters_left.mirrored = self.mirrored_left
+        parameters_left.servo_port = self.port_left
+
+        parameters_right = parameters
+        parameters_right.mirrored = self.mirrored_right
+        parameters_right.servo_port = self.port_right
+
 
         self.pca = pca9685
         self.SingleServo_left = SingleServo(parameters_left, pca9685, angle, debug_mode)
@@ -142,7 +154,7 @@ class DualServo:
             self.old_angle = self.new_angle
         self.SingleServo_left.set_angle(self.current_angle, self.new_angle)
         self.SingleServo_right.set_angle(self.current_angle, self.new_angle)
-    
+
     def bound_angle(self, angle):
         if self.min_angle <= angle <= self.max_angle:
             return angle
@@ -166,6 +178,7 @@ class Grabber:
         - set_open
         - set_closed
     """
+
     def __init__(self, parameters, pca9685, angle, debug_mode: bool = False):
         self.debug_mode = debug_mode
         self.angle = angle
@@ -179,7 +192,7 @@ class Grabber:
         self.pca = pca9685
         if not VIRTUAL_RUN:
             self.grabber = servo.Servo(pca9685.channels[self.port], min_pulse=500, max_pulse=2500,
-                                     actuation_range=self.actuation_range)
+                                       actuation_range=self.actuation_range)
 
     def set_angle(self, new_angle):
         new_angle = self.bound_angle(new_angle)
@@ -198,6 +211,7 @@ class Grabber:
             return self.min_angle
         elif angle > self.max_angle:
             return self.max_angle
+
 
 class RobotArm:
     """
@@ -223,23 +237,30 @@ class RobotArm:
         - current_angle: updated every step when moving
     """
 
-    def __init__(self, parameters, init_pos):
-        self.N = min(len(parameters), len(init_pos))
-        self.joints = list()
-        self.current_angle = list()
-        self.bounds = list()
-        self.grabber = Grabber(GRABBER_PARAMETERS, PCA, 90, False)
-        for i in range(self.N):
-            self.bounds.append({"min angle": parameters[i]["min angle"],
-                                "max angle": parameters[i]["max angle"]})
-            if parameters[i]["servo"] == "single":
-                self.joints.append(SingleServo(parameters[i], PCA, 90))
-            if parameters[i]["servo"] == "dual":
-                self.joints.append(DualServo(parameters[i], PCA, 90))        
-            self.current_angle.append(90)
-        self.set_arm(init_pos, 1)
+    def __init__(self, joint_ids: list):
+        """
 
-    def set_arm(self, new_angle:dict, v_max):
+        """
+        self.N = N_JOINTS
+        self.joints = dict()
+
+        self.grabber = Grabber(GRABBER_PARAMETERS, PCA, 90, False)
+
+        for id in joint_ids:
+            parameters = JointParameters(min_angle=ANGLE_BOUNDS[id][0], max_angle= ANGLE_BOUNDS[id][1],
+                                         servo_port=SERVO_PORTS[id], mirrored=JOINT_TYPE[id]['mirrored'],
+                                         actuation_range=ACTUATION_RANGE[id], init_angle=INITIAL_ANGLES[id])
+
+            if JOINT_TYPE[id]["duality"] == "single":
+                self.joints[id] = (SingleServo(parameters=parameters, pca9685=PCA,
+                                               angle=parameters.initial_angle))
+            elif JOINT_TYPE[id]["duality"] == "dual":
+                self.joints[id] = (DualServo(parameters=parameters, pca9685=PCA,
+                                             angle=parameters.initial_angle))
+
+        self.set_arm(INITIAL_ANGLES, 1)
+
+    def set_arm(self, new_angles: dict, v_max):
         """
         Sets the angle of all servos smoothly over period of time
         ARGUMENTS
@@ -250,12 +271,12 @@ class RobotArm:
             - angle: list(5) of angles, shoulder ports 1 and 2 share angle
             - v_max: float time in seconds
         """
-        new_angle_list = [new_angle['base'], new_angle['shoulder'], new_angle['elbow'], new_angle['wrist']]
-        new_angle = self.bound_angle(new_angle_list)
-        old_angle = self.bound_angle(self.current_angle)
-        self.current_angle = old_angle
-        old_angle_arr = np.array(old_angle)
-        new_angle_arr = np.array(new_angle_list)
+
+        new_angles = self.bound_angles(new_angles)
+        old_angles = self.get_current_angles()
+
+        old_angle_arr = np.array(old_angles.values())
+        new_angle_arr = np.array(new_angles.values())
         total_angle_arr = new_angle_arr - old_angle_arr
 
         if v_max > MAX_VELOCITY:
@@ -263,7 +284,7 @@ class RobotArm:
             print(f"Velocity: {v_max} degrees/s over the max: {MAX_VELOCITY}")
             v_max = MAX_VELOCITY
 
-        duration = (total_angle_arr*math.pi) / (2*v_max)
+        duration = (total_angle_arr * math.pi) / (2 * v_max)
         duration = np.max(duration)  # for now, use the max duration of all servos
 
         dtime = 0.02  # 50Hz
@@ -271,11 +292,18 @@ class RobotArm:
 
         # for each step adjust for each servo the angle
         for step in range(steps):
-            for i in range(self.N):
-                self.current_angle[i] = get_angle_smooth(start_angle=old_angle[i], end_angle=new_angle[i],
-                                                         seconds=duration, elapsed=(step+1)*dtime)
-                self._set_servo(self.joints[i], self.current_angle[i], new_angle[i])
-            time.sleep(dtime)
+            current_ptime = time.process_time()
+            for j_id, joint in self.joints:
+                calculated_angle = get_angle_smooth(start_angle=old_angles[j_id], end_angle=new_angles[j_id],
+                                                         seconds=duration, elapsed=(step + 1) * dtime)
+                self._set_servo(self.joints[j_id], calculated_angle, new_angles[j_id])
+
+            time_elapsed = time.process_time() - current_ptime
+            if time_elapsed >= dtime:
+                print("!!!! Process took longer than control loop time !!!!")
+                print("time elapsed = {}".format(time_elapsed))
+            else:
+                time.sleep(dtime - time_elapsed)
 
     @staticmethod
     def _set_servo(joint, angle, new_angle):
@@ -290,17 +318,20 @@ class RobotArm:
         else:
             self.grabber.set_closed()
 
-    def bound_angle(self, angle):
-        bound_angle = list()
-        for i in range(self.N):
-            if self.bounds[i]['min angle'] <= angle[i] <= self.bounds[i]['max angle']:
-                bound_angle.append(angle[i])
-            elif angle[i] < self.bounds[i]['min angle']:
-                bound_angle.append(self.bounds[i]['min angle'])
-            elif angle[i] > self.bounds[i]['max angle']:
-                bound_angle.append(self.bounds[i]['max angle'])
-        return bound_angle
+    def bound_angles(self, angles: dict):
+        for id, angle in angles:
+            if self.joints[id].min_angle > angle:
+                angles[id] = self.joints[id].min_angle
+            elif self.joints[id].max_angle < angle:
+                angles[id] = self.joints[id].max_angle
 
+        return angles
+
+    def get_current_angles(self):
+        angles = dict()
+        for j_id, joint in self.joints:
+            angles[id] = joint.current_angle
+        return angles
 
 def get_angle_smooth(start_angle, end_angle, seconds, elapsed):
     """
@@ -313,18 +344,17 @@ def get_angle_smooth(start_angle, end_angle, seconds, elapsed):
         Returns: new angle given the elapsed time
     """
     moving_angle = abs(start_angle - end_angle)  # degrees the servo has to move
-    time = (elapsed / seconds)*np.pi
+    time = (elapsed / seconds) * np.pi
     if elapsed < seconds:
         if end_angle > start_angle:
-            return start_angle + (-.5*math.cos(time)+.5)*moving_angle
+            return start_angle + (-.5 * math.cos(time) + .5) * moving_angle
         if end_angle < start_angle:
-            return start_angle - (-.5*math.cos(time)+.5)*moving_angle
+            return start_angle - (-.5 * math.cos(time) + .5) * moving_angle
     return end_angle
 
-
-if __name__ == "__main__":
-    print(math.cos(np.pi))
-    init_pos = [90, 80, 90, 70, 90]
-    robotarm = RobotArm(DEFAULT_PARAMETERS, init_pos)
-    # new_pos = [40, 30, 40, 30, 50]
-    # robotarm.set_arm(new_pos, 3)
+# if __name__ == "__main__":
+#     print(math.cos(np.pi))
+#     init_pos = [90, 80, 90, 70, 90]
+#     robotarm = RobotArm(DEFAULT_PARAMETERS, init_pos)
+#     # new_pos = [40, 30, 40, 30, 50]
+#     # robotarm.set_arm(new_pos, 3)

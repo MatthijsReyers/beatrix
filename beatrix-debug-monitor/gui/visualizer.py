@@ -3,8 +3,13 @@ from matplotlib.backends.qt_compat import QtWidgets
 from matplotlib.backends.backend_qtagg import FigureCanvas
 from matplotlib.figure import Figure
 from lib.constants import HOME_POSITION, HOME_ANGLES
-from lib.chain import ik_chain
+import numpy as np
+from math import pi, radians, degrees
+from ikpy.link import OriginLink, URDFLink
+from lib.chain import beatrix_rep
+
 from ikpy.chain import Chain
+
 
 class Visualizer(QGroupBox):
     def __init__(self):
@@ -12,13 +17,27 @@ class Visualizer(QGroupBox):
         self.setTitle("Visualizer")
         self.layout = QBoxLayout(QBoxLayout.Direction.Up, self)
 
+        self.position = (5.0, 5.0, 5.0)
+
+        # Load robot arm chain from URDF file.
+        # self.chain = Chain.from_urdf_file("./robot.URDF")
+        self.chain = beatrix_rep
+        # self.chain = guus_chain
+        print("Length chain = {}".format(len(self.chain)))
+        print(repr(self.chain))
+        for l in self.chain.links:
+            print(repr(l))
+
+        solution = self.chain.inverse_kinematics(self.position)
+
+        self.figure = Figure(figsize=(10, 10), dpi=100)
         self.position = HOME_POSITION
         self.angles   = HOME_ANGLES
-        
+
         self.chain  = ik_chain
         self.figure = Figure(figsize=(5, 4), dpi=100)
         self.ax = self.figure.add_subplot(111, projection='3d')
-        
+
         self.canvas = FigureCanvas(self.figure)
         self.layout.addWidget(self.canvas)
 
@@ -34,14 +53,31 @@ class Visualizer(QGroupBox):
 
     def update_graph(self):
         self.ax.clear()
-        self.ax.set_zlim([0,50])
-        self.ax.set_xlim([-50,50])
-        self.ax.set_ylim([-50,50])
+        self.ax.set_zlim([0, 50])
+        self.ax.set_xlim([-50, 50])
+        self.ax.set_ylim([-50, 50])
+
+        zeroes = np.array([0, 0, radians(90), radians(10), radians(88), 0])
+        test1 = np.array([0, radians(30), radians(70), radians(30), radians(40), 0])
+        solution = self.chain.inverse_kinematics(self.position)
+        # self.chain.plot(solution, self.ax)
+
+        # self.print_solution()
 
         self.chain.plot(self.angles, self.ax)
 
         self.ax.scatter(
-            self.position[0], self.position[1], self.position[2], 
+            self.position[0], self.position[1], self.position[2],
             marker="x", c="red")
 
         self.canvas.draw()
+
+    def print_solution(self):
+        import math
+        solution = self.chain.inverse_kinematics(self.position)
+        for angle in solution:
+            print(' {:.2f} '.format(degrees(angle)), end='')
+        print('')
+
+
+
