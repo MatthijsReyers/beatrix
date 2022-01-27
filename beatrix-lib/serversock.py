@@ -111,4 +111,5 @@ class ServerSocket():
             except OSError: conn_end()
             except Exception as e:
                 print('[!] Encountered unexpected exception while receiving:\n', type(e), e) 
+                print(data)
                 conn_end()

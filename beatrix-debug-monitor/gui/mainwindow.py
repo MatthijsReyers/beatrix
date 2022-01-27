@@ -7,6 +7,7 @@ from threading import Thread
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QMainWindow, QGroupBox, QWidget, QVBoxLayout, QHBoxLayout, QSplitter, 
     QLabel, QSlider, QPushButton)
+import math
 
 class MainWindow(QMainWindow):
     def __init__(self, client, kinematics, logger, config):
@@ -93,10 +94,10 @@ class MainWindow(QMainWindow):
         print('[*] Sending angles')
         angles = self.position_manager.angles
         self.client.send_set_angles_cmd({
-            BASE_JOINT_ID:       angles[1],
-            SHOULDER_JOINT_ID:   angles[2],
-            ELBOW_JOINT_ID:      angles[3],
-            WRIST_JOINT_ID:      angles[4],
-            WRIST_TURN_JOINT_ID: angles[5],
+            BASE_JOINT_ID:       math.degrees(angles[1]),
+            SHOULDER_JOINT_ID:   math.degrees(angles[2]),
+            ELBOW_JOINT_ID:      math.degrees(angles[3]),
+            WRIST_JOINT_ID:      math.degrees(angles[4]),
+            WRIST_TURN_JOINT_ID: math.degrees(angles[5]),
         })
     

@@ -270,7 +270,7 @@ class RobotArm:
 
         self.set_arm(INITIAL_ANGLES, 1)
 
-    def set_arm(self, new_angles: dict, v_max):
+    def set_arm(self, new_angles: dict, v_max:int=5):
         """
         Sets the angle of all servos smoothly over period of time
         ARGUMENTS
@@ -280,7 +280,6 @@ class RobotArm:
         PARAMETERS
             - v_max: float time in seconds
         """
-
         new_angles = self.bound_angles(new_angles)
         old_angles = self.get_current_angles(new_angles.keys())
 
@@ -332,11 +331,11 @@ class RobotArm:
             self.grabber.set_closed()
 
     def bound_angles(self, angles: dict):
-        for id, angle in angles.items():
-            if self.joints[id].min_angle > angle:
-                angles[id] = self.joints[id].min_angle
-            elif self.joints[id].max_angle < angle:
-                angles[id] = self.joints[id].max_angle
+        for angle_id, angle in angles.items():
+            if self.joints[angle_id].min_angle > angle:
+                angles[angle_id] = self.joints[angle_id].min_angle
+            elif self.joints[angle_id].max_angle < angle:
+                angles[angle_id] = self.joints[angle_id].max_angle
 
         return angles
 

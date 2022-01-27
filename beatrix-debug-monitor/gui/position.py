@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QTabWidget, QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QSizePolicy
 from PyQt5.QtCore import Qt
+from lib.constants import *
 import math
 
 POSITION_LIMIT = 50
@@ -14,8 +15,14 @@ class PositionManager(QTabWidget):
         self.position_sliders = []
         self.position_texts = []
 
-        self.angles = kinematics.inverse(self.position)
-        self.angles = [0.0 for i in range(len(self.angles))]
+        self.angles = [
+            0.0,
+            math.radians(INITIAL_ANGLES[BASE_JOINT_ID]),
+            math.radians(INITIAL_ANGLES[SHOULDER_JOINT_ID]),
+            math.radians(INITIAL_ANGLES[ELBOW_JOINT_ID]),
+            math.radians(INITIAL_ANGLES[WRIST_JOINT_ID]),
+            math.radians(INITIAL_ANGLES[WRIST_TURN_JOINT_ID]),
+        ]
         self.angles_callbacks = []
         self.angle_sliders = []
         self.angle_texts = []
@@ -135,8 +142,8 @@ class PositionManager(QTabWidget):
             layout.addWidget(line_edit, 1,i, 1,1)
 
             slider = QSlider(Qt.Orientation.Horizontal)
-            slider.valueChanged.connect(self.__on_angle_slider(i))
             slider.setValue(math.degrees(angle))
+            slider.valueChanged.connect(self.__on_angle_slider(i))
             slider.setMinimum(0)
             slider.setMaximum(360)
             self.angle_sliders.append(slider)

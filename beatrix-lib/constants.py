@@ -13,21 +13,20 @@ HOME_POSITION = [50, 50, 50]
 
 HOME_ANGLES = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
-"Measurements of the physical arm in centimeters"
+
 BASE_HEIGHT = 6.0
 SHOULDER_HEIGHT = 3.0
 SHOULDER_LENGTH = 22
 ELBOW_LENGTH = 15
 WRIST_LENGTH = 10
 
-
 "Global Identifiers of the different joints"
-BASE_JOINT_ID = 100
-SHOULDER_JOINT_ID = 101
-ELBOW_JOINT_ID = 102
-WRIST_JOINT_ID = 103
-WRIST_TURN_JOINT_ID = 104
-GRABBER_JOINT_ID = 105
+BASE_JOINT_ID       = 'base_joint'
+SHOULDER_JOINT_ID   = 'shoulder_joint'
+ELBOW_JOINT_ID      = 'elbow_joint'
+WRIST_JOINT_ID      = 'wrist_joint'
+WRIST_TURN_JOINT_ID = 'wrist_turn_joint'
+GRABBER_JOINT_ID    = 'grabber_joint'
 
 N_JOINTS = 6
 
