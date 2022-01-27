@@ -152,7 +152,6 @@ class PositionManager(QTabWidget):
             inputbox = self.angle_texts[i]
             okay, value = self.__text_to_int(inputbox.text())
             if okay:
-                # value = max(-POSITION_LIMIT if axis != 2 else 0, min(POSITION_LIMIT, value))
                 self.angles[i] = math.radians(value)
                 self.set_angles(self.angles)
             else:

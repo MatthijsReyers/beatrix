@@ -27,6 +27,14 @@ class DebugServer():
         except Exception as e:
             print(e)
 
+    def send_command(self, cmd):
+        try:
+            packet = json.dumps(cmd)
+            self.control_socket.send(packet)
+        except Exception as e:
+            print('Caught exception:')
+            print(e)
+
 if __name__ == '__main__':
     server = DebugServer()
     server.start()
