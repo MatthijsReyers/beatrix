@@ -1,5 +1,6 @@
 from lib.chain import ik_chain
 from abc import abstractmethod
+from ikpy.chain import Chain
 
 class Kinematics():
     def __init__(self):
@@ -14,8 +15,8 @@ class Kinematics():
         raise NotImplemented
 
 class IkPyKinematics(Kinematics):
-    def __init__(self):
-        self.chain = ik_chain
+    def __init__(self, chain: Chain):
+        self.chain = chain
 
     def inverse(self, position:(float,float,float)) -> list:
         return self.chain.inverse_kinematics(position)

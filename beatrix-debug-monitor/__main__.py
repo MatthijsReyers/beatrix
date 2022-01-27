@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QApplication
 from gui.mainwindow import MainWindow
 from debugclient import DebugClient
 from configfile import ConfigFile
-from kinematics import IkPyKinematics
+from lib.kinematics import IkPyKinematics
 from lib.logger import Logger
 import sys
 
