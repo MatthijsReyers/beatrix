@@ -15,6 +15,7 @@ class PositionManager(QTabWidget):
         self.position_texts = []
 
         self.angles = kinematics.inverse(self.position)
+        self.angles = [0.0 for i in range(len(self.angles))]
         self.angles_callbacks = []
         self.angle_sliders = []
         self.angle_texts = []
@@ -119,7 +120,7 @@ class PositionManager(QTabWidget):
     def __init_angles_tab(self):
         self.angles_tab = QWidget()
         layout = QGridLayout(self.angles_tab)
-        labels = ['-', 'Base', '-', 'Shoulder', 'Elbow', 'Wrist']
+        labels = ['-', 'Base', 'Shoulder', 'Elbow', 'Wrist', 'Grabber']
         for (i, angle) in enumerate(self.angles):
             label = QLabel(labels[i])
             label.setAlignment(Qt.AlignCenter)
