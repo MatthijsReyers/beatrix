@@ -1,4 +1,5 @@
 from lib.constants import HOME_POSITION
+from gui.position import PositionManager
 from gui.visualizer import Visualizer
 from gui.camerafeed import CameraFeed
 from gui.topbar import TopBar
@@ -8,7 +9,7 @@ from PyQt5.QtWidgets import (QMainWindow, QGroupBox, QWidget, QVBoxLayout, QHBox
     QLabel, QSlider)
 
 class MainWindow(QMainWindow):
-    def __init__(self, client, logger, config):
+    def __init__(self, client, kinematics, logger, config):
         super(QMainWindow, self).__init__()
         self.setWindowTitle("Beatrix debug monitor")
         self.central_widget = QWidget()
@@ -17,11 +18,12 @@ class MainWindow(QMainWindow):
         self.layout.setSpacing(5)
         self.central_widget.setLayout(self.layout)
         
-        self.position = [40.0, 0.0, 10.0]
+        self.position = [40.0, 0.0, -20.0]
 
         self.logger = logger
         self.config = config
         self.client = client
+        self.kinematics = kinematics
 
         self.topbar = TopBar(client, config)
         self.layout.addWidget(self.topbar)
@@ -44,23 +46,11 @@ class MainWindow(QMainWindow):
         base_splitter = QSplitter()
         self.splitter.addWidget(base_splitter)
 
-        self.__init_position_frame()
-        base_splitter.addWidget(self.position_frame)  
-        self.update_position(self.position)      
+        self.position_manager = PositionManager(kinematics)
+        self.position_manager.on_position_change(self.visualizer.update_position)
+        self.position_manager.on_angles_change(self.visualizer.update_angles)
+        base_splitter.addWidget(self.position_manager)  
 
-        # self.box.add(v_bar)
-
-        # # self.__init_position_frame()
-        
-        # # self.angles = [45,45,45,45,45,45]
-        # # self.__init_angles_frame()
-
-        # # self.grid = Gtk.Grid()
-        # # self.grid.set_vexpand(True)
-        # # self.grid.set_hexpand(True)
-        # # self.add(self.grid)
-        # self.connect('destroy', self.stop)
-        # # self.update_position(self.position)
 
     def start(self):
         self.running = True
@@ -80,35 +70,8 @@ class MainWindow(QMainWindow):
         for i in range(3):
             self.position_sliders[i].setValue(position[i])
 
-    def __init_position_frame(self):
-        self.position_frame = QGroupBox()
-        self.position_frame.setTitle("Position")
-
-        self.position_sliders = []
-
-        sliders = QHBoxLayout(self.position_frame)
-        # sliders.set_orientation(Gtk.Orientation.VERTICAL)
-
-        for axis in range(3):
-            slider = QSlider(Qt.Orientation.Horizontal, self.position_frame)
-            slider.setMinimum(-50)
-            slider.setMaximum(50)
-            slider.valueChanged.connect(self.__on_slider_move(axis))
-            sliders.addWidget(slider)
-            self.position_sliders.append(slider)
-        
-
-    def __init_angles_frame(self):
-        pass
-
     def __command_thread(self):
         print('[*] Started command thread.')
-
-    def __on_slider_move(self, axis):
-        def update(value):
-            self.position[axis] = value
-            self.update_position(self.position)
-        return update
 
     def __on_go_home(self):
         self.update_position(HOME_POSITION)

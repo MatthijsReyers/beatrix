@@ -2,19 +2,21 @@ from PyQt5.QtWidgets import QApplication
 from gui.mainwindow import MainWindow
 from debugclient import DebugClient
 from configfile import ConfigFile
+from kinematics import IkPyKinematics
 from lib.logger import Logger
 import sys
 
 logger = Logger()
 config = ConfigFile(logger)
 client = DebugClient(logger, config)
+kinematics = IkPyKinematics()
 
 # Connect to debug server.
 client.connect()
 
 # Create and start Qt5 based GUI.
 app = QApplication(sys.argv)
-window = MainWindow(client, logger, config)
+window = MainWindow(client, kinematics, logger, config)
 window.start()
 window.show()
 app.exec()
