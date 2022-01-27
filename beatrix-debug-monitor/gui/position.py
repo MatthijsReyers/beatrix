@@ -14,7 +14,7 @@ class PositionManager(QTabWidget):
         self.position_sliders = []
         self.position_texts = []
 
-        self.angles = [0,0,0, 0,0,0]
+        self.angles = kinematics.inverse(self.position)
         self.angles_callbacks = []
         self.angle_sliders = []
         self.angle_texts = []
@@ -136,8 +136,8 @@ class PositionManager(QTabWidget):
             slider = QSlider(Qt.Orientation.Horizontal)
             slider.valueChanged.connect(self.__on_angle_slider(i))
             slider.setValue(math.degrees(angle))
-            slider.setMinimum(-180)
-            slider.setMaximum(180)
+            slider.setMinimum(0)
+            slider.setMaximum(360)
             self.angle_sliders.append(slider)
             layout.addWidget(slider, 2,i, 1,1)
 
