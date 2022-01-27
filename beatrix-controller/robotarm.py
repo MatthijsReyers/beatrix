@@ -6,7 +6,7 @@ from lib.constants import *
 MAX_VELOCITY = 30  # Fastest speed of arm in degrees/s
 
 # False if running with robot arm, true otherwise.
-VIRTUAL_RUN = True
+VIRTUAL_RUN = False
 
 # Only instantiate servos and other physical components when ran with the robot arm
 if not VIRTUAL_RUN:
