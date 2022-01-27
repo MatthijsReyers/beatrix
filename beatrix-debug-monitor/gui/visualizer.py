@@ -34,7 +34,9 @@ class Visualizer(QGroupBox):
         self.position = HOME_POSITION
         self.angles   = HOME_ANGLES
 
-        self.chain  = ik_chain
+        # self.chain  = ik_chain
+        self.chain = guus_chain
+
         self.figure = Figure(figsize=(5, 4), dpi=100)
         self.ax = self.figure.add_subplot(111, projection='3d')
 
@@ -106,7 +108,7 @@ guus_chain = Chain(name='guus_chain', links=[
     URDFLink(
         name="wrist",
         origin_translation=[0, 0, 15],
-        origin_orientation=[-radians(88), 0, pi],
+        origin_orientation=[-radians(88), 0, 0],
         rotation=[1, 0, 0],
         bounds=(radians(0), radians(180))
     ),
