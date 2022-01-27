@@ -344,7 +344,7 @@ class RobotArm:
             to_be_retrieved_angles = requested_angles
 
         angles = dict()
-        for j_id, joint in to_be_retrieved_angles:
+        for j_id, joint in to_be_retrieved_angles.items():
             angles[id] = joint.current_angle
         return angles
 

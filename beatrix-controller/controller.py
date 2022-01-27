@@ -4,14 +4,13 @@ from lib.kinematics import IkPyKinematics
 from lib.chain import beatrix_rep
 from lib.constants import *
 
-class Controller():
+
+class Controller:
 
     def __init__(self, robotarm: RobotArm, camera: Camera):
         self.kinematics = IkPyKinematics(chain=beatrix_rep)
         self.robotarm = robotarm
         self.camera = camera
-
-
 
     def _move_arm_to_workspace_coordinate(self, x, y, z):
         solution_angles = self.kinematics.inverse(position=(x, y, z))
