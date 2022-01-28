@@ -63,7 +63,7 @@ class PositionManager(QTabWidget):
         for i in range(len(self.position)):
             slider = self.position_sliders[i] 
             slider.blockSignals(True)
-            slider.setValue(self.position[i])
+            slider.setValue(round(self.position[i]))
             slider.blockSignals(False)
             self.position_texts[i].setText('{0:.2f}'.format(self.position[i]))
         for callback in self.position_callbacks:
@@ -79,7 +79,7 @@ class PositionManager(QTabWidget):
         for (i, angle) in enumerate(self.angles):
             slider = self.angle_sliders[i]
             slider.blockSignals(True)
-            slider.setValue(math.degrees(angle))
+            slider.setValue(round(math.degrees(angle)))
             slider.blockSignals(False)
             self.angle_texts[i].setText('{0:.2f}'.format(math.degrees(angle)))
         for callback in self.angles_callbacks:
@@ -152,7 +152,7 @@ class PositionManager(QTabWidget):
             layout.addWidget(line_edit, 1,i, 1,1)
 
             slider = QSlider(Qt.Orientation.Horizontal)
-            slider.setValue(math.degrees(angle))
+            slider.setValue(round(math.degrees(angle)))
             slider.valueChanged.connect(self.__on_angle_slider(i))
             slider.setMinimum(0)
             slider.setMaximum(360)

@@ -14,7 +14,7 @@ HOME_POSITION = [50, 50, 50]
 HOME_ANGLES = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 """ DT used for calculating steps in set_arm"""
-D_TIME = 1 / 10 # 2Hz
+D_TIME = 1 / 50 # 2Hz
 
 BASE_HEIGHT = 6.0
 SHOULDER_HEIGHT = 3.0
@@ -31,6 +31,16 @@ WRIST_TURN_JOINT_ID = 'wrist_turn_joint'
 GRABBER_JOINT_ID    = 'grabber_joint'
 
 N_JOINTS = 6
+
+""" Parameters used for initializing grabber servo/joints.Grabber class. """
+GRABBER_PARAMETERS = {
+    "min angle": 50,
+    "max angle": 120,
+    "actuation range": 180,
+    "open": 90,
+    "closed": 50,
+    "port": 6
+}
 
 "Initial angles of all the joints so that the arm stands vertically"
 INITIAL_ANGLES = {
