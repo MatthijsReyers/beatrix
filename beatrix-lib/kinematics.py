@@ -10,6 +10,14 @@ class WristOrientation(Enum):
     HORIZONTAL = 1
     VERTICAL = 2
 
+    def __str__(self) -> str:
+        if self.value == WristOrientation.HORIZONTAL.value:
+            return 'Horizontal'
+        if self.value == WristOrientation.VERTICAL.value:
+            return 'Vertical'
+        else:
+            return 'Unset'
+
 class Kinematics():
     def __init__(self):
         pass
