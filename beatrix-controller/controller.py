@@ -3,6 +3,7 @@ from camera import Camera
 from lib.kinematics import IkPyKinematics
 from lib.chain import beatrix_rep
 from lib.constants import *
+from lib.locations import Location, INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW
 
 
 class Controller:
@@ -22,3 +23,6 @@ class Controller:
         """
         new_angles = self.kinematics.inverse(position=(x, y, z))
         self.robotarm.set_arm(new_angles=new_angles)
+
+    def go_to_location(self, location: Location):
+        pass
