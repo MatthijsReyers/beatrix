@@ -1,25 +1,46 @@
 from lib.chain import ik_chain
 from abc import abstractmethod
 from ikpy.chain import Chain
+from lib.constants import *
+
 
 class Kinematics():
     def __init__(self):
         pass
 
     @abstractmethod
-    def inverse(self, position:(float,float,float)) -> list:
+    def inverse(self, position: (float, float, float)) -> list:
         raise NotImplemented
 
     @abstractmethod
-    def forward(self, angles:list) -> (float,float,float):
+    def forward(self, angles: list) -> (float, float, float):
         raise NotImplemented
+
 
 class IkPyKinematics(Kinematics):
     def __init__(self, chain: Chain):
         self.chain = chain
 
-    def inverse(self, position:(float,float,float)) -> list: # TODO omzetten naar dict
-        return self.chain.inverse_kinematics(position)
+    def inverse(self, position: (float, float, float)) -> dict:
+        """
+        Calculates the solution of angles for a workspace coordinate (in degrees)
+        Args:
+            position: X,Y,Z coordinates
 
-    def forward(self, angles:list) -> (float,float,float):
-        return [0,0,0]
+        Returns:
+            Angles dictionary:  {JOINT_ID: anglex, JOINT_ID2: anglexx, etc...} with angles in degrees
+
+        """
+        solution_angles = self.chain.inverse_kinematics(position)
+        new_angles = {
+            BASE_JOINT_ID: (solution_angles[1] + 90),  # +90 for compensation of chain bounds (-90, 180)
+            # instead of (0, 270)
+            SHOULDER_JOINT_ID: solution_angles[2],
+            ELBOW_JOINT_ID: solution_angles[3],
+            WRIST_JOINT_ID: solution_angles[4],
+            WRIST_TURN_JOINT_ID: solution_angles[5]
+        }
+        return new_angles
+
+    def forward(self, angles: list) -> (float, float, float):
+        return [0, 0, 0]
