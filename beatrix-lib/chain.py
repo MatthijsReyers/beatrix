@@ -42,13 +42,13 @@ beatrix_rep = Chain(name='beatrix_representation', links=[
         rotation=[0, 0, 1],
         bounds=(radians(0), radians(180))
     ),
-    # URDFLink(
-    #     name="grabber",
-    #     origin_translation=[0, 0, 10],
-    #     origin_orientation=[0, 0, 0],
-    #     rotation=[0, 0, 0],
-    #     #bounds=(radians(0), radians(180))
-    # ),
+    URDFLink(
+        name="grabber",
+        origin_translation=[0, 0, 14],
+        origin_orientation=[0, 0, 0],
+        rotation=[0, 0, 0],
+        #bounds=(radians(0), radians(180))
+    ),
 
 ],
                    #active_links_mask=[False, True, True, True, True, True]
