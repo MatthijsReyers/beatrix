@@ -20,7 +20,7 @@ class PositionManager(QSplitter):
         self.position_sliders = []
         self.position_texts = []
 
-        self.angles = INITIAL_ANGLES
+        self.angles = INITIAL_ANGLES.copy()
         self.angles_callbacks = []
         self.angle_sliders = dict()
         self.angle_texts = dict()
