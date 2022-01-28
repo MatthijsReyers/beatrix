@@ -123,7 +123,6 @@ class PositionManager(QTabWidget):
     def __init_angles_tab(self):
         self.angles_tab = QWidget()
         layout = QGridLayout(self.angles_tab)
-        print(self.angles)
         for (i, (joint, angle)) in enumerate(self.angles.items()):
             label = QLabel(joint.capitalize().replace('_joint', '').replace('_', ' '))
             label.setAlignment(Qt.AlignCenter)
