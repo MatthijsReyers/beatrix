@@ -42,7 +42,7 @@ class IkPyKinematics(Kinematics):
 
         solution_angles = self.chain.inverse_kinematics(position)
         new_angles = {
-            BASE_JOINT_ID: degrees(solution_angles[1] + 90),  # +90 for compensation of chain bounds (-90, 180)
+            BASE_JOINT_ID: degrees(solution_angles[1]) + 90,  # +90 for compensation of chain bounds (-90, 180)
             # instead of (0, 270)
             SHOULDER_JOINT_ID: degrees(solution_angles[2]),
             ELBOW_JOINT_ID: degrees(solution_angles[3]),
@@ -53,4 +53,4 @@ class IkPyKinematics(Kinematics):
 
     def forward(self, angles: list) -> Tuple[float, float, float]:
         self.chain.forward_kinematics()
-        return [0, 0, 0]
+        return (0, 0, 0)
