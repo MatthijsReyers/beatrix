@@ -131,7 +131,7 @@ class PositionManager(QTabWidget):
             line_edit = QLineEdit()
             line_edit.setAlignment(Qt.AlignCenter)
             line_edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            line_edit.editingFinished.connect(self.__on_angle_text(i, joint))
+            line_edit.editingFinished.connect(self.__on_angle_text(joint))
             line_edit.setText('{0:.2f}'.format(angle))
             self.angle_texts[joint] = line_edit
             layout.addWidget(line_edit, 1,i, 1,1)
@@ -150,9 +150,9 @@ class PositionManager(QTabWidget):
             self.set_angles(self.angles)
         return update
 
-    def __on_angle_text(self, i, joint):
+    def __on_angle_text(self, joint):
         def update():
-            inputbox = self.angle_texts[i]
+            inputbox = self.angle_texts[joint]
             okay, value = self.__text_to_int(inputbox.text())
             if okay:
                 self.angles[joint] = value
