@@ -35,7 +35,7 @@ class CommandHandler:
 
     def _cmd_home(self):
         print('[CMD] Go home')
-        self.controller.robotarm.set_arm(INITIAL_ANGLES, 10)
+        self.controller.robotarm.set_arm(INITIAL_ANGLES, 30)
 
     def _cmd_get_pos(self):
         pass
