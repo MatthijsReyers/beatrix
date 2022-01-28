@@ -16,7 +16,7 @@ class Kinematics():
         pass
 
     @abstractmethod
-    def inverse(self, position: (float, float, float)) -> list:
+    def inverse(self, position: (float, float, float), wrist_orientation: WristOrientation = WristOrientation.UNSET) -> dict:
         raise NotImplemented
 
     @abstractmethod
@@ -32,7 +32,7 @@ class IkPyKinematics(Kinematics):
         """
         Calculates the solution of angles for a workspace coordinate (in degrees)
         Args:
-            wrist_orientation:
+            wrist_orientation: desired orientation for the wrist joint
             position: X,Y,Z coordinates
 
         Returns:
