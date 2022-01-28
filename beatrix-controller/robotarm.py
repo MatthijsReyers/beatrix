@@ -115,14 +115,14 @@ class RobotArm:
             else:
                 time.sleep(dtime - time_elapsed)
 
-    def set_grabber(self, state, angle=None):
+    def set_grabber(self, closed, angle=None):
         """If no angle is parsed, state=0 is open, state=1 is closed"""
         if angle:
             self.grabber.set_angle(angle)
-        elif state:
-            self.grabber.set_open()
-        else:
+        elif closed:
             self.grabber.set_closed()
+        else:
+            self.grabber.set_open()
 
     def bound_angles(self, angles: dict):
         for angle_id, angle in angles.items():

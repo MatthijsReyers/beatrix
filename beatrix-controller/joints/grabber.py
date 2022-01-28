@@ -32,9 +32,11 @@ class Grabber:
         self.grabber.angle = new_angle
 
     def set_open(self):
+        print("set open")
         self.grabber.angle = self.open
 
     def set_closed(self):
+        print("set closed")
         self.grabber.angle = self.closed
 
     def bound_angle(self, angle):
