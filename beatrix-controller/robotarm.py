@@ -299,7 +299,7 @@ class RobotArm:
         duration = (total_angle_arr * math.pi) / (2 * v_max)
         duration = np.max(duration)  # for now, use the max duration of all servos
 
-        dtime = D_TIME  # 50Hz
+        dtime = D_TIME
         steps = int(duration / dtime)
 
         # for each step adjust for each servo the angle
