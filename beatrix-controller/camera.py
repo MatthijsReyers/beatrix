@@ -42,6 +42,7 @@ class Camera():
         try:
             while self.running:
                 okay, frame = self.cap.read()
+                print("while camera thread okay = {}".format(okay))
                 if okay:
                     objects = objectrecognition.object_recognition(frame)
                     objectrecognition.draw_on_image(frame, objects)
@@ -51,7 +52,6 @@ class Camera():
                     self.debug_server.send_video_frame(frame)
         except Exception as e:
             print(e)
-
         finally:
             self.cap.release()
 
