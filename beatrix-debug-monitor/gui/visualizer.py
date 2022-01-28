@@ -6,7 +6,7 @@ from math import radians
 from lib.chain import beatrix_rep
 from lib.constants import *
 from math import radians
-import numpy as np
+from typing import Tuple
 
 class Visualizer(QGroupBox):
     def __init__(self):
@@ -29,7 +29,7 @@ class Visualizer(QGroupBox):
 
         self.update_graph()
 
-    def update_position(self, position:(float,float,float)):
+    def update_position(self, position: Tuple[float,float,float]):
         self.position = position
         self.update_graph()
 

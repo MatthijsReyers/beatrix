@@ -1,5 +1,6 @@
-from socket import socket, AF_INET, SOCK_STREAM, SOCK_DGRAM, SO_SNDBUF, SOL_SOCKET, SHUT_RDWR, timeout
+from socket import socket, AF_INET, SOCK_STREAM, SOCK_DGRAM, SO_SNDBUF, SOL_SOCKET, SHUT_RDWR, timeout, gaierror
 from threading import Thread, Condition, Lock
+from typing import Tuple
 import time
 
 SEND_TIMEOUT = 0.8
@@ -80,7 +81,7 @@ class ClientSocket():
                 self._socket_mutex.release()
         return False
 
-    def receive(self, buffer_size=1024) -> (bool, bytes):
+    def receive(self, buffer_size=1024) -> Tuple[bool, bytes]:
         """ Tries to receive a buffer of 1024 bytes or a given size worth of data. If any data is 
         received it will return it in a tuple prepended with `True`, if it fails to receive data; 
         either through an error or timeout it will return `False` and an empty byte array.
@@ -147,6 +148,10 @@ class ClientSocket():
                 self._socket.connect((self.ip_addr, self.port))
                 self.__set_connected(True)
                 self.reconnecting = False
+            except gaierror:
+                self._socket_mutex.release()
+                time.sleep(RECONNECT_TIME)
+                self._socket_mutex.acquire()
             except timeout:
                 self._socket_mutex.release()
                 time.sleep(RECONNECT_TIME)

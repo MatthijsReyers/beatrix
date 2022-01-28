@@ -1,3 +1,4 @@
+from typing import Tuple, Union
 from lib.constants import VIDEO_BUFFER_SIZE, VIDEO_PORT, CONTROL_PORT
 from lib.clientsock import ClientSocket
 from lib.utils import safe_import_cv
@@ -6,6 +7,7 @@ import pickle, json, struct, time
 cv2 = safe_import_cv()
 
 FRAME_TIMEOUT = 2
+CMD_TIMEOUT = 1.5
 
 class DebugClient():
     def __init__(self, logger, config):
@@ -34,7 +36,7 @@ class DebugClient():
     def on_change(self, callback):
         self._callbacks.append(callback)
 
-    def receive_video(self) -> (bool, any):
+    def receive_video(self) -> Tuple[bool, any]:
         start_t = time.time()
         okay, raw_size = self.video_socket.receive(buffer_size=4)
         if okay:
@@ -42,7 +44,8 @@ class DebugClient():
             frame = b""
             while len(frame) < frame_size and abs(start_t - time.time()) < FRAME_TIMEOUT:
                 okay, data = self.video_socket.receive(buffer_size=frame_size-len(frame))
-                frame += data
+                if okay:
+                    frame += data
             if len(frame) < frame_size:
                 self.logger.warn('Video frame receiving timed out.')
                 return (False, None)
@@ -52,18 +55,25 @@ class DebugClient():
             time.sleep(0.1)
         return (False, None)
 
-    def receive_command(self) -> (bool, object):
+    def receive_command(self) -> Tuple[bool, Union[dict, None]]:
         """ Tries to receive a command from the server. """
         try:
-            okay, cmd = self.control_socket.receive(buffer_size=1024*4)
+            start_t = time.time()
+            okay, raw_size = self.control_socket.receive(buffer_size=4)
             if okay:
-                cmd = json.loads(cmd)
-                if cmd['type'] != None: return (True, cmd)
-                else:
-                    self.logger.warn('Received invalid command')
+                cmd_size = struct.unpack('>I', raw_size)[0]
+                cmd = b""
+                while len(cmd) < cmd_size and abs(start_t - time.time()) < CMD_TIMEOUT:
+                    okay, data = self.video_socket.receive(buffer_size=cmd_size-len(cmd))
+                    if okay:
+                        cmd += data
+                if len(cmd) < cmd_size:
+                    self.logger.warn('Command receiving timed out.')
+                    return (False, None)
+                return (True, json.loads(cmd))
         except Exception as e:
             self.logger.exception(e, 'DebugClient.receive_command')
-        return (False, {})
+        return (False, None)
 
     def send_set_angles_cmd(self, angles:dict):
         """ Sends a command to set the servo angles of the robotarm. """
@@ -74,7 +84,7 @@ class DebugClient():
             }
         })
 
-    def send_set_position_cmd(self, position: (float, float, float)):
+    def send_set_position_cmd(self, position: Tuple[float, float, float]):
         """ Sends a command to set the position of the robot arm. """
         self._send_cmd({
             'type': 'SET_POSITION',
@@ -99,7 +109,7 @@ class DebugClient():
             'data': {}
         })
 
-    def send_set_grabber(self, closed:bool):
+    def send_set_grabber(self, closed: bool):
         """ Sets the state of the grabber """
         self._send_cmd({
             'type': 'GRABBER',
