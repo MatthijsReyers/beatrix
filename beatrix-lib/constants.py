@@ -34,10 +34,10 @@ N_JOINTS = 6
 
 """ Parameters used for initializing grabber servo/joints.Grabber class. """
 GRABBER_PARAMETERS = {
-    "min angle": 80, 
-    "max angle": 100, 
+    "min angle": 50,
+    "max angle": 120,
     "actuation range": 180,
-    "open": 140,
+    "open": 90,
     "closed": 50,
     "port": 6
 }
