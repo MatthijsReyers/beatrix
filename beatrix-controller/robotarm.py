@@ -8,35 +8,6 @@ import time, math
 
 MAX_VELOCITY = 30  # Fastest speed of arm in degrees/s
 
-# False if running with robot arm, true otherwise.
-# VIRTUAL_RUN = False
-
-# Only instantiate servos and other physical components when ran with the robot arm
-# if not VIRTUAL_RUN:
-#     from board import SCL, SDA
-#     import busio
-#     from adafruit_motor import servo
-#     from adafruit_pca9685 import PCA9685
-
-#     I2C = busio.I2C(SCL, SDA)
-#     PCA = PCA9685(I2C)
-#     PCA.frequency = 50
-# if VIRTUAL_RUN:
-#     PCA = None
-
-# Default parameters, only thing that should be edited is min angle and max angle,
-# or if the shoulder is reversed, mirrored for the shoulder
-# DEFAULT_PARAMETERS = [{"servo": "single", "min angle": 0, "max angle": 270, "actuation range": 270,
-#                        "mirrored": False, "port": 0},  # base
-#                       {"servo": "dual", "min angle": 38, "max angle": 90, "actuation range": 180,
-#                        "mirrored": [True, False], "port": [1, 2]},  # shoulder
-#                       {"servo": "single", "min angle": 10, "max angle": 150, "actuation range": 180,
-#                        "mirrored": False, "port": 3},  # elbow
-#                       {"servo": "single", "min angle": 0, "max angle": 180, "actuation range": 180,
-#                        "mirrored": False, "port": 4},  # wrist
-#                       {"servo": "single", "min angle": 0, "max angle": 180, "actuation range": 180,
-#                        "mirrored": False, "port": 5}]  # wrist turn
-
 class RobotArm:
     """
         Main class to initialise and control the robot arm
@@ -125,7 +96,7 @@ class RobotArm:
         duration = (total_angle_arr * math.pi) / (2 * v_max)
         duration = np.max(duration)  # for now, use the max duration of all servos
 
-        dtime = D_TIME  # 50Hz
+        dtime = D_TIME
         steps = int(duration / dtime)
 
         # for each step adjust for each servo the angle
@@ -192,10 +163,3 @@ def get_angle_smooth(start_angle, end_angle, seconds, elapsed):
         if end_angle < start_angle:
             return start_angle - (-.5 * math.cos(time) + .5) * moving_angle
     return end_angle
-
-# if __name__ == "__main__":
-#     print(math.cos(np.pi))
-#     init_pos = [90, 80, 90, 70, 90]
-#     robotarm = RobotArm(DEFAULT_PARAMETERS, init_pos)
-#     # new_pos = [40, 30, 40, 30, 50]
-#     # robotarm.set_arm(new_pos, 3)
