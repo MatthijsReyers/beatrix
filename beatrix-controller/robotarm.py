@@ -35,7 +35,7 @@ DEFAULT_PARAMETERS = [{"servo": "single", "min angle": 0, "max angle": 270, "act
                       {"servo": "single", "min angle": 0, "max angle": 180, "actuation range": 180,
                        "mirrored": False, "port": 5}]  # wrist turn
 GRABBER_PARAMETERS = {"min angle": 80, "max angle": 100, "actuation range": 180,
-                      "open": 60, "closed": 110, "port": 6}
+                      "open": 60, "closed": 180, "port": 6}
 
 
 class JointParameters:
