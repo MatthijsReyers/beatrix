@@ -35,7 +35,7 @@ DEFAULT_PARAMETERS = [{"servo": "single", "min angle": 0, "max angle": 270, "act
                       {"servo": "single", "min angle": 0, "max angle": 180, "actuation range": 180,
                        "mirrored": False, "port": 5}]  # wrist turn
 GRABBER_PARAMETERS = {"min angle": 0, "max angle": 180, "actuation range": 180,
-                      "open": 60, "closed": 180, "port": 6}
+                      "open": 100, "closed": 80, "port": 6}
 
 
 class JointParameters:
@@ -198,17 +198,12 @@ class Grabber:
                                        actuation_range=self.actuation_range)
 
     def set_angle(self, new_angle):
-        # new_angle = self.bound_angle(new_angle)
+        new_angle = self.bound_angle(new_angle)
         self.grabber.angle = new_angle
 
     def set_open(self):
         print("set open")
-        # self.grabber.angle = self.open
-        self.set_angle(0)
-        time.sleep(1)
-        self.set_angle(90)
-        time.sleep(1)
-        self.set_angle(180)
+        self.grabber.angle = self.open
 
     def set_closed(self):
         print("set closed")
@@ -329,14 +324,14 @@ class RobotArm:
     def _set_servo(joint, angle, new_angle):
         joint.set_angle(angle, new_angle)
 
-    def set_grabber(self, state, angle=None):
+    def set_grabber(self, closed, angle=None):
         """If no angle is parsed, state=0 is open, state=1 is closed"""
         if angle:
             self.grabber.set_angle(angle)
-        elif state:
-            self.grabber.set_open()
-        else:
+        elif closed:
             self.grabber.set_closed()
+        else:
+            self.grabber.set_open()
 
     def bound_angles(self, angles: dict):
         for angle_id, angle in angles.items():
