@@ -1,3 +1,4 @@
+from typing import Tuple
 from lib.chain import ik_chain
 from abc import abstractmethod
 from ikpy.chain import Chain
@@ -18,8 +19,8 @@ class IkPyKinematics(Kinematics):
     def __init__(self, chain: Chain):
         self.chain = chain
 
-    def inverse(self, position:(float,float,float)) -> list: # TODO omzetten naar dict
+    def inverse(self, position:Tuple[float, float, float]) -> list: # TODO omzetten naar dict
         return self.chain.inverse_kinematics(position)
 
-    def forward(self, angles:list) -> (float,float,float):
+    def forward(self, angles:list) -> Tuple[float, float, float]:
         return [0,0,0]
