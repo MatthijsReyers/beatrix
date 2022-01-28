@@ -49,6 +49,9 @@ class Camera():
                     frame = cv2.resize(frame, dsize=(int(width * 0.5), int(height * 0.5)),
                                        interpolation=cv2.INTER_AREA)
                     self.debug_server.send_video_frame(frame)
+        except Exception as e:
+            print(e)
+
         finally:
             self.cap.release()
 
