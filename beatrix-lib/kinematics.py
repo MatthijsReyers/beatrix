@@ -18,7 +18,7 @@ class IkPyKinematics(Kinematics):
     def __init__(self, chain: Chain):
         self.chain = chain
 
-    def inverse(self, position:(float,float,float)) -> list:
+    def inverse(self, position:(float,float,float)) -> list: # TODO omzetten naar dict
         return self.chain.inverse_kinematics(position)
 
     def forward(self, angles:list) -> (float,float,float):
