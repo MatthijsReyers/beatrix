@@ -53,7 +53,7 @@ INITIAL_ANGLES = {
 "The angle bounds (allowed angles) for each joint"
 ANGLE_BOUNDS = {
     BASE_JOINT_ID: (0, 270),
-    SHOULDER_JOINT_ID: (90, 142),
+    SHOULDER_JOINT_ID: (75, 142),
     ELBOW_JOINT_ID: (10, 150),
     WRIST_JOINT_ID: (10, 180),
     WRIST_TURN_JOINT_ID: (0, 180)
