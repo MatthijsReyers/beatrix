@@ -202,7 +202,10 @@ class Grabber:
         self.grabber.angle = new_angle
 
     def set_open(self):
-        self.grabber.angle = self.open
+        # self.grabber.angle = self.open
+        for i in range(start=0, stop=180, step=10):
+            self.set_angle(i)
+            time.sleep(3)
 
     def set_closed(self):
         self.grabber.angle = self.closed
