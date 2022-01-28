@@ -27,26 +27,28 @@ class Camera():
         if self.camera_thread != None:
             self.camera_thread.join()
 
+    # def __camera_thread(self):
+    #     try:
+    #         while self.running:
+    #             okay, frame = self.cap.read()
+    #             if okay:
+    #                 self.debug_server.send_video_frame(frame)
+    #                 self.__frame = frame
+    #     finally:
+    #         self.cap.release()
+    #
+
     def __camera_thread(self):
-        # try:
-        #     while self.running:
-        #         okay, frame = self.cap.read()
-        #         if okay:
-        #             self.debug_server.send_video_frame(frame)
-        #             self.__frame = frame
-        # finally:
-        #     self.cap.release()
-        def __camera_thread(self):
-            try:
-                while self.running:
-                    okay, frame = self.cap.read()
-                    if okay:
-                        objects = objectrecognition.object_recognition(frame)
-                        objectrecognition.draw_on_image(frame, objects)
-                        objectrecognition.scale_image(frame, 0.5)
-                        self.debug_server.send_video_frame(frame)
-            finally:
-                self.cap.release()
+        try:
+            while self.running:
+                okay, frame = self.cap.read()
+                if okay:
+                    objects = objectrecognition.object_recognition(frame)
+                    objectrecognition.draw_on_image(frame, objects)
+                    objectrecognition.scale_image(frame, 0.5)
+                    self.debug_server.send_video_frame(frame)
+        finally:
+            self.cap.release()
 
     def get_latest_frame(self):
         return self.__frame
