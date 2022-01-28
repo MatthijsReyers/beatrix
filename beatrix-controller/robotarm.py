@@ -198,7 +198,7 @@ class Grabber:
                                        actuation_range=self.actuation_range)
 
     def set_angle(self, new_angle):
-        new_angle = self.bound_angle(new_angle)
+        # new_angle = self.bound_angle(new_angle)
         self.grabber.angle = new_angle
 
     def set_open(self):
