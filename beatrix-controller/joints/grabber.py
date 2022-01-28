@@ -33,11 +33,13 @@ class Grabber:
 
     def set_open(self):
         print("set open")
-        self.grabber.angle = self.open
+        #self.grabber.angle = self.open
+        self.set_angle(self.open)
 
     def set_closed(self):
         print("set closed")
-        self.grabber.angle = self.closed
+        # self.grabber.angle = self.closed
+        self.set_angle(self.closed)
 
     def bound_angle(self, angle):
         if self.min_angle <= angle <= self.max_angle:
