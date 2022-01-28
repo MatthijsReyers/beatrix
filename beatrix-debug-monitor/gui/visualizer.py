@@ -49,8 +49,9 @@ class Visualizer(QGroupBox):
             radians(self.angles[SHOULDER_JOINT_ID]),
             radians(self.angles[ELBOW_JOINT_ID]),
             radians(self.angles[WRIST_JOINT_ID]),
-            radians(self.angles[WRIST_TURN_JOINT_ID])
-        ], self.ax)
+            radians(self.angles[WRIST_TURN_JOINT_ID,
+            0.0
+        ])], self.ax)
 
         self.ax.scatter(
             self.position[0], self.position[1], self.position[2],
