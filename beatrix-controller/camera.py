@@ -45,7 +45,7 @@ class Camera():
                 if okay:
                     objects = objectrecognition.object_recognition(frame)
                     objectrecognition.draw_on_image(frame, objects)
-                    frame = objectrecognition.scale_image([frame], 0.5)[0]
+                    frame = objectrecognition.scale_image([frame], 0.25)[0]
                     self.debug_server.send_video_frame(frame)
         finally:
             self.cap.release()
