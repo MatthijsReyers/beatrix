@@ -52,18 +52,17 @@ class ServerSocket():
                 converted to bytestrings.
             ip (str): Optional Ip address to send to, all clients will receive data if none is provided.
         """
-        length = struct.pack('>I', len(data))
         for (conn, addr) in self._connections:
             try:
                 if ip == None or addr[1] == ip:
-                    conn.send(length)
                     conn.send(data)
             except BrokenPipeError:
                 if (conn, addr) in self._connections:
                     self._connections.remove((conn, addr))
             except Exception as e:
                 print(f'[!] Encountered unexpected exception while sending:\n', type(e), e)
-
+                self._connections.remove((conn, addr))
+                
     def on_receive(self, callback:callable):
         """ Adds a callback function to the socket that will be called whenever one of the clients sends
         something to this server socket. 

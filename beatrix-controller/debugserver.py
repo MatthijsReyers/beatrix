@@ -22,7 +22,8 @@ class DebugServer():
         try:
             _, frame = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 30])
             frame_bytes = pickle.dumps(frame)
-            self.video_socket.send(frame_bytes)
+            length = struct.pack('>I', len(frame_bytes))
+            self.video_socket.send(length+frame_bytes)
         except UnpicklingError as e:
             print('Video decode error.')
         except Exception as e:
@@ -30,8 +31,9 @@ class DebugServer():
 
     def send_command(self, cmd):
         try:
-            packet = json.dumps(cmd).encode('utf-8')
-            self.control_socket.send(packet)
+            data = json.dumps(cmd).encode('utf-8')
+            length = struct.pack('>I', len(data))
+            self.control_socket.send(length+data)
         except Exception as e:
             print('Caught exception:')
             print(e)

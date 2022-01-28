@@ -11,7 +11,7 @@ beatrix_rep = Chain(name='beatrix_representation', links=[
         origin_translation=[0, 0, 6],
         origin_orientation=[0, 0, pi],
         rotation=[0, 0, 1],
-        bounds=(0, radians(180))
+        bounds=(radians(-90), radians(180))
     ),
     URDFLink(
         name="shoulder",
@@ -39,9 +39,17 @@ beatrix_rep = Chain(name='beatrix_representation', links=[
         name="wrist_turn",
         origin_translation=[0, 0, 10],
         origin_orientation=[0, 0, 0],
-        rotation=[1, 0, 0],
+        rotation=[0, 0, 1],
+        bounds=(radians(0), radians(180))
+    ),
+    URDFLink(
+        name="grabber",
+        origin_translation=[0, 0, 14],
+        origin_orientation=[0, 0, 0],
+        rotation=[0, 0, 0],
         #bounds=(radians(0), radians(180))
     ),
+
 ],
                    #active_links_mask=[False, True, True, True, True, True]
                    )
