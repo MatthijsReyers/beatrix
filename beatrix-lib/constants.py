@@ -35,7 +35,7 @@ GRABBER_PARAMETERS = {
     "min angle": 50,
     "max angle": 120,
     "actuation range": 180,
-    "open": 90,
+    "open": 120,
     "closed": 60,
     "port": 6
 }
