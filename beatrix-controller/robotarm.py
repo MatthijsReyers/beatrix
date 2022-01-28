@@ -71,7 +71,7 @@ class RobotArm:
             PCA.frequency = 50
 
         self.joints = dict()
-        self.grabber = Grabber(GRABBER_PARAMETERS, PCA, 90, False)
+        self.grabber = Grabber(GRABBER_PARAMETERS, PCA, 90, debug_mode)
 
         if joint_ids == None:
             joint_ids = [
@@ -90,10 +90,10 @@ class RobotArm:
 
             if JOINT_TYPE[j_id]["duality"] == "single":
                 self.joints[j_id] = (SingleServo(parameters=parameters, pca9685=PCA,
-                                               angle=parameters.initial_angle))
+                                               angle=parameters.initial_angle, debug_mode=debug_mode))
             elif JOINT_TYPE[j_id]["duality"] == "dual":
                 self.joints[j_id] = (DualServo(parameters=parameters, pca9685=PCA,
-                                             angle=parameters.initial_angle))
+                                             angle=parameters.initial_angle, debug_mode=debug_mode))
 
         self.set_arm(INITIAL_ANGLES, 1)
 
