@@ -1,9 +1,7 @@
-import enum
 from typing import Tuple
 from PyQt5.QtWidgets import QTabWidget, QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QSizePolicy
 from PyQt5.QtCore import Qt
 from lib.constants import *
-import math
 
 POSITION_LIMIT = 50
 
