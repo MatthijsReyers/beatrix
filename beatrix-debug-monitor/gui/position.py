@@ -1,15 +1,19 @@
+from re import S
 from typing import Tuple
-from PyQt5.QtWidgets import QTabWidget, QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QSizePolicy
+from PyQt5.QtWidgets import (QSplitter, QTabWidget, QWidget, QGridLayout, QGroupBox, QLabel, QSlider, 
+    QLineEdit, QSizePolicy, QVBoxLayout, QRadioButton, QButtonGroup)
 from PyQt5.QtCore import Qt
 from lib.constants import *
+from lib.kinematics import Kinematics, WristOrientation
 
 POSITION_LIMIT = 50
 
-class PositionManager(QTabWidget):
-    def __init__(self, kinematics):
-        super(QTabWidget, self).__init__()
-        self.tab_widget = QTabWidget()
+class PositionManager(QSplitter):
+    def __init__(self, kinematics: Kinematics):
+        super(QSplitter, self).__init__()
         self.kinematics = kinematics
+
+        self.wrist_orientation = WristOrientation.UNSET
 
         self.position = [0,0,0]
         self.position_callbacks = []
@@ -21,11 +25,17 @@ class PositionManager(QTabWidget):
         self.angle_sliders = dict()
         self.angle_texts = dict()
 
+        tab_widget = QTabWidget()
+        self.addWidget(tab_widget)
+
         self.__init_postion_tab()
-        self.addTab(self.position_tab, 'Position')
+        tab_widget.addTab(self.position_tab, 'Position')
 
         self.__init_angles_tab()
-        self.addTab(self.angles_tab, 'Angles')
+        tab_widget.addTab(self.angles_tab, 'Angles')
+
+        self.__init_wrist_angle_frame()
+        self.addWidget(self.wrist_angle_box)
 
     def on_angles_change(self, callback:callable):
         """ Registers a callback function to be called whenever the user manually changes one of the 
@@ -45,7 +55,7 @@ class PositionManager(QTabWidget):
         functions. (Note: Do NOT call this within a callback handler to avoid infinite recursion)."""
         self.position = pos
         if update_kin:
-            self.angles = self.kinematics.inverse(pos)
+            self.angles = self.kinematics.inverse(self.position, self.wrist_orientation)
             self.set_angles(self.angles, update_kin=False)
         for i in range(len(self.position)):
             slider = self.position_sliders[i] 
@@ -71,6 +81,36 @@ class PositionManager(QTabWidget):
             self.angle_texts[joint].setText('{0:.2f}'.format(angle))
         for callback in self.angles_callbacks:
             callback(angles)
+
+    def __init_wrist_angle_frame(self):
+        self.wrist_angle_box = QGroupBox()
+        layout = QVBoxLayout(self.wrist_angle_box)
+        layout.addWidget(QLabel('Wrist angle:'))
+
+        btn0 = QRadioButton(str(WristOrientation.UNSET))
+        btn0.setChecked(True)
+        btn1 = QRadioButton(str(WristOrientation.HORIZONTAL))
+        btn2 = QRadioButton(str(WristOrientation.VERTICAL))
+
+        layout.addWidget(btn0)
+        layout.addWidget(btn1)
+        layout.addWidget(btn2)
+
+        buttons = QButtonGroup()
+        buttons.setExclusive(True)
+        buttons.addButton(btn0, WristOrientation.UNSET.value)
+        buttons.addButton(btn1, WristOrientation.HORIZONTAL.value)
+        buttons.addButton(btn2, WristOrientation.VERTICAL.value)
+
+        btn0.toggled.connect(self.__on_wrist_btn(WristOrientation.UNSET.value))
+        btn1.toggled.connect(self.__on_wrist_btn(WristOrientation.HORIZONTAL.value))
+        btn2.toggled.connect(self.__on_wrist_btn(WristOrientation.VERTICAL.value))
+
+    def __on_wrist_btn(self, i):
+        def update(ok):
+            if ok: self.wrist_orientation = WristOrientation(i)
+        return update
+
 
     def __init_postion_tab(self):
         self.position_tab = QWidget()
