@@ -2,6 +2,13 @@ from lib.chain import ik_chain
 from abc import abstractmethod
 from ikpy.chain import Chain
 from lib.constants import *
+from enum import Enum
+
+class WristOrientation(Enum):
+    UNSET = 0
+    HORIZONTAL = 1
+    VERTICAL = 2
+
 
 
 class Kinematics():
@@ -21,10 +28,11 @@ class IkPyKinematics(Kinematics):
     def __init__(self, chain: Chain):
         self.chain = chain
 
-    def inverse(self, position: (float, float, float)) -> dict:
+    def inverse(self, position: (float, float, float), wrist_orientation: WristOrientation = WristOrientation.UNSET) -> dict:
         """
         Calculates the solution of angles for a workspace coordinate (in degrees)
         Args:
+            wrist_orientation:
             position: X,Y,Z coordinates
 
         Returns:
