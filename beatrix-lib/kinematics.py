@@ -4,6 +4,8 @@ from ikpy.chain import Chain
 from lib.constants import *
 from enum import Enum
 from math import degrees
+import numpy as np
+
 
 class WristOrientation(Enum):
     UNSET = 0
@@ -23,7 +25,8 @@ class Kinematics():
         pass
 
     @abstractmethod
-    def inverse(self, position: Tuple[float, float, float], wrist_orientation: WristOrientation = WristOrientation.UNSET) -> dict:
+    def inverse(self, position: Tuple[float, float, float],
+                wrist_orientation: WristOrientation = WristOrientation.UNSET) -> dict:
         raise NotImplemented
 
     @abstractmethod
@@ -35,7 +38,8 @@ class IkPyKinematics(Kinematics):
     def __init__(self, chain: Chain):
         self.chain = chain
 
-    def inverse(self, position: Tuple[float, float, float], wrist_orientation: WristOrientation = WristOrientation.UNSET) -> dict:
+    def inverse(self, position: Tuple[float, float, float],
+                wrist_orientation: WristOrientation = WristOrientation.UNSET) -> dict:
         """
         Calculates the solution of angles for a workspace coordinate (in degrees)
         Args:
@@ -46,11 +50,21 @@ class IkPyKinematics(Kinematics):
             Angles dictionary:  {JOINT_ID: anglex, JOINT_ID2: anglexx, etc...} with angles in degrees
 
         """
+        if wrist_orientation == WristOrientation.UNSET:
+            solution_angles = self.chain.inverse_kinematics(position)
+            print("unset")
+        elif wrist_orientation == WristOrientation.VERTICAL:
+            solution_angles = self.chain.inverse_kinematics(position, orientation_mode='Z',
+                                                            target_orientation=np.array([0, 0, 1]))
+            print("vertical")
+        elif wrist_orientation == WristOrientation.HORIZONTAL:
+            solution_angles = self.chain.inverse_kinematics(position, orientation_mode='X',
+                                                            target_orientation=np.array([0, 0, 1]))  # TODO
+            print("horizontal")
 
-
-        solution_angles = self.chain.inverse_kinematics(position)
         new_angles = {
-            BASE_JOINT_ID: degrees(solution_angles[1]) + 90,  # +90 for compensation of chain bounds (-90, 180)
+            BASE_JOINT_ID: degrees(solution_angles[1]) + 90,
+            # +90 for compensation of chain bounds (-90, 180)
             # instead of (0, 270)
             SHOULDER_JOINT_ID: degrees(solution_angles[2]),
             ELBOW_JOINT_ID: degrees(solution_angles[3]),
