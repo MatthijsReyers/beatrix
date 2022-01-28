@@ -71,7 +71,7 @@ class PositionManager(QSplitter):
         functions. (Note: Do NOT call this within a callback handler to avoid infinite recursion). """
         self.angles = angles
         if update_kin:
-            self.position = self.kinematics.forward(angles)
+            self.position = list(self.kinematics.forward(angles))
             self.set_position(self.position, update_kin=False)
         for (joint, angle) in self.angles.items():
             slider = self.angle_sliders[joint]
