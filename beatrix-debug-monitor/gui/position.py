@@ -8,6 +8,7 @@ POSITION_LIMIT = 50
 class PositionManager(QTabWidget):
     def __init__(self, kinematics):
         super(QTabWidget, self).__init__()
+        self.tab_widget = QTabWidget()
         self.kinematics = kinematics
 
         self.position = [0,0,0]
