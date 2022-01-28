@@ -11,7 +11,7 @@ beatrix_rep = Chain(name='beatrix_representation', links=[
         origin_translation=[0, 0, 6],
         origin_orientation=[0, 0, pi],
         rotation=[0, 0, 1],
-        bounds=(0, radians(180))
+        bounds=(radians(-90), radians(180))
     ),
     URDFLink(
         name="shoulder",

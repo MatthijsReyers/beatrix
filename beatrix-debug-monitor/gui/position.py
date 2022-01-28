@@ -1,3 +1,5 @@
+import enum
+from typing import Tuple
 from PyQt5.QtWidgets import QTabWidget, QWidget, QGridLayout, QLabel, QSlider, QLineEdit, QSizePolicy
 from PyQt5.QtCore import Qt
 from lib.constants import *
@@ -15,17 +17,10 @@ class PositionManager(QTabWidget):
         self.position_sliders = []
         self.position_texts = []
 
-        self.angles = [
-            0.0,
-            math.radians(INITIAL_ANGLES[BASE_JOINT_ID]),
-            math.radians(INITIAL_ANGLES[SHOULDER_JOINT_ID]),
-            math.radians(INITIAL_ANGLES[ELBOW_JOINT_ID]),
-            math.radians(INITIAL_ANGLES[WRIST_JOINT_ID]),
-            math.radians(INITIAL_ANGLES[WRIST_TURN_JOINT_ID]),
-        ]
+        self.angles = INITIAL_ANGLES
         self.angles_callbacks = []
-        self.angle_sliders = []
-        self.angle_texts = []
+        self.angle_sliders = dict()
+        self.angle_texts = dict()
 
         self.__init_postion_tab()
         self.addTab(self.position_tab, 'Position')
@@ -44,16 +39,9 @@ class PositionManager(QTabWidget):
         self.position_callbacks.append(callback)
 
     def set_home(self):
-        self.set_angles([
-            0.0,
-            math.radians(INITIAL_ANGLES[BASE_JOINT_ID]),
-            math.radians(INITIAL_ANGLES[SHOULDER_JOINT_ID]),
-            math.radians(INITIAL_ANGLES[ELBOW_JOINT_ID]),
-            math.radians(INITIAL_ANGLES[WRIST_JOINT_ID]),
-            math.radians(INITIAL_ANGLES[WRIST_TURN_JOINT_ID]),
-        ])
+        self.set_angles(INITIAL_ANGLES)
 
-    def set_position(self, pos:(int,int,int), update_kin:bool=True):
+    def set_position(self, pos:Tuple[float,float,float], update_kin:bool=True):
         """ Sets the position while updating all of the GUI elements and calling the registered callback
         functions. (Note: Do NOT call this within a callback handler to avoid infinite recursion)."""
         self.position = pos
@@ -69,19 +57,19 @@ class PositionManager(QTabWidget):
         for callback in self.position_callbacks:
             callback(pos)
 
-    def set_angles(self, angles:list, update_kin:bool=True):
+    def set_angles(self, angles:dict, update_kin:bool=True):
         """ Sets the angles while updating all of the GUI elements and calling the registered callback
-        functions. (Note: Do NOT call this within a callback handler to avoid infinite recursion)."""
+        functions. (Note: Do NOT call this within a callback handler to avoid infinite recursion). """
         self.angles = angles
         if update_kin:
             self.position = self.kinematics.forward(angles)
             self.set_position(self.position, update_kin=False)
-        for (i, angle) in enumerate(self.angles):
-            slider = self.angle_sliders[i]
+        for (joint, angle) in self.angles.items():
+            slider = self.angle_sliders[joint]
             slider.blockSignals(True)
-            slider.setValue(round(math.degrees(angle)))
+            slider.setValue(round(angle))
             slider.blockSignals(False)
-            self.angle_texts[i].setText('{0:.2f}'.format(math.degrees(angle)))
+            self.angle_texts[joint].setText('{0:.2f}'.format(angle))
         for callback in self.angles_callbacks:
             callback(angles)
 
@@ -137,46 +125,46 @@ class PositionManager(QTabWidget):
     def __init_angles_tab(self):
         self.angles_tab = QWidget()
         layout = QGridLayout(self.angles_tab)
-        labels = ['-', 'Base', 'Shoulder', 'Elbow', 'Wrist', 'Grabber']
-        for (i, angle) in enumerate(self.angles):
-            label = QLabel(labels[i])
+        print(self.angles)
+        for (i, (joint, angle)) in enumerate(self.angles.items()):
+            label = QLabel(joint.capitalize().replace('_joint', '').replace('_', ' '))
             label.setAlignment(Qt.AlignCenter)
             layout.addWidget(label, 0,i, 1,1)
 
             line_edit = QLineEdit()
             line_edit.setAlignment(Qt.AlignCenter)
             line_edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            line_edit.editingFinished.connect(self.__on_angle_text(i))
-            line_edit.setText('{0:.2f}'.format(math.degrees(angle)))
-            self.angle_texts.append(line_edit)
+            line_edit.editingFinished.connect(self.__on_angle_text(i, joint))
+            line_edit.setText('{0:.2f}'.format(angle))
+            self.angle_texts[joint] = line_edit
             layout.addWidget(line_edit, 1,i, 1,1)
 
             slider = QSlider(Qt.Orientation.Horizontal)
-            slider.setValue(round(math.degrees(angle)))
-            slider.valueChanged.connect(self.__on_angle_slider(i))
-            slider.setMinimum(0)
-            slider.setMaximum(360)
-            self.angle_sliders.append(slider)
-            layout.addWidget(slider, 2,i, 1,1)
+            slider.setValue(round(angle))
+            slider.valueChanged.connect(self.__on_angle_slider(joint))
+            slider.setMinimum(ANGLE_BOUNDS[joint][0])
+            slider.setMaximum(ANGLE_BOUNDS[joint][1])
+            self.angle_sliders[joint] = slider
+            layout.addWidget(slider, 2, i, 1,1)
 
-    def __on_angle_slider(self, i):
+    def __on_angle_slider(self, joint):
         def update(value):
-            self.angles[i] = math.radians(value)
+            self.angles[joint] = value
             self.set_angles(self.angles)
         return update
 
-    def __on_angle_text(self, i):
+    def __on_angle_text(self, i, joint):
         def update():
             inputbox = self.angle_texts[i]
             okay, value = self.__text_to_int(inputbox.text())
             if okay:
-                self.angles[i] = math.radians(value)
+                self.angles[joint] = value
                 self.set_angles(self.angles)
             else:
-                inputbox.setText('{0:.2f}'.format(math.degrees(self.angles[i])))
+                inputbox.setText('{0:.2f}'.format(self.angles[joint]))
         return update
 
-    def __text_to_int(self, text) -> (bool, float):
+    def __text_to_int(self, text) -> Tuple[bool, float]:
         if len(text) == 0:
             return (True, 0)
         try:
