@@ -71,7 +71,7 @@ class PositionManager(QSplitter):
         functions. (Note: Do NOT call this within a callback handler to avoid infinite recursion). """
         self.angles = angles
         if update_kin:
-            self.position = self.kinematics.forward(angles)
+            self.position = list(self.kinematics.forward(angles))
             self.set_position(self.position, update_kin=False)
         for (joint, angle) in self.angles.items():
             slider = self.angle_sliders[joint]
@@ -86,25 +86,15 @@ class PositionManager(QSplitter):
         self.wrist_angle_box = QGroupBox()
         layout = QVBoxLayout(self.wrist_angle_box)
         layout.addWidget(QLabel('Wrist angle:'))
-
-        btn0 = QRadioButton(str(WristOrientation.UNSET))
-        btn0.setChecked(True)
-        btn1 = QRadioButton(str(WristOrientation.HORIZONTAL))
-        btn2 = QRadioButton(str(WristOrientation.VERTICAL))
-
-        layout.addWidget(btn0)
-        layout.addWidget(btn1)
-        layout.addWidget(btn2)
-
         buttons = QButtonGroup()
         buttons.setExclusive(True)
-        buttons.addButton(btn0, WristOrientation.UNSET.value)
-        buttons.addButton(btn1, WristOrientation.HORIZONTAL.value)
-        buttons.addButton(btn2, WristOrientation.VERTICAL.value)
-
-        btn0.toggled.connect(self.__on_wrist_btn(WristOrientation.UNSET.value))
-        btn1.toggled.connect(self.__on_wrist_btn(WristOrientation.HORIZONTAL.value))
-        btn2.toggled.connect(self.__on_wrist_btn(WristOrientation.VERTICAL.value))
+        for orient in WristOrientation:
+            btn = QRadioButton(str(orient))
+            if orient == self.wrist_orientation:
+                btn.setChecked(True)
+            layout.addWidget(btn)
+            buttons.addButton(btn, orient.value)
+            btn.toggled.connect(self.__on_wrist_btn(orient.value))
 
     def __on_wrist_btn(self, i):
         def update(ok):
