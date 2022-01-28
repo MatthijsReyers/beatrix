@@ -14,7 +14,7 @@ HOME_POSITION = [50, 50, 50]
 HOME_ANGLES = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 """ DT used for calculating steps in set_arm"""
-D_TIME = 1 / 2 # 2Hz
+D_TIME = 1 / 10 # 2Hz
 
 BASE_HEIGHT = 6.0
 SHOULDER_HEIGHT = 3.0
@@ -45,7 +45,7 @@ INITIAL_ANGLES = {
 "The angle bounds (allowed angles) for each joint"
 ANGLE_BOUNDS = {
     BASE_JOINT_ID: (0, 270),
-    SHOULDER_JOINT_ID: (38, 90),
+    SHOULDER_JOINT_ID: (90, 142),
     ELBOW_JOINT_ID: (10, 150),
     WRIST_JOINT_ID: (0, 180),
     WRIST_TURN_JOINT_ID: (0, 180)

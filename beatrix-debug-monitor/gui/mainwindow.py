@@ -19,8 +19,6 @@ class MainWindow(QMainWindow):
         self.layout.setSpacing(5)
         self.central_widget.setLayout(self.layout)
         
-        self.position = [40.0, 0.0, -20.0]
-
         self.logger = logger
         self.config = config
         self.client = client
@@ -40,7 +38,6 @@ class MainWindow(QMainWindow):
         self.camera_feed = CameraFeed(client, logger)
         main_bar.addWidget(self.camera_feed)
         self.visualizer = Visualizer()
-        self.visualizer.update_position(self.position)
         main_bar.addWidget(self.visualizer)
         self.splitter.addWidget(main_bar)
 
@@ -53,16 +50,26 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(button_row)
         base_splitter.addWidget(button_row)  
         
-        btn = QPushButton("Send angles")
+        btn = QPushButton("Set position")
         btn.clicked.connect(self.__on_send_angles)
+        layout.addWidget(btn)
+
+        btn = QPushButton("Go home")
+        btn.clicked.connect(self.__on_go_home)
+        layout.addWidget(btn)
+
+        btn = QPushButton("Close grabber")
+        btn.clicked.connect(self.__on_close_grabber)
+        layout.addWidget(btn)
+
+        btn = QPushButton("Open grabber")
+        btn.clicked.connect(self.__on_open_grabber)
         layout.addWidget(btn)
 
         self.position_manager = PositionManager(kinematics)
         self.position_manager.on_position_change(self.visualizer.update_position)
         self.position_manager.on_angles_change(self.visualizer.update_angles)
         base_splitter.addWidget(self.position_manager)  
-
-
 
 
     def start(self):
@@ -77,21 +84,11 @@ class MainWindow(QMainWindow):
         self.camera_feed.stop()
         self.command_thread.join()
 
-    def update_position(self, position):
-        self.position = position
-        self.visualizer.update_position(position)
-        for i in range(3):
-            self.position_sliders[i].setValue(position[i])
-
     def __command_thread(self):
         print('[*] Started command thread.')
 
-    def __on_go_home(self):
-        self.update_position(HOME_POSITION)
-        self.send_go_home_cmd()
-
     def __on_send_angles(self):
-        print('[*] Sending angles')
+        print('[*] Sending set angles')
         angles = self.position_manager.angles
         self.client.send_set_angles_cmd({
             BASE_JOINT_ID:       math.degrees(angles[1]),
@@ -101,3 +98,15 @@ class MainWindow(QMainWindow):
             WRIST_TURN_JOINT_ID: math.degrees(angles[5]),
         })
     
+    def __on_go_home(self):
+        print('[*] Sending go home')
+        self.position_manager.set_home()
+        self.client.send_go_home_cmd()
+
+    def __on_close_grabber(self):
+        print('[*] Sending go home')
+        self.client.send_set_grabber(closed=True)
+
+    def __on_open_grabber(self):
+        print('[*] Sending go home')
+        self.client.send_set_grabber(closed=False)

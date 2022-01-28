@@ -43,6 +43,16 @@ class PositionManager(QTabWidget):
         goal via this GUI menu. """
         self.position_callbacks.append(callback)
 
+    def set_home(self):
+        self.set_angles([
+            0.0,
+            math.radians(INITIAL_ANGLES[BASE_JOINT_ID]),
+            math.radians(INITIAL_ANGLES[SHOULDER_JOINT_ID]),
+            math.radians(INITIAL_ANGLES[ELBOW_JOINT_ID]),
+            math.radians(INITIAL_ANGLES[WRIST_JOINT_ID]),
+            math.radians(INITIAL_ANGLES[WRIST_TURN_JOINT_ID]),
+        ])
+
     def set_position(self, pos:(int,int,int), update_kin:bool=True):
         """ Sets the position while updating all of the GUI elements and calling the registered callback
         functions. (Note: Do NOT call this within a callback handler to avoid infinite recursion)."""

@@ -27,7 +27,7 @@ server     = DebugServer()
 camera     = Camera(debug_server=server)
 robotarm   = RobotArm(debug_mode=args.no_io)
 controller = Controller(robotarm, camera)
-handler    = CommandHandler(controller)
+handler    = CommandHandler(server, controller)
 
 try:
     # Start threads

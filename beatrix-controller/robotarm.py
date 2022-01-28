@@ -35,7 +35,7 @@ DEFAULT_PARAMETERS = [{"servo": "single", "min angle": 0, "max angle": 270, "act
                       {"servo": "single", "min angle": 0, "max angle": 180, "actuation range": 180,
                        "mirrored": False, "port": 5}]  # wrist turn
 GRABBER_PARAMETERS = {"min angle": 80, "max angle": 100, "actuation range": 180,
-                      "open": 89, "closed": 91, "port": 6}
+                      "open": 90, "closed": 180, "port": 6}
 
 
 class JointParameters:
@@ -94,7 +94,7 @@ class SingleServo:
                                      actuation_range=self.actuation_range)
 
         # Update angle of servo
-        self.set_angle(angle)
+        self.set_angle(angle, angle)
 
     def set_angle(self, angle, new_angle):
         self.new_angle = self.bound_angle(new_angle)
@@ -199,13 +199,13 @@ class Grabber:
 
     def set_angle(self, new_angle):
         new_angle = self.bound_angle(new_angle)
-        self.grabber.set_angle(new_angle)
+        self.grabber.angle = new_angle
 
     def set_open(self):
-        self.grabber.set_angle(self.open)
+        self.grabber.angle = self.open
 
     def set_closed(self):
-        self.grabber.set_angle(self.closed)
+        self.grabber.angle = self.closed
 
     def bound_angle(self, angle):
         if self.min_angle <= angle <= self.max_angle:
@@ -289,7 +289,7 @@ class RobotArm:
 
         old_angle_arr = np.array(list(old_angles.values()))
         new_angle_arr = np.array(list(new_angles.values()))
-        total_angle_arr = new_angle_arr - old_angle_arr
+        total_angle_arr = abs(new_angle_arr - old_angle_arr)
 
         if v_max > MAX_VELOCITY:
             print("Currently no implementation for movement that is too fast\n")
