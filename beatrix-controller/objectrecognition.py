@@ -1,7 +1,7 @@
 import cv2
 from enum import Enum
 import numpy as np
-import tensorflow as tf
+from tflite_runtime.interpreter import Interpreter
 
 
 class RecognicedObject:
@@ -169,7 +169,7 @@ def label_images(images):
 
 def instantiate_model():
     # Load the TFLite model and allocate tensors.
-    interpreter = tf.lite.Interpreter(model_path="int8-model.lite")
+    interpreter = Interpreter(model_path="int8-model.lite")
     interpreter.allocate_tensors()
     return interpreter
 

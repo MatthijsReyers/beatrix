@@ -1,5 +1,6 @@
 from threading import Thread
 import cv2
+import objectrecognition
 
 class Camera():
     def __init__(self, debug_server):
@@ -7,6 +8,9 @@ class Camera():
 
         self.cap = cv2.VideoCapture(0)
         self.cap.set(cv2.CAP_PROP_FPS, 2)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1088)
+        # self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
         self.running = False
 
@@ -24,11 +28,26 @@ class Camera():
             self.camera_thread.join()
 
     def __camera_thread(self):
-        try:
-            while self.running:
-                okay, frame = self.cap.read()
-                if okay:
-                    self.debug_server.send_video_frame(frame)
-        finally:
-            self.cap.release()
+        # try:
+        #     while self.running:
+        #         okay, frame = self.cap.read()
+        #         if okay:
+        #             self.debug_server.send_video_frame(frame)
+        #             self.__frame = frame
+        # finally:
+        #     self.cap.release()
+        def __camera_thread(self):
+            try:
+                while self.running:
+                    okay, frame = self.cap.read()
+                    if okay:
+                        objects = objectrecognition.object_recognition(frame)
+                        objectrecognition.draw_on_image(frame, objects)
+                        objectrecognition.scale_image(frame, 0.5)
+                        self.debug_server.send_video_frame(frame)
+            finally:
+                self.cap.release()
+
+    def get_latest_frame(self):
+        return self.__frame
     
