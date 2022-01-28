@@ -34,7 +34,7 @@ DEFAULT_PARAMETERS = [{"servo": "single", "min angle": 0, "max angle": 270, "act
                        "mirrored": False, "port": 4},  # wrist
                       {"servo": "single", "min angle": 0, "max angle": 180, "actuation range": 180,
                        "mirrored": False, "port": 5}]  # wrist turn
-GRABBER_PARAMETERS = {"min angle": 80, "max angle": 100, "actuation range": 180,
+GRABBER_PARAMETERS = {"min angle": 0, "max angle": 180, "actuation range": 180,
                       "open": 60, "closed": 180, "port": 6}
 
 
@@ -205,7 +205,7 @@ class Grabber:
         # self.grabber.angle = self.open
         for i in range(start=0, stop=180, step=10):
             self.set_angle(i)
-            time.sleep(3)
+            time.sleep(1)
 
     def set_closed(self):
         self.grabber.angle = self.closed
