@@ -74,5 +74,16 @@ class IkPyKinematics(Kinematics):
         return new_angles
 
     def forward(self, angles: dict) -> Tuple[float, float, float]:
-        # self.chain.forward_kinematics()
+        angles_list = self.__angle_dict_to_list(angles)
+
+        trans_matrix = self.chain.forward_kinematics(angles_list)
+        # return trans_matrix
         return (0, 0, 0)
+
+
+    @staticmethod
+    def __angle_dict_to_list(angles_i: dict):
+        result = [0]
+        result.extend(angles_i.values())
+        result.append(0)
+        return result

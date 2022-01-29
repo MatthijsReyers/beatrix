@@ -9,5 +9,7 @@ __pycache__/
 beatrix-debug-monitor/lib
 beatrix-controller/lib
 
+beatrix-debug-monitor/guus tests
+
 test.py
 tests
