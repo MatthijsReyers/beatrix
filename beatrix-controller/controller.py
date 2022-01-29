@@ -25,4 +25,10 @@ class Controller:
         self.robotarm.set_arm(new_angles=new_angles)
 
     def go_to_location(self, location: Location):
-        pass
+        """
+        Moves the robot arm to a specific pre defined location
+        Args:
+            location: location object including joint angles
+        """
+        angles = location.get_angle_dict()
+        self.robotarm.set_arm(angles)
