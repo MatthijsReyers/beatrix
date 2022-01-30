@@ -30,7 +30,7 @@ class Kinematics():
         raise NotImplemented
 
     @abstractmethod
-    def forward(self, angles: list) -> Tuple[float, float, float]:
+    def get_forward_cartesian(self, angles: list) -> Tuple[float, float, float]:
         raise NotImplemented
 
 
@@ -73,12 +73,24 @@ class IkPyKinematics(Kinematics):
         }
         return new_angles
 
-    def forward(self, angles: dict) -> Tuple[float, float, float]:
-        angles_list = self.__angle_dict_to_list(angles)
+    def get_forward_cartesian(self, angles: dict) -> Tuple[float, float, float]:
+        """
+        returns the workspace coordinates of the end effector in x, y, z
+        Args:
+            angles: dictionary[JOINT_ID -> angle]
 
-        trans_matrix = self.chain.forward_kinematics(angles_list)
-        # return trans_matrix
-        return (0, 0, 0)
+        Returns:
+            tuple of x, y and z coordinate
+        """
+        angles_list = self.__angle_dict_to_list(angles)
+        angles_list_radians = np.radians( np.array(angles_list) ).tolist()
+
+        trans_matrix = self.chain.forward_kinematics(angles_list_radians)
+        x = trans_matrix[0][3]
+        y = trans_matrix[1][3]
+        z = trans_matrix[2][3]
+        #print("\n {} \n\n".format(trans_matrix))
+        return (x, y, z)
 
 
     @staticmethod
