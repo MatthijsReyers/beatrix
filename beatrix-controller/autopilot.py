@@ -1,23 +1,30 @@
 from threading import Thread, Lock
-from controller import Controller
 from objectrecognition import Label
-import enum
+from enum import Enum
 
-class AutoPilotState(enum):
+class AutoPilotState(Enum):
     STOPPING = 1
     STOPPED  = 2
     STARTING = 3
     STARTED  = 4
 
 class AutoPilot:
-    def __init__(self, controller: Controller):
+    def __init__(self, controller: 'Controller', camera: 'Camera'):
         self.controller = controller
+        self.camera = camera
 
         self.state = AutoPilotState.STOPPED
         self._state_mutex = Lock()
 
-        self.currently_holding: Label = None
         self._pilot_thread = None
+
+    def is_running(self):
+        """ Checks if the autopilot is currently running. (May block if the autopilot thread is just 
+        being started). """
+        self._state_mutex.acquire()
+        running = (self.state == AutoPilotState.STARTED or self.state == AutoPilotState.STARTING)
+        self._state_mutex.release()
+        return running
 
     def start(self):
         self._state_mutex.acquire()
@@ -57,4 +64,7 @@ class AutoPilot:
         self._state_mutex.release()
         
         while self.state == AutoPilotState.STARTED:
-            self.controller
+            print('Autopilot running...')
+            import time
+            time.sleep(5)
+        
