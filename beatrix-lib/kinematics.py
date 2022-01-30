@@ -54,12 +54,12 @@ class IkPyKinematics(Kinematics):
             solution_angles = self.chain.inverse_kinematics(position)
             print("unset")
         elif wrist_orientation == WristOrientation.VERTICAL:
-            solution_angles = self.chain.inverse_kinematics(position, orientation_mode='Z',
-                                                            target_orientation=np.array([0, 0, 1]))
+            solution_angles = self.chain.inverse_kinematics(target_position=position, orientation_mode='Z',
+                                                            target_orientation=np.array([0, 0, -1]))
             print("vertical")
         elif wrist_orientation == WristOrientation.HORIZONTAL:
-            solution_angles = self.chain.inverse_kinematics(position, orientation_mode='X',
-                                                            target_orientation=np.array([0, 0, 1]))  # TODO
+            solution_angles = self.chain.inverse_kinematics(position, orientation_mode='Y',
+                                                            target_orientation=np.array([0, 0, -1]))  # TODO
             print("horizontal")
 
         new_angles = {
