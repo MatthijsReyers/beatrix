@@ -6,7 +6,6 @@ from lib.shapes import Shape
 from tflite_runtime.interpreter import Interpreter 
 import time
 
-
 class RecognizedObject:
 
     def __init__(self, contour, center, label, confidence):
