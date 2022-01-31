@@ -1,8 +1,6 @@
-from constants import BASE_JOINT_ID, SHOULDER_JOINT_ID, ELBOW_JOINT_ID, WRIST_JOINT_ID, WRIST_TURN_JOINT_ID
-
+from lib.constants import BASE_JOINT_ID, SHOULDER_JOINT_ID, ELBOW_JOINT_ID, WRIST_JOINT_ID, WRIST_TURN_JOINT_ID
 
 class Location:
-
     def __init__(self, base, shoulder, elbow, wrist, wrist_turn):
         self.base = base
         self.shoulder = shoulder

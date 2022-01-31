@@ -30,7 +30,9 @@ class RobotArm:
                 list of joints of which this robot arm consists
     """
 
-    def __init__(self, joint_ids:list=None, debug_mode:bool=False):
+    def __init__(self, debug_server, joint_ids:list=None, debug_mode:bool=False):
+        self.debug_server = debug_server
+
         if debug_mode: 
             PCA = None
         else: 
@@ -109,11 +111,15 @@ class RobotArm:
                 self.joints[j_id].set_angle(calculated_angle, new_angles[j_id])
 
             time_elapsed = time.process_time() - current_ptime
+            if step % 10 == 0:
+                self.debug_server.send_angles_update(self.get_current_angles())
             if time_elapsed >= dtime:
                 print("!!!! Process took longer than control loop time !!!!")
                 print("time elapsed = {}".format(time_elapsed))
             else:
                 time.sleep(dtime - time_elapsed)
+
+        self.debug_server.send_angles_update(self.get_current_angles())
 
     def set_grabber(self, closed, angle=None):
         """If no angle is parsed, state=0 is open, state=1 is closed"""

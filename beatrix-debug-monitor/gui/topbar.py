@@ -1,13 +1,13 @@
-from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QPushButton, 
+from PyQt5.QtWidgets import (QWidget, QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QPushButton, 
     QButtonGroup, QRadioButton, QSpacerItem, QSizePolicy)
 from PyQt5 import QtCore
 
 LOCALHOST = 'Localhost'
 RASPBERRY_PI = 'Raspberry Pi'
 
-class TopBar(QWidget):
+class TopBar(QGroupBox):
     def __init__(self, client, config):
-        super(QWidget, self).__init__()
+        super(QGroupBox, self).__init__()
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
         self.setMaximumHeight(40)
         self.layout = QHBoxLayout(self)

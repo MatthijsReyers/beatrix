@@ -2,6 +2,7 @@ from typing import Tuple, Union
 from lib.constants import VIDEO_BUFFER_SIZE, VIDEO_PORT, CONTROL_PORT
 from lib.clientsock import ClientSocket
 from lib.utils import safe_import_cv
+import lib.commands as cmd
 import pickle, json, struct, time
 
 cv2 = safe_import_cv()
@@ -64,7 +65,7 @@ class DebugClient():
                 cmd_size = struct.unpack('>I', raw_size)[0]
                 cmd = b""
                 while len(cmd) < cmd_size and abs(start_t - time.time()) < CMD_TIMEOUT:
-                    okay, data = self.video_socket.receive(buffer_size=cmd_size-len(cmd))
+                    okay, data = self.control_socket.receive(buffer_size=cmd_size-len(cmd))
                     if okay:
                         cmd += data
                 if len(cmd) < cmd_size:
@@ -75,19 +76,26 @@ class DebugClient():
             self.logger.exception(e, 'DebugClient.receive_command')
         return (False, None)
 
-    def send_set_angles_cmd(self, angles:dict):
+    def send_get_update(self):
+        """ Sends a command to get the current position of the robot arm. """
+        self._send_cmd({
+            'type': cmd.GET_UPDATE,
+            'data': {}
+        })
+
+    def send_set_angles(self, angles:dict):
         """ Sends a command to set the servo angles of the robotarm. """
         self._send_cmd({
-            'type': 'SET_ANG',
+            'type': cmd.SET_ANGLES,
             'data': {
                 'angles': angles
             }
         })
 
-    def send_set_position_cmd(self, position: Tuple[float, float, float]):
+    def send_set_position(self, position: Tuple[float, float, float]):
         """ Sends a command to set the position of the robot arm. """
         self._send_cmd({
-            'type': 'SET_POSITION',
+            'type': cmd.SET_POSITION,
             'data': {
                 'x': position[0],
                 'y': position[1],
@@ -95,26 +103,20 @@ class DebugClient():
             }
         })
 
-    def send_get_position_cmd(self):
-        """ Sends a command to get the current position of the robot arm. """
-        self._send_cmd({
-            'type': 'GET_POSITION',
-            'data': {}
-        })
-
-    def send_go_home_cmd(self):
-        """ Sends a command to move the robot arm to its home position. """
-        self._send_cmd({
-            'type': 'GO_HOME',
-            'data': {}
-        })
-
     def send_set_grabber(self, closed: bool):
         """ Sets the state of the grabber """
         self._send_cmd({
-            'type': 'GRABBER',
+            'type': cmd.SET_GRABBER,
             'data': {
                 'closed':closed
+            }
+        })
+
+    def send_set_autopilot(self, enabled: bool):
+        self._send_cmd({
+            'type': cmd.SET_AUTOPILOT,
+            'data': {
+                'enabled':enabled
             }
         })
 
@@ -125,6 +127,8 @@ class DebugClient():
         except Exception as e:
             self.logger.exception(e, 'DebugClient._send_cmd')
 
-    def _change_connection_state(self, sock, connected):
+    def _change_connection_state(self, socket, connected):
+        if socket == self.control_socket and connected:
+            self.send_get_update()
         for callback in self._callbacks:
             callback(self.is_connected())

@@ -146,24 +146,19 @@ class ClientSocket():
                 self._socket = socket(AF_INET, SOCK_STREAM)
                 self._socket.settimeout(RECV_TIMEOUT)
                 self._socket.connect((self.ip_addr, self.port))
+                self._socket_mutex.release()
                 self.__set_connected(True)
                 self.reconnecting = False
             except gaierror:
                 self._socket_mutex.release()
                 time.sleep(RECONNECT_TIME)
-                self._socket_mutex.acquire()
             except timeout:
                 self._socket_mutex.release()
                 time.sleep(RECONNECT_TIME)
-                self._socket_mutex.acquire()
             except ConnectionRefusedError:
                 self._socket_mutex.release()
                 time.sleep(RECONNECT_TIME)
-                self._socket_mutex.acquire()
             except Exception as e:
                 self.logger.exception(e, 'ClientSocket.__reconnect_thread')
                 self._socket_mutex.release()
                 time.sleep(RECONNECT_TIME)
-                self._socket_mutex.acquire()
-            finally:
-                self._socket_mutex.release()
