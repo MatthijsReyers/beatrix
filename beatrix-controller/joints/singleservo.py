@@ -27,7 +27,8 @@ class SingleServo:
         - current_angle: updated every step when moving
     """
 
-    def __init__(self, parameters: JointParameters, pca9685, angle, debug_mode: bool = False):
+    def __init__(self, parameters: JointParameters, pca9685, angle, debug_mode: bool = False, offset = 0):
+        self.offset = offset
         self.debug_mode = debug_mode
         self.current_angle = angle
         self.old_angle = angle
@@ -55,9 +56,9 @@ class SingleServo:
             self.old_angle = self.new_angle
         if not self.debug_mode:
             if not self.mirrored:
-                self.servo.angle = self.current_angle
+                self.servo.angle = self.__hard_actuation_bound(self.current_angle + self.offset)
             if self.mirrored:
-                self.servo.angle = self.actuation_range - self.current_angle
+                self.servo.angle = self.actuation_range - self.__hard_actuation_bound(self.current_angle + self.offset)
         # else:
         #     print('Servo',self.port,'going to',self.new_angle)
 
@@ -69,3 +70,12 @@ class SingleServo:
             return self.min_angle
         elif angle > self.max_angle:
             return self.max_angle
+
+    def __hard_actuation_bound(self, angle):
+        if angle < 0:
+            return 0
+        elif angle > self.actuation_range:
+            return self.actuation_range
+        else:
+            return angle
+
