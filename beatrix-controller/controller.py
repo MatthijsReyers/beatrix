@@ -6,6 +6,8 @@ from typing import Tuple
 from objectrecognition import ObjectRecognizer
 from lib.shapes import Shape
 from lib.locations import PUZZLE_LOCATIONS
+from objectrecognition import draw_on_image
+import cv2
 
 HOVER_DIST = 10
 
@@ -63,6 +65,8 @@ class Controller:
             return None
 
         classified_shapes = self.object_recognizer.object_recognition(latest_frame)
+        draw_on_image(latest_frame, classified_shapes)
+        cv2.imwrite('LatestClassify.jpg', latest_frame)
         classified_shapes = list(filter(lambda y: y.label != Shape.Unknown, classified_shapes))
         if len(classified_shapes) == 0:
             return None
