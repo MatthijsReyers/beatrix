@@ -25,11 +25,11 @@ class Location:
 
 TABLE_Z_COORDINATE = 5  # TODO
 
-INPUT_AREA_CAM_VIEW = Location(74, 90, 64, 107, 90, "Input area cam view")
-PUZZLE_AREA_CAM_VIEW = Location(160, 90, 64, 107, 90, "Puzzle area cam view")
+INPUT_AREA_CAM_VIEW  = Location(90, 90, 64, 107, 90, "Input area cam view")
+PUZZLE_AREA_CAM_VIEW = Location(180, 90, 64, 107, 90, "Puzzle area cam view")
 
 # ---- Puzzle locations
-OCTAGON = Location(181, 102, 84, 48, 90, "Octagon")
+OCTAGON = Location(186, 108, 77.47, 48.27, 0, "Octagon")
 
 LOCATIONS_FOR_GUI = [
     INPUT_AREA_CAM_VIEW, 
