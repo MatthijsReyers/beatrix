@@ -3,6 +3,7 @@ from objectrecognition import RecognizedObject
 from enum import Enum
 from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, PUZZLE_LOCATIONS
 from lib.shapes import Shape
+import time
 
 class AutoPilotState(Enum):
     STOPPING = 1
@@ -65,8 +66,7 @@ class AutoPilot:
         self._state_mutex.acquire()
         self.__set_state(AutoPilotState.STARTED)
         self._state_mutex.release()
-        
-        import time
+
         while self.is_running():
             obj = self.__identify_object()
             if not self.is_running(): break
@@ -93,7 +93,12 @@ class AutoPilot:
             if not self.is_running(): break
 
     def __identify_object(self) -> RecognizedObject:
-        pass
+        self.controller.go_to_location(location=INPUT_AREA_CAM_VIEW)
+        result = None
+        while (result is None):
+            result = self.controller.classify_current_view()
+            time.sleep(0.5)
+        return result
 
     def __pickup_object(self, obj: RecognizedObject):
         self.controller.hover_above_location(PUZZLE_LOCATIONS[obj.label])
