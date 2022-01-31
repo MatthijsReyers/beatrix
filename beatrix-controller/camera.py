@@ -57,5 +57,7 @@ class Camera():
     #         self.cap.release()
 
     def get_latest_frame(self):
-        return self.__frame
+        frame = self.__frame
+        self.__frame = None
+        return frame
     

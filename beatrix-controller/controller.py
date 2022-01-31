@@ -3,18 +3,21 @@ from lib.chain import beatrix_rep
 from lib.constants import *
 from lib.locations import Location, INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW
 from typing import Tuple
-from autopilot import AutoPilot
+from objectrecognition import ObjectRecognizer
+from lib.shapes import Shape
 
 HOVER_DIST = 10
 
+
 class Controller:
 
-    def __init__(self, robotarm: 'RobotArm', camera: 'Camera'):
+    def __init__(self, robotarm: 'RobotArm', camera: 'Camera', object_recognizer: ObjectRecognizer):
         self.kinematics = IkPyKinematics(chain=beatrix_rep)
         self.robotarm = robotarm
         self.camera = camera
+        self.object_recognizer = object_recognizer
 
-    def _move_arm_to_workspace_coordinate(self, position: Tuple[float,float,float]):
+    def _move_arm_to_workspace_coordinate(self, position: Tuple[float, float, float]):
         """
             Moves the robot arm to a 3d point in space
         Args:
@@ -35,6 +38,11 @@ class Controller:
         self.robotarm.set_arm(angles)
 
     def hover_above_location(self, location: Location):
+        """
+
+        Args:
+            location:
+        """
         angles = location.get_angle_dict()
         coordinates = self.kinematics.get_forward_cartesian(angles)
         self._move_arm_to_workspace_coordinate((
@@ -42,3 +50,23 @@ class Controller:
             coordinates[1],
             coordinates[2] + HOVER_DIST,
         ))
+
+    def classify_current_view(self) -> 'RecognizedObject':
+        """
+
+        Returns:
+
+        """
+        latest_frame = self.camera.get_latest_frame()
+        if latest_frame is None:
+            return None
+
+        classified_shapes = self.object_recognizer.object_recognition(latest_frame)
+        classified_shapes = list(filter(lambda y: y.label != Shape.Unknown, classified_shapes))
+        if len(classified_shapes) == 0:
+            return None
+
+        classified_shapes = sorted(classified_shapes, key=lambda y: y.confidence)
+        return classified_shapes[-1]
+
+

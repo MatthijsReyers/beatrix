@@ -13,6 +13,7 @@ class RecognizedObject:
         self.contour = contour
         self.center = center
         self.label: Shape = label
+        self.confidence = confidence
 
 def gamma_correction(image, gamma):
     look_up_table = np.empty((1,256), np.uint8)
@@ -125,7 +126,7 @@ def draw_on_image(image, objects):
         cv2.circle(image,center, 3, (0,0,255), 3)
         cv2.putText(image,text,center, 0, 1,(0,255,0),2,cv2.LINE_AA)
         
-class ObjectRecognicer():
+class ObjectRecognizer():
     
     def __init__(self, model_path_string):
         self.interpreter = Interpreter(model_path = model_path_string)
@@ -161,7 +162,7 @@ class ObjectRecognicer():
 
         # return contours, centers, labels, confidences in a class
         for index in range(len(contours)):
-            object = RecognicedObject(contours[index], centers[index], labels[index], confidences[index])
+            object = RecognizedObject(contours[index], centers[index], labels[index], confidences[index])
             objects.append(object)
 
         return objects
