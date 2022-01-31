@@ -101,7 +101,7 @@ class RobotArm:
             duration_i = (difference * math.pi) / (2 * v_max)
             durations[i] = duration_i
 
-        max_duration = np.max(durations.values())  # for now, use the max duration of all servos
+        max_duration = np.max(list(durations.values()))  # for now, use the max duration of all servos
 
         dtime = D_TIME
         steps = int(max_duration / dtime)
