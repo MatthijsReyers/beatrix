@@ -78,26 +78,31 @@ class RobotArm:
         PARAMETERS
             - v_max: float time in seconds
         """
-        new_angles = self.bound_angles(new_angles)
-        old_angles = self.get_current_angles(new_angles.keys())
-
-        if len(new_angles) != len(old_angles):
-            raise ValueError("New angles is not the same size as old angles")
-
-        old_angle_arr = np.array(list(old_angles.values()))
-        new_angle_arr = np.array(list(new_angles.values()))
-        total_angle_arr = abs(new_angle_arr - old_angle_arr)
 
         if v_max > MAX_VELOCITY:
             print("Currently no implementation for movement that is too fast\n")
             print(f"Velocity: {v_max} degrees/s over the max: {MAX_VELOCITY}")
             v_max = MAX_VELOCITY
 
-        duration = (total_angle_arr * math.pi) / (2 * v_max)
-        duration = np.max(duration)  # for now, use the max duration of all servos
+        new_angles = self.bound_angles(new_angles)
+        old_angles = self.get_current_angles(new_angles.keys())
+
+        if len(new_angles) != len(old_angles):
+            raise ValueError("New angles is not the same size as old angles")
+
+        angle_differences = dict()
+        durations = dict()
+
+        for i, value in new_angles.items():
+            difference = abs(value - old_angles[i])
+            angle_differences[i] = difference
+            duration_i = (difference * math.pi) / (2 * v_max)
+            durations[i] = duration_i
+
+        max_duration = np.max(durations.values())  # for now, use the max duration of all servos
 
         dtime = D_TIME
-        steps = int(duration / dtime)
+        steps = int(max_duration / dtime)
 
         # for each step adjust for each servo the angle
         for step in range(steps):
@@ -105,7 +110,7 @@ class RobotArm:
             for j_id, angle in new_angles.items():
                 calculated_angle = get_angle_smooth(start_angle=old_angles[j_id],
                                                     end_angle=new_angles[j_id],
-                                                    seconds=duration, elapsed=(step + 1) * dtime)
+                                                    seconds=durations[j_id], elapsed=(step + 1) * dtime)
                 self.joints[j_id].set_angle(calculated_angle, new_angles[j_id])
 
             time_elapsed = time.process_time() - current_ptime
