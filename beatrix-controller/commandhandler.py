@@ -26,7 +26,6 @@ class CommandHandler:
             cmd = cmd.decode('utf-8')
             cmd = json.loads(cmd)
             cmd_type = cmd['type']
-            print(cmd)
             if cmd_type in self.command_funcs:
                 func = self.command_funcs[cmd['type']]
                 func(**cmd['data'])

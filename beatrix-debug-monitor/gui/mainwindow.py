@@ -120,6 +120,8 @@ class MainWindow(QMainWindow):
     def __handle_update(self, update):
         if 'angles' in update:
             self.real_visualizer.update_angles(update['angles'])
+            pos = self.position_manager.kinematics.get_forward_cartesian(update['angles'])
+            self.real_visualizer.update_position(pos)
         if 'autopilot' in update:
             self.autopilot_state.setText(update['autopilot'])
 

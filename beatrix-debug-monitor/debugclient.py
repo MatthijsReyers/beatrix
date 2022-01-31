@@ -113,6 +113,7 @@ class DebugClient():
         })
 
     def send_set_autopilot(self, enabled: bool):
+        print('[@] Setting autopilot:', enabled)
         self._send_cmd({
             'type': cmd.SET_AUTOPILOT,
             'data': {

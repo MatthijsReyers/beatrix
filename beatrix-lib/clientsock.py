@@ -6,7 +6,7 @@ import time
 
 SEND_TIMEOUT = 0.4
 RECV_TIMEOUT = 0.3
-RECONNECT_TIME = 0.3
+RECONNECT_TIME = 0.2
 
 class ClientSocket():
     def __init__(self, ip_addr:str, port:int, logger=None):
@@ -39,7 +39,7 @@ class ClientSocket():
 
     def is_connected(self) -> bool:
         """ Checks if the given socket is currently connected. """
-        return not self.closed_by_user and self.connected
+        return (not self.closed_by_user) and self.connected
 
     def stop(self):
         """ Closes the socket and stops any automatic reconnection attempts.  """
@@ -69,7 +69,6 @@ class ClientSocket():
                 self._on_connected.wait(timeout=SEND_TIMEOUT)
                 self._on_connected.release()
             if self.connected:
-                self._socket_mutex.acquire()
                 self._socket.sendall(data)
                 return True
         except BrokenPipeError:
@@ -77,8 +76,10 @@ class ClientSocket():
         except Exception as e:
             self.logger.exception(e, 'ClientSocket.send')
         finally:
-            if self._socket_mutex.locked():
-                self._socket_mutex.release()
+            pass
+            # if self._socket_mutex.locked():
+            #     self._socket_mutex.release()
+        print('[!] Failed to send command!')
         return False
 
     def receive(self, buffer_size=1024) -> Tuple[bool, bytes]:
@@ -93,24 +94,25 @@ class ClientSocket():
             (True, data) when data was successfully sent and (False, '') when not.
         """
         try:
-            self._socket_mutex.acquire()
+            # self._socket_mutex.acquire()
             data = self._socket.recv(buffer_size)
             if len(data) == 0:
                 raise ConnectionResetError()
-            self._socket_mutex.release()
+            # self._socket_mutex.release()
             return (True, data)
         except timeout:
-            self._socket_mutex.release()
+        #     self._socket_mutex.release()
             return (False, b'')
-        except ConnectionResetError as e:
-            self._socket_mutex.release()
-            self.__set_connected(False)
-        except OSError as e:
-            self._socket_mutex.release()
-            self.__set_connected(False)
+        # except ConnectionResetError as e:
+        #     self._socket_mutex.release()
+        #     self.__set_connected(False)
+        # except OSError as e:
+        #     self._socket_mutex.release()
+        #     self.__set_connected(False)
         except Exception as e:
-            self._socket_mutex.release()
-            self.logger.exception(e, 'ClientSocket.receive')
+            # self._socket_mutex.release()
+            # self.logger.exception(e, 'ClientSocket.receive')
+            pass
         return (False, b'')
 
     def on_change(self, callback:callable):
@@ -142,22 +144,15 @@ class ClientSocket():
     def __reconnect_thread(self):
         """ Automatically reconnects the socket when the connection is lost. """
         self.reconnecting = True
-        def retry():
-            self._socket_mutex.release()
-            if not self.closed_by_user:
-                time.sleep(RECONNECT_TIME)
-        while not self.connected and not self.closed_by_user:
+        self._socket_mutex.acquire()
+        while (not self.connected) and (not self.closed_by_user):
             try:
-                self._socket_mutex.acquire()
                 self._socket = socket(AF_INET, SOCK_STREAM)
                 self._socket.settimeout(RECV_TIMEOUT)
                 self._socket.connect((self.ip_addr, self.port))
+                self.__set_connected(True)
                 self.reconnecting = False
-            except gaierror: retry()
-            except timeout: retry()
-            except ConnectionRefusedError: retry()
             except Exception as e:
-                self._socket_mutex.release()
-                self.logger.exception(e, 'ClientSocket.__reconnect_thread')
-                retry()
-                
+                if not self.closed_by_user:
+                    time.sleep(RECONNECT_TIME)
+        self._socket_mutex.release()

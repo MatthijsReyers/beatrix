@@ -1,6 +1,7 @@
 from threading import Thread, Lock
 from objectrecognition import Label
 from enum import Enum
+from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW
 
 class AutoPilotState(Enum):
     STOPPING = 1
@@ -64,8 +65,10 @@ class AutoPilot:
         self.__set_state(AutoPilotState.STARTED)
         self._state_mutex.release()
         
+        import time
         while self.state == AutoPilotState.STARTED:
             print('Autopilot running...')
-            import time
+            self.controller.go_to_location(PUZZLE_AREA_CAM_VIEW)
             time.sleep(5)
-        
+            self.controller.go_to_location(INPUT_AREA_CAM_VIEW)
+            time.sleep(5)

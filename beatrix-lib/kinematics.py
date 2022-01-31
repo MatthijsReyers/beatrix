@@ -82,6 +82,8 @@ class IkPyKinematics(Kinematics):
         Returns:
             tuple of x, y and z coordinate
         """
+        angles = angles.copy()
+        angles[BASE_JOINT_ID] = angles[BASE_JOINT_ID] - 90
         angles_list = self.__angle_dict_to_list(angles)
         angles_list_radians = np.radians( np.array(angles_list) ).tolist()
 

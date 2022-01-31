@@ -5,7 +5,7 @@ from PyQt5 import QtCore
 LOCALHOST = 'Localhost'
 RASPBERRY_PI = 'Raspberry Pi'
 
-class TopBar(QFrame):
+class TopBar(QGroupBox):
     def __init__(self, client, config):
         super(QGroupBox, self).__init__()
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
