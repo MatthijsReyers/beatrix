@@ -34,7 +34,8 @@ class CommandHandler:
             print('Caught exception when parsing command:', type(e), '\n', e)
 
     def _cmd_home(self):
-        self.controller.robotarm.set_arm(INITIAL_ANGLES, 10)
+        print('[CMD] Go home')
+        self.controller.robotarm.set_arm(INITIAL_ANGLES, 30)
 
     def _cmd_get_pos(self):
         pass
@@ -45,15 +46,15 @@ class CommandHandler:
     def _cmd_get_ang(self):
         pass
 
-    def _cmd_set_ang(self, angles:dict):
-        print('Received setting angles command:', angles)
+    def _cmd_set_ang(self, angles: dict):
+        print('[CMD] Set angles:', list(angles.values()))
         if self.autopilot.running:
             print('Autopilot is running, ignoring command.')
         else:
             self.controller.robotarm.set_arm(angles, 30)
 
-    def _cmd_grabber(self, closed:bool):
-        print('Received grabber command:', 'closed' if closed else 'open')
+    def _cmd_grabber(self, closed: bool):
+        print('[CMD] Grabber', 'closed' if closed else 'open')
         if self.autopilot.running:
             print('Autopilot is running, ignoring command.')
         else:

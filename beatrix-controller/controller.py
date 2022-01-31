@@ -3,6 +3,7 @@ from camera import Camera
 from lib.kinematics import IkPyKinematics
 from lib.chain import beatrix_rep
 from lib.constants import *
+from lib.locations import Location, INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW
 
 
 class Controller:
@@ -13,13 +14,21 @@ class Controller:
         self.camera = camera
 
     def _move_arm_to_workspace_coordinate(self, x, y, z):
-        solution_angles = self.kinematics.inverse(position=(x, y, z))
-
-        new_angles = {
-            BASE_JOINT_ID: solution_angles[1],
-            SHOULDER_JOINT_ID: solution_angles[2],
-            ELBOW_JOINT_ID: solution_angles[3],
-            WRIST_JOINT_ID: solution_angles[4],
-            WRIST_TURN_JOINT_ID: solution_angles[5]
-        }
+        """
+            Moves the robot arm to a 3d point in space
+        Args:
+            x: coordinate
+            y: coordinate
+            z: height coordinate
+        """
+        new_angles = self.kinematics.inverse(position=(x, y, z))
         self.robotarm.set_arm(new_angles=new_angles)
+
+    def go_to_location(self, location: Location):
+        """
+        Moves the robot arm to a specific pre defined location
+        Args:
+            location: location object including joint angles
+        """
+        angles = location.get_angle_dict()
+        self.robotarm.set_arm(angles)

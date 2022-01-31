@@ -11,10 +11,8 @@ CONTROL_PORT = 4400
 """ Home/start position of the robot arm in x,y,z coordinates. """
 HOME_POSITION = [50, 50, 50]
 
-HOME_ANGLES = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-
 """ DT used for calculating steps in set_arm"""
-D_TIME = 1 / 10 # 2Hz
+D_TIME = 1 / 50 # 2Hz
 
 BASE_HEIGHT = 6.0
 SHOULDER_HEIGHT = 3.0
@@ -32,12 +30,22 @@ GRABBER_JOINT_ID    = 'grabber_joint'
 
 N_JOINTS = 6
 
+""" Parameters used for initializing grabber servo/joints.Grabber class. """
+GRABBER_PARAMETERS = {
+    "min angle": 50,
+    "max angle": 120,
+    "actuation range": 180,
+    "open": 120,
+    "closed": 60,
+    "port": 6
+}
+
 "Initial angles of all the joints so that the arm stands vertically"
 INITIAL_ANGLES = {
     BASE_JOINT_ID: 0,  # TODO
-    SHOULDER_JOINT_ID: 90,
+    SHOULDER_JOINT_ID: 87,
     ELBOW_JOINT_ID: 10,
-    WRIST_JOINT_ID: 88,
+    WRIST_JOINT_ID: 130,
     WRIST_TURN_JOINT_ID: 90  # TODO
     # GRABBER_JOINT_ID: 000       # TODO
 }
@@ -45,9 +53,9 @@ INITIAL_ANGLES = {
 "The angle bounds (allowed angles) for each joint"
 ANGLE_BOUNDS = {
     BASE_JOINT_ID: (0, 270),
-    SHOULDER_JOINT_ID: (90, 142),
+    SHOULDER_JOINT_ID: (75, 142),
     ELBOW_JOINT_ID: (10, 150),
-    WRIST_JOINT_ID: (0, 180),
+    WRIST_JOINT_ID: (10, 180),
     WRIST_TURN_JOINT_ID: (0, 180)
     # GRABBER_JOINT_ID: (80, 100)
 }

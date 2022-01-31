@@ -90,13 +90,7 @@ class MainWindow(QMainWindow):
     def __on_send_angles(self):
         print('[*] Sending set angles')
         angles = self.position_manager.angles
-        self.client.send_set_angles_cmd({
-            BASE_JOINT_ID:       math.degrees(angles[1]),
-            SHOULDER_JOINT_ID:   math.degrees(angles[2]),
-            ELBOW_JOINT_ID:      math.degrees(angles[3]),
-            WRIST_JOINT_ID:      math.degrees(angles[4]),
-            WRIST_TURN_JOINT_ID: math.degrees(angles[5]),
-        })
+        self.client.send_set_angles_cmd(angles)
     
     def __on_go_home(self):
         print('[*] Sending go home')
