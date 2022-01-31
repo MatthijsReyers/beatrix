@@ -96,3 +96,8 @@ ACTUATION_RANGE = {
     WRIST_TURN_JOINT_ID: 180,
     # GRABBER_JOINT_ID: 180
 }
+
+SHOULDER_OFFSET = {
+    1: 0,
+    2: 5
+}

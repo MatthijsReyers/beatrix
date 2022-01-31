@@ -1,6 +1,6 @@
 from joints.parameters import JointParameters
 from joints.singleservo import SingleServo
-
+from lib.constants import SHOULDER_OFFSET
 class DualServo:
     """
         Class to control dual-servos/shoulder, same functionality as single servo
@@ -31,8 +31,8 @@ class DualServo:
         parameters_right.servo_port = self.port_right
 
         self.pca = pca9685
-        self.SingleServo_left = SingleServo(parameters_left, pca9685, angle, debug_mode)
-        self.SingleServo_right = SingleServo(parameters_right, pca9685, angle, debug_mode)
+        self.SingleServo_left = SingleServo(parameters_left, pca9685, angle, debug_mode, offset=SHOULDER_OFFSET[self.port_left])
+        self.SingleServo_right = SingleServo(parameters_right, pca9685, angle, debug_mode, offset=SHOULDER_OFFSET[self.port_right])
 
     def set_angle(self, angle, new_angle):
         self.new_angle = self.bound_angle(new_angle)
