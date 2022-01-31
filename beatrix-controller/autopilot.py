@@ -96,6 +96,9 @@ class AutoPilot:
         pass
 
     def __pickup_object(self, obj: RecognizedObject):
+        self.controller.hover_above_location(PUZZLE_LOCATIONS[obj.label])
+
+        INPUT_AREA_GRAB_CENTER
         pass
 
     def __move_object(self, shape: Shape):
