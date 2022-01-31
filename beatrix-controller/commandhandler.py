@@ -13,8 +13,9 @@ class CommandHandler:
         self.server = server
 
         self.command_funcs = {
+            # cmd.GO_HOME: self._cmd_home,
             cmd.GET_UPDATE: self._cmd_get_update,
-            cmd.SET_POSITION: self._cmd_set_pos,
+            # cmd.SET_POSITION: self._cmd_set_pos,
             cmd.SET_ANGLES: self._cmd_set_ang,
             cmd.SET_GRABBER: self._cmd_grabber,
             cmd.SET_AUTOPILOT: self._cmd_autopilot,
@@ -44,10 +45,10 @@ class CommandHandler:
                 func(*args, **kwargs)
         return decorator
 
-    # @NoRunningAutopilot
-    # def _cmd_home(self):
-    #     print('[CMD] Go home')
-    #     self.controller.robotarm.set_arm(INITIAL_ANGLES, 30)
+    @NoRunningAutopilot
+    def _cmd_home(self):
+        print('[CMD] Go home')
+        self.controller.robotarm.set_arm(INITIAL_ANGLES, 30)
 
     def _cmd_get_update(self):
         self.server.send_update(
@@ -56,10 +57,10 @@ class CommandHandler:
             # grabber=self.controller.robotarm
         )
 
-    @NoRunningAutopilot
-    def _cmd_set_pos(self, position: Tuple[float, float, float]):
-        print('[CMD] Set position:', list(position))
-        self.controller._move_arm_to_workspace_coordinate(position)
+    # @NoRunningAutopilot
+    # def _cmd_set_pos(self, position: Tuple[float, float, float]):
+    #     print('[CMD] Set position:', list(position))
+    #     self.controller._move_arm_to_workspace_coordinate(position)
 
     @NoRunningAutopilot
     def _cmd_set_ang(self, angles: dict):

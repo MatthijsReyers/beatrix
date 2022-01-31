@@ -1,7 +1,8 @@
 from threading import Thread, Lock
-from objectrecognition import Label
+from objectrecognition import RecognizedObject
 from enum import Enum
-from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW
+from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, PUZZLE_LOCATIONS
+from lib.shapes import Shape
 
 class AutoPilotState(Enum):
     STOPPING = 1
@@ -13,7 +14,7 @@ class AutoPilot:
     def __init__(self, server: 'DebugServer', controller: 'Controller', camera: 'Camera'):
         self.controller = controller
         self.camera = camera
-        self.server =  server
+        self.server = server
 
         self.state = AutoPilotState.STOPPED
         self._state_mutex = Lock()
@@ -66,9 +67,40 @@ class AutoPilot:
         self._state_mutex.release()
         
         import time
-        while self.state == AutoPilotState.STARTED:
-            print('Autopilot running...')
-            self.controller.go_to_location(PUZZLE_AREA_CAM_VIEW)
-            time.sleep(5)
-            self.controller.go_to_location(INPUT_AREA_CAM_VIEW)
-            time.sleep(5)
+        while self.is_running():
+            obj = self.__identify_object()
+            if not self.is_running(): break
+
+            time.sleep(4)
+            if not self.is_running(): break
+
+            self.__pickup_object(obj)
+            if not self.is_running(): break
+
+            time.sleep(4)
+            if not self.is_running(): break
+
+            self.__move_object(obj.label)
+            if not self.is_running(): break
+
+            time.sleep(4)
+            if not self.is_running(): break
+
+            self.__place_down_object(obj.label)
+            if not self.is_running(): break
+
+            time.sleep(4)
+            if not self.is_running(): break
+
+    def __identify_object(self) -> RecognizedObject:
+        pass
+
+    def __pickup_object(self, obj: RecognizedObject):
+        pass
+
+    def __move_object(self, shape: Shape):
+        self.controller.hover_above_location(PUZZLE_LOCATIONS[shape])
+
+    def __place_down_object(self, shape: Shape):
+        self.controller.go_to_location(PUZZLE_LOCATIONS[shape])
+        self.controller.robotarm.set_grabber(closed=False)

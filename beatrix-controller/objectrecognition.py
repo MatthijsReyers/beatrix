@@ -4,7 +4,7 @@ import numpy as np
 # from tflite_runtime.interpreter import Interpreter
 
 
-class RecognicedObject:
+class RecognizedObject:
 
     def __init__(self, contour, center, label, confidence):
         self.contour = contour

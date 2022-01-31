@@ -5,6 +5,7 @@ from lib.locations import Location, INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW
 from typing import Tuple
 from autopilot import AutoPilot
 
+HOVER_DIST = 10
 
 class Controller:
 
@@ -32,3 +33,12 @@ class Controller:
         """
         angles = location.get_angle_dict()
         self.robotarm.set_arm(angles)
+
+    def hover_above_location(self, location: Location):
+        angles = location.get_angle_dict()
+        coordinates = self.kinematics.get_forward_cartesian(angles)
+        self._move_arm_to_workspace_coordinate((
+            coordinates[0],
+            coordinates[1],
+            coordinates[2] + HOVER_DIST,
+        ))
