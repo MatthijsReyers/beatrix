@@ -159,8 +159,9 @@ class MainWindow(QMainWindow):
 
     def __on_go_home(self):
         print('[*] Sending go home')
-        self.position_manager.set_home()
-        self.client.send_go_home_cmd()
+        self.position_manager.set_angles(INITIAL_ANGLES.copy())
+        self.local_visualizer.update_angles(INITIAL_ANGLES.copy())
+        self.client.send_set_angles(INITIAL_ANGLES)
 
     def __on_set_grabber(self, closed):
         def send():
