@@ -99,5 +99,5 @@ ACTUATION_RANGE = {
 
 SHOULDER_OFFSET = {
     1: 0,
-    2: 5
+    2: 0,
 }

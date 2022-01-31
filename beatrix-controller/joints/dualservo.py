@@ -16,8 +16,8 @@ class DualServo:
         self.min_angle = parameters.min_angle
         self.max_angle = parameters.max_angle
         self.actuation_range = parameters.actuation_range
-        self.mirrored_left = parameters.mirrored[0]
-        self.mirrored_right = parameters.mirrored[1]
+        self.mirrored_left = parameters.mirrored[0] # i.e. mirrored = True
+        self.mirrored_right = parameters.mirrored[1]    # * = False
 
         self.port_left = parameters.servo_port[0]
         self.port_right = parameters.servo_port[1]
