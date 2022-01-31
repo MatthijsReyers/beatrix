@@ -97,9 +97,10 @@ class RobotArm:
 
         for i, value in new_angles.items():
             difference = abs(value - old_angles[i])
-            angle_differences[i] = difference
-            duration_i = (difference * math.pi) / (2 * v_max)
-            durations[i] = duration_i
+            if difference != 0:
+                angle_differences[i] = difference
+                duration_i = (difference * math.pi) / (2 * v_max)
+                durations[i] = duration_i
 
         max_duration = np.max(list(durations.values()))  # for now, use the max duration of all servos
 
@@ -109,7 +110,7 @@ class RobotArm:
         # for each step adjust for each servo the angle
         for step in range(steps):
             current_ptime = time.process_time()
-            for j_id, angle in new_angles.items():
+            for j_id in angle_differences:
                 calculated_angle = get_angle_smooth(start_angle=old_angles[j_id],
                                                     end_angle=new_angles[j_id],
                                                     seconds=durations[j_id], elapsed=(step + 1) * dtime)
@@ -158,6 +159,8 @@ class RobotArm:
         for j_id in to_be_retrieved_angles:
             angles[j_id] = self.joints[j_id].current_angle
         return angles
+
+
 
 
 def get_angle_smooth(start_angle, end_angle, seconds, elapsed):
