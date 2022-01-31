@@ -22,12 +22,14 @@ from controller import Controller
 from debugserver import DebugServer
 from autopilot import AutoPilot
 from commandhandler import CommandHandler
+from objectrecognition import ObjectRecognizer
 
 # Initialize system components.
 server     = DebugServer()
 camera     = Camera(debug_server=server)
 robotarm   = RobotArm(server, debug_mode=args.no_io)
-controller = Controller(robotarm, camera)
+recognizer = ObjectRecognizer('./beatrix-controller/int8-model_3.lite')
+controller = Controller(robotarm, camera, recognizer)
 autopilot  = AutoPilot(server, controller, camera)
 handler    = CommandHandler(server, controller, autopilot)
 

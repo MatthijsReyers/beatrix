@@ -96,6 +96,7 @@ class AutoPilot:
         self.controller.go_to_location(location=INPUT_AREA_CAM_VIEW)
         result = None
         while (result is None):
+            print('[@] Identifying object')
             result = self.controller.classify_current_view()
             time.sleep(0.5)
         return result

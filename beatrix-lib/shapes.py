@@ -1,3 +1,4 @@
+from enum import Enum
 
 class Shape(Enum):
     Circle = 1
