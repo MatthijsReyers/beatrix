@@ -1,22 +1,17 @@
-from PyQt5.QtWidgets import QLabel, QGroupBox, QBoxLayout
-from matplotlib.backends.qt_compat import QtWidgets
 from matplotlib.backends.backend_qtagg import FigureCanvas
 from matplotlib.figure import Figure
-from math import radians
-from lib.chain import beatrix_rep
+from PyQt5.QtWidgets import QBoxLayout, QGroupBox
 from lib.constants import *
-from math import radians
+from lib.chain import beatrix_rep
 from typing import Tuple
+from math import radians
 
 class Visualizer(QGroupBox):
-    def __init__(self):
+    def __init__(self, title: str):
         super(QGroupBox, self).__init__()
-        self.setTitle("Visualizer")
+        self.setTitle(title)
         self.layout = QBoxLayout(QBoxLayout.Direction.Up, self)
 
-        self.position = (5.0, 5.0, 5.0)
-
-        self.figure   = Figure(figsize=(10, 10), dpi=100)
         self.position = [0.0, 0.0, 0.0]
         self.angles   = INITIAL_ANGLES
 

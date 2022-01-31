@@ -20,14 +20,16 @@ from robotarm import RobotArm
 from camera import Camera
 from controller import Controller
 from debugserver import DebugServer
+from autopilot import AutoPilot
 from commandhandler import CommandHandler
 
 # Initialize system components.
 server     = DebugServer()
 camera     = Camera(debug_server=server)
-robotarm   = RobotArm(debug_mode=args.no_io)
+robotarm   = RobotArm(server, debug_mode=args.no_io)
 controller = Controller(robotarm, camera)
-handler    = CommandHandler(server, controller)
+autopilot  = AutoPilot(server, controller, camera)
+handler    = CommandHandler(server, controller, autopilot)
 
 try:
     # Start threads

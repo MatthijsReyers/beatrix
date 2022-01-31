@@ -11,6 +11,7 @@ POSITION_LIMIT = 50
 class PositionManager(QSplitter):
     def __init__(self, kinematics: Kinematics):
         super(QSplitter, self).__init__()
+        # self.setOrientation(Qt.Orientation.Vertical)
         self.kinematics = kinematics
 
         self.wrist_orientation = WristOrientation.UNSET
@@ -35,7 +36,6 @@ class PositionManager(QSplitter):
         tab_widget.addTab(self.angles_tab, 'Angles')
 
         self.__init_wrist_angle_frame()
-        self.addWidget(self.wrist_angle_box)
 
     def on_angles_change(self, callback:callable):
         """ Registers a callback function to be called whenever the user manually changes one of the 
@@ -84,8 +84,9 @@ class PositionManager(QSplitter):
 
     def __init_wrist_angle_frame(self):
         self.wrist_angle_box = QGroupBox()
+        self.wrist_angle_box.setTitle('Wrist angle')
         layout = QVBoxLayout(self.wrist_angle_box)
-        layout.addWidget(QLabel('Wrist angle:'))
+        # layout.addWidget(QLabel('Wrist angle:'))
         buttons = QButtonGroup()
         buttons.setExclusive(True)
         for orient in WristOrientation:
@@ -95,12 +96,12 @@ class PositionManager(QSplitter):
             layout.addWidget(btn)
             buttons.addButton(btn, orient.value)
             btn.toggled.connect(self.__on_wrist_btn(orient.value))
+        self.addWidget(self.wrist_angle_box)
 
     def __on_wrist_btn(self, i):
         def update(ok):
             if ok: self.wrist_orientation = WristOrientation(i)
         return update
-
 
     def __init_postion_tab(self):
         self.position_tab = QWidget()

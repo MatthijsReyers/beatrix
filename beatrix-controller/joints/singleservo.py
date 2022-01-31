@@ -58,8 +58,8 @@ class SingleServo:
                 self.servo.angle = self.current_angle
             if self.mirrored:
                 self.servo.angle = self.actuation_range - self.current_angle
-        else:
-            print('Servo',self.port,'going to',self.new_angle)
+        # else:
+        #     print('Servo',self.port,'going to',self.new_angle)
 
     def bound_angle(self, angle):
         """Bound the angle with the min and max angle parameters of the servo"""

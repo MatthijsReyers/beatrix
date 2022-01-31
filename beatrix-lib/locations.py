@@ -1,9 +1,7 @@
-from lib.constants import BASE_JOINT_ID, SHOULDER_JOINT_ID, ELBOW_JOINT_ID, WRIST_JOINT_ID, \
-    WRIST_TURN_JOINT_ID
-
+from lib.constants import (BASE_JOINT_ID, SHOULDER_JOINT_ID, ELBOW_JOINT_ID, WRIST_JOINT_ID, 
+    WRIST_TURN_JOINT_ID)
 
 class Location:
-
     def __init__(self, base, shoulder, elbow, wrist, wrist_turn, name: str):
         self.base = base
         self.shoulder = shoulder
@@ -33,4 +31,9 @@ PUZZLE_AREA_CAM_VIEW = Location(160, 90, 64, 107, 90, "Puzzle area cam view")
 # ---- Puzzle locations
 OCTAGON = Location(181, 102, 84, 48, 90, "Octagon")
 
-LOCATIONS_FOR_GUI = [INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, OCTAGON]
+LOCATIONS_FOR_GUI = [
+    INPUT_AREA_CAM_VIEW, 
+    PUZZLE_AREA_CAM_VIEW, 
+    OCTAGON
+]
+

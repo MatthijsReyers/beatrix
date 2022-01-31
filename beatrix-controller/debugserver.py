@@ -1,8 +1,8 @@
 from lib.constants import VIDEO_PORT, CONTROL_PORT, VIDEO_BUFFER_SIZE
 from lib.serversock import ServerSocket
-from threading import Thread
+import lib.commands as cmd
 from pickle import UnpicklingError
-import pickle, struct, cv2
+import pickle, struct, cv2, json
 
 class DebugServer():
     def __init__(self):
@@ -37,3 +37,17 @@ class DebugServer():
         except Exception as e:
             print('Caught exception:')
             print(e)
+
+    def send_update(self, angles:dict=None, autopilot_state:str=None, grabber:bool=None):
+        """  """
+        data = dict()
+        if angles != None: 
+            data['angles'] = angles
+        if autopilot_state != None:
+            data['autopilot'] = str(autopilot_state)
+        if grabber != None:
+            data['grabber'] = grabber
+        self.send_command({
+            'type': cmd.GET_UPDATE,
+            'data': data
+        })
