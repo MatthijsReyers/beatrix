@@ -1,4 +1,5 @@
 from lib.constants import *
+from lib.commands import *
 from gui.position import PositionManager
 from gui.visualizer import Visualizer
 from gui.camerafeed import CameraFeed
@@ -111,20 +112,24 @@ class MainWindow(QMainWindow):
             (okay, cmd) = self.client.receive_command()
             if okay:
                 cmd_type = cmd['type']
-                if cmd_type == 'ANGLES':
-                    self.real_visualizer.update_angles(cmd['data']['angles'])
-                elif cmd_type == 'AUTOPILOT':
-                    self.autopilot_state.setText(cmd['data']['state'])
+                if cmd_type == GET_UPDATE:
+                    self.__handle_update(cmd['data'])
             else:
                 time.sleep(0.1)
+
+    def __handle_update(self, update):
+        if 'angles' in update:
+            self.real_visualizer.update_angles(update['angles'])
+        if 'autopilot' in update:
+            self.autopilot_state.setText(update['autopilot'])
 
     def __on_send_angles(self):
         print('[*] Sending set angles')
         angles = self.position_manager.angles
-        self.client.send_set_angles_cmd(angles)
+        self.client.send_set_angles(angles)
     
     def __on_get_angles(self):
-        self.client.send_get_angles_cmd()
+        self.client.send_get_update()
         angles = self.real_visualizer.angles
         self.position_manager.set_angles(angles.copy())
         self.local_visualizer.update_angles(angles.copy())

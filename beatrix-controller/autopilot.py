@@ -9,9 +9,10 @@ class AutoPilotState(Enum):
     STARTED  = 4
 
 class AutoPilot:
-    def __init__(self, controller: 'Controller', camera: 'Camera'):
+    def __init__(self, server: 'DebugServer', controller: 'Controller', camera: 'Camera'):
         self.controller = controller
         self.camera = camera
+        self.server =  server
 
         self.state = AutoPilotState.STOPPED
         self._state_mutex = Lock()
@@ -55,10 +56,10 @@ class AutoPilot:
         should NOT be called without acquiring it first! Use this method in favour of modifying the state
         directly to log autopilot state to clients/terminal. """
         self.state = state
+        self.server.send_update(autopilot_state=str(state))
         print('[A] Setting autopilot to:', state)
 
     def __pilot_thread(self):
-        # Update autopilot state.
         self._state_mutex.acquire()
         self.__set_state(AutoPilotState.STARTED)
         self._state_mutex.release()

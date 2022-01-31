@@ -112,14 +112,16 @@ class RobotArm:
 
             time_elapsed = time.process_time() - current_ptime
             if step % 10 == 0:
-                self.debug_server.send_angles_update(self.get_current_angles())
+                self.debug_server.send_update(
+                    angles=self.get_current_angles())
             if time_elapsed >= dtime:
                 print("!!!! Process took longer than control loop time !!!!")
                 print("time elapsed = {}".format(time_elapsed))
             else:
                 time.sleep(dtime - time_elapsed)
 
-        self.debug_server.send_angles_update(self.get_current_angles())
+        self.debug_server.send_update(
+            angles=self.get_current_angles())
 
     def set_grabber(self, closed, angle=None):
         """If no angle is parsed, state=0 is open, state=1 is closed"""
@@ -129,6 +131,8 @@ class RobotArm:
             self.grabber.set_closed()
         else:
             self.grabber.set_open()
+        self.debug_server.send_update(
+            grabber=closed)
 
     def bound_angles(self, angles: dict):
         for angle_id, angle in angles.items():

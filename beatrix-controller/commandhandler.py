@@ -3,6 +3,7 @@ from controller import Controller
 from autopilot import AutoPilot
 from debugserver import DebugServer
 from lib.constants import INITIAL_ANGLES
+import lib.commands as cmd
 import json
 
 class CommandHandler:
@@ -12,13 +13,11 @@ class CommandHandler:
         self.server = server
 
         self.command_funcs = {
-            'GO_HOME': self._cmd_home,
-            'GET_POS': self._cmd_get_pos,
-            'SET_POS': self._cmd_set_pos,
-            'GET_ANG': self._cmd_get_ang,
-            'SET_ANG': self._cmd_set_ang,
-            'GRABBER': self._cmd_grabber,
-            'AUTOPIT': self._cmd_autopilot,
+            cmd.GET_UPDATE: self._cmd_get_update,
+            cmd.SET_POSITION: self._cmd_set_pos,
+            cmd.SET_ANGLES: self._cmd_set_ang,
+            cmd.SET_GRABBER: self._cmd_grabber,
+            cmd.SET_AUTOPILOT: self._cmd_autopilot,
         }
 
     def exec_cmd(self, cmd: bytes, client: Tuple[str,int]):
@@ -46,27 +45,22 @@ class CommandHandler:
                 func(*args, **kwargs)
         return decorator
 
-    @NoRunningAutopilot
-    def _cmd_home(self):
-        print('[CMD] Go home')
-        self.controller.robotarm.set_arm(INITIAL_ANGLES, 30)
+    # @NoRunningAutopilot
+    # def _cmd_home(self):
+    #     print('[CMD] Go home')
+    #     self.controller.robotarm.set_arm(INITIAL_ANGLES, 30)
 
-    def _cmd_get_pos(self):
-        pass
+    def _cmd_get_update(self):
+        self.server.send_update(
+            angles=self.controller.robotarm.get_current_angles(),
+            autopilot_state=self.autopilot.state,
+            # grabber=self.controller.robotarm
+        )
 
     @NoRunningAutopilot
     def _cmd_set_pos(self, position: Tuple[float, float, float]):
         print('[CMD] Set position:', list(position))
         self.controller._move_arm_to_workspace_coordinate(position)
-
-    def _cmd_get_ang(self):
-        angles = self.controller.robotarm.get_current_angles()
-        self.server.send_command({
-            'type': 'ANGLES',
-            'data': {
-                'angles': angles
-            }
-        })
 
     @NoRunningAutopilot
     def _cmd_set_ang(self, angles: dict):
@@ -78,7 +72,7 @@ class CommandHandler:
         print('[CMD] Grabber', 'closed' if closed else 'open')
         self.controller.robotarm.set_grabber(closed)
 
-    def _cmd_autopilot(self, enable: bool):
-        print('[CMD]', 'Start' if enable else 'Stop', 'autopilot')
-        if enable: self.autopilot.start()
+    def _cmd_autopilot(self, enabled: bool):
+        print('[CMD]', 'Start' if enabled else 'Stop', 'autopilot')
+        if enabled: self.autopilot.start()
         else: self.autopilot.stop()

@@ -28,7 +28,7 @@ server     = DebugServer()
 camera     = Camera(debug_server=server)
 robotarm   = RobotArm(server, debug_mode=args.no_io)
 controller = Controller(robotarm, camera)
-autopilot  = AutoPilot(controller, camera)
+autopilot  = AutoPilot(server, controller, camera)
 handler    = CommandHandler(server, controller, autopilot)
 
 try:

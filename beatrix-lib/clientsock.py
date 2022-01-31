@@ -97,18 +97,20 @@ class ClientSocket():
             data = self._socket.recv(buffer_size)
             if len(data) == 0:
                 raise ConnectionResetError()
-            else:
-                return (True, data)
+            self._socket_mutex.release()
+            return (True, data)
         except timeout:
+            self._socket_mutex.release()
             return (False, b'')
         except ConnectionResetError as e:
+            self._socket_mutex.release()
             self.__set_connected(False)
         except OSError as e:
+            self._socket_mutex.release()
             self.__set_connected(False)
         except Exception as e:
-            self.logger.exception(e, 'ClientSocket.receive')
-        finally:
             self._socket_mutex.release()
+            self.logger.exception(e, 'ClientSocket.receive')
         return (False, b'')
 
     def on_change(self, callback:callable):
@@ -130,7 +132,7 @@ class ClientSocket():
         self.connected = state
         if inform_callbacks:
             for callback in self._callbacks:
-                    callback(self, state)
+                callback(self, state)
         if not self.connected and not self.reconnecting:
             self.reconnect_thread = Thread(
                 target=self.__reconnect_thread, 
@@ -146,9 +148,9 @@ class ClientSocket():
                 self._socket = socket(AF_INET, SOCK_STREAM)
                 self._socket.settimeout(RECV_TIMEOUT)
                 self._socket.connect((self.ip_addr, self.port))
+                self.reconnecting = False
                 self._socket_mutex.release()
                 self.__set_connected(True)
-                self.reconnecting = False
             except gaierror:
                 self._socket_mutex.release()
                 time.sleep(RECONNECT_TIME)
@@ -159,6 +161,6 @@ class ClientSocket():
                 self._socket_mutex.release()
                 time.sleep(RECONNECT_TIME)
             except Exception as e:
-                self.logger.exception(e, 'ClientSocket.__reconnect_thread')
                 self._socket_mutex.release()
+                self.logger.exception(e, 'ClientSocket.__reconnect_thread')
                 time.sleep(RECONNECT_TIME)

@@ -14,4 +14,3 @@ SET_GRABBER = 'SET_GRB'
 
 """ Enable/disable the autopilot. """
 SET_AUTOPILOT = 'SET_AUT'
-

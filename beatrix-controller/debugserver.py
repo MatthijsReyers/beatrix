@@ -38,13 +38,15 @@ class DebugServer():
             print('Caught exception:')
             print(e)
 
-    def send_update(self, angles=None, autopilot_state=None):
+    def send_update(self, angles:dict=None, autopilot_state:str=None, grabber:bool=None):
         """  """
         data = dict()
         if angles != None: 
             data['angles'] = angles
         if autopilot_state != None:
             data['autopilot'] = str(autopilot_state)
+        if grabber != None:
+            data['grabber'] = grabber
         self.send_command({
             'type': cmd.GET_UPDATE,
             'data': data
