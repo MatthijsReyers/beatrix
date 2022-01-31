@@ -47,12 +47,15 @@ class AutoPilot:
         self._state_mutex.release()
 
     def stop(self):
-        self._state_mutex.acquire()
-        self.__set_state(AutoPilotState.STOPPING)
-        if self._pilot_thread:
-            self._pilot_thread.join()
-        self.__set_state(AutoPilotState.STOPPED)
-        self._state_mutex.release()
+        if self.is_running():
+            self._state_mutex.acquire()
+            self.__set_state(AutoPilotState.STOPPING)
+            self._state_mutex.release()
+            if self._pilot_thread:
+                self._pilot_thread.join()
+            self._state_mutex.acquire()
+            self.__set_state(AutoPilotState.STOPPED)
+            self._state_mutex.release()
 
     def __set_state(self, state: AutoPilotState):
         """" Updates the Autopilot state. Note that this method does NOT acquire the state mutex and 
