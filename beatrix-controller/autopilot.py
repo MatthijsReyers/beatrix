@@ -1,8 +1,9 @@
 from threading import Thread, Lock
 from objectrecognition import RecognizedObject
-from enum import Enum
 from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, PUZZLE_LOCATIONS, INPUT_AREA_GRAB_CENTER
 from lib.shapes import Shape
+from enum import Enum
+import time
 
 class AutoPilotState(Enum):
     STOPPING = 1
@@ -66,7 +67,6 @@ class AutoPilot:
         self.__set_state(AutoPilotState.STARTED)
         self._state_mutex.release()
         
-        import time
         while self.is_running():
             obj = self.__identify_object()
             if not self.is_running(): break
