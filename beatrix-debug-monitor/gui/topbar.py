@@ -1,37 +1,35 @@
-from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QPushButton, 
+from PyQt5.QtWidgets import (QWidget, QFrame, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit, QPushButton, 
     QButtonGroup, QRadioButton, QSpacerItem, QSizePolicy)
 from PyQt5 import QtCore
 
 LOCALHOST = 'Localhost'
 RASPBERRY_PI = 'Raspberry Pi'
 
-class TopBar(QWidget):
+class TopBar(QFrame):
     def __init__(self, client, config):
         super(QWidget, self).__init__()
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
         self.setMaximumHeight(40)
         self.layout = QHBoxLayout(self)
         self.layout.setSpacing(10)
-        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setContentsMargins(4, 4, 4, 4)
 
         self.client = client
         self.config = config
 
         # self.setAttribute(WA_StyledBackground, True)
-        # self.setStyleSheet("""
-        #     background-color: red;
-        # """)
-
+        # self.setStyleSheet("background-color: #fff;")
 
         # Server source select
         # ===========================================================================
         self.source_select = QWidget()
+        self.source_select.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         layout = QVBoxLayout(self.source_select)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(2)
         
         label = QLabel('Connect to:')
-        label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        # label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         label.setAlignment(QtCore.Qt.AlignCenter)
         label.setMinimumHeight(20)
         layout.addWidget(label)
@@ -56,7 +54,7 @@ class TopBar(QWidget):
         buttons = QButtonGroup()
         buttons.setExclusive(True)
         buttons.addButton(self.local_btn, 1)
-        buttons.addButton(self.remote_btn, 2)
+        buttons.addButton(self.remote_btn,2)
 
         layout2.addWidget(self.local_btn)
         layout2.addWidget(self.remote_btn)
@@ -66,6 +64,9 @@ class TopBar(QWidget):
         # ===========================================================================
         self.ip_select = QWidget()
         self.ip_select.setVisible(not self.config.local_server)
+        self.ip_select.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        self.ip_select.setMaximumWidth(300)
+
         layout = QVBoxLayout(self.ip_select)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(2)
@@ -103,8 +104,9 @@ class TopBar(QWidget):
 
         # Spacer to keep everything to the left.
         # ===========================================================================
-        verticalSpacer = QSpacerItem(800, 1, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        self.layout.addItem(verticalSpacer)
+        verticalSpacer = QWidget()
+        verticalSpacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.layout.addWidget(verticalSpacer)
 
 
         # Connection state text in the top right.
