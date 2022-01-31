@@ -96,6 +96,7 @@ class AutoPilot:
         pass
 
     def __pickup_object(self, obj: RecognizedObject):
+        print('[@] Picking up', obj.label, 'object')
         # TODO: Actually use RecognizedObject for grab location.
         self.controller.hover_above_location(INPUT_AREA_GRAB_CENTER)
         if not self.is_running(): return
@@ -103,8 +104,10 @@ class AutoPilot:
         self.controller.robotarm.set_grabber(closed=True)
 
     def __move_object(self, shape: Shape):
+        print('[@] Moving object')
         self.controller.hover_above_location(PUZZLE_LOCATIONS[shape])
 
     def __place_down_object(self, shape: Shape):
+        print('[@] Placing down object')
         self.controller.go_to_location(PUZZLE_LOCATIONS[shape])
         self.controller.robotarm.set_grabber(closed=False)
