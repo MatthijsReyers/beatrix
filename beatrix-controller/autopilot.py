@@ -1,8 +1,8 @@
 from threading import Thread, Lock
 from objectrecognition import RecognizedObject
-from enum import Enum
-from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, PUZZLE_LOCATIONS
+from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, PUZZLE_LOCATIONS, INPUT_AREA_GRAB_CENTER
 from lib.shapes import Shape
+from enum import Enum
 import time
 
 class AutoPilotState(Enum):
@@ -101,14 +101,18 @@ class AutoPilot:
         return result
 
     def __pickup_object(self, obj: RecognizedObject):
-        self.controller.hover_above_location(PUZZLE_LOCATIONS[obj.label])
-
-        INPUT_AREA_GRAB_CENTER
-        pass
+        print('[@] Picking up', obj.label, 'object')
+        # TODO: Actually use RecognizedObject for grab location.
+        self.controller.hover_above_location(INPUT_AREA_GRAB_CENTER)
+        if not self.is_running(): return
+        self.controller.go_to_location(INPUT_AREA_GRAB_CENTER)
+        self.controller.robotarm.set_grabber(closed=True)
 
     def __move_object(self, shape: Shape):
+        print('[@] Moving object')
         self.controller.hover_above_location(PUZZLE_LOCATIONS[shape])
 
     def __place_down_object(self, shape: Shape):
+        print('[@] Placing down object')
         self.controller.go_to_location(PUZZLE_LOCATIONS[shape])
         self.controller.robotarm.set_grabber(closed=False)
