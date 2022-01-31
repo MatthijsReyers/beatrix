@@ -1,5 +1,6 @@
 from lib.constants import *
 from lib.commands import *
+from lib.locations import LOCATIONS_FOR_GUI
 from gui.position import PositionManager
 from gui.visualizer import Visualizer
 from gui.camerafeed import CameraFeed
@@ -94,6 +95,18 @@ class MainWindow(QMainWindow):
         layout.addWidget(btn)
         base_splitter.addWidget(autopilot)  
 
+        # Locations move thing.
+        # ===========================================================
+        locations = QGroupBox()
+        locations.setTitle('Go to location:')
+        layout = QVBoxLayout(locations)
+        for location in LOCATIONS_FOR_GUI:
+            btn = QPushButton(location.name)
+            btn.clicked.connect(self.__on_move_location(location))
+            layout.addWidget(btn)
+        base_splitter.addWidget(locations)  
+
+
     def start(self):
         self.running = True
         self.camera_feed.start()
@@ -124,6 +137,14 @@ class MainWindow(QMainWindow):
             self.real_visualizer.update_position(pos)
         if 'autopilot' in update:
             self.autopilot_state.setText(update['autopilot'])
+
+    def __on_move_location(self, location):
+        def move():
+            print('[*] Sending goto:', location.name)
+            angles = location.get_angle_dict()
+            self.client.send_set_angles(angles)
+            self.position_manager.set_angles(angles)
+        return move
 
     def __on_send_angles(self):
         print('[*] Sending set angles')
