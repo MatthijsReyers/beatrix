@@ -5,6 +5,7 @@ from lib.locations import Location, INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW
 from typing import Tuple
 from objectrecognition import ObjectRecognizer
 from lib.shapes import Shape
+from lib.locations import PUZZLE_LOCATIONS
 
 HOVER_DIST = 10
 
@@ -67,6 +68,10 @@ class Controller:
             return None
 
         classified_shapes = sorted(classified_shapes, key=lambda y: y.confidence)
+
+        if classified_shapes[-1].label not in PUZZLE_LOCATIONS.keys():
+            print('Did not find puzzle shape!')
+            classified_shapes[-1].label = Shape.Octagon
         return classified_shapes[-1]
 
 

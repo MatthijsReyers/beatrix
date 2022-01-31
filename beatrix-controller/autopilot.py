@@ -60,7 +60,7 @@ class AutoPilot:
         directly to log autopilot state to clients/terminal. """
         self.state = state
         self.server.send_update(autopilot_state=str(state))
-        print('[A] Setting autopilot to:', state)
+        print('[@] Setting autopilot to:', state)
 
     def __pilot_thread(self):
         self._state_mutex.acquire()

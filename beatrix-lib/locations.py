@@ -31,10 +31,22 @@ INPUT_AREA_GRAB_CENTER = Location(97, 118, 68, 38, 90, "Input area grab center")
 PUZZLE_AREA_CAM_VIEW = Location(180, 90, 64, 107, 90, "Puzzle area cam view")
 
 # ---- Puzzle locations
-OCTAGON = Location(186, 108, 77.47, 48.27, 0, "Octagon")
+OCTAGON = Location(186.0, 108, 77.47, 48.27, 0, "Octagon")
+ELLIPSE = Location(168.0, 121.31, 54.63, 36, 165, "Ellipse")
+SQUARE  = Location(156.9, 108, 83, 45, 146, "Square")
+CIRCLE  = Location(201, 135.36, 18.5955905287035, 23, 74, "Circle")
+SEMICIRCLE = Location(185.71, 96, 99, 51.0, 0.0, "Semicircle")
+TRIANGLE   = Location(215.28, 98, 100, 58, 30, "Triangle")
+RECTANLGE  = Location(205.0, 119, 62, 41, 151, "Rectangle")
 
 PUZZLE_LOCATIONS = {
-    Shape.Octagon: OCTAGON
+    Shape.Octagon: OCTAGON,
+    Shape.Ellipse: ELLIPSE,
+    Shape.Square:  SQUARE,
+    Shape.Circle:  CIRCLE,
+    Shape.Semicircle: SEMICIRCLE,
+    Shape.Triangle:   TRIANGLE,
+    Shape.Rectangle:  RECTANLGE
 }
 
 LOCATIONS_FOR_GUI = [
