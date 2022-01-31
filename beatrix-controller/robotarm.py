@@ -160,8 +160,6 @@ class RobotArm:
             angles[j_id] = self.joints[j_id].current_angle
         return angles
 
-    def get_non_zero_angles(self, angles: dict) -> dict:
-        pass
 
 
 
