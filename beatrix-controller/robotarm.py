@@ -70,7 +70,7 @@ class RobotArm:
 
         self.set_arm(INITIAL_ANGLES, 1)
 
-    def set_arm(self, new_angles: dict, v_max:int=5):
+    def set_arm(self, new_angles: dict, v_max:int=25):
         """
         Sets the angle of all servos smoothly over period of time
         ARGUMENTS

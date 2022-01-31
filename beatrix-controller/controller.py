@@ -21,7 +21,7 @@ class Controller:
             y: coordinate
             z: height coordinate
         """
-        new_angles = self.kinematics.inverse(position=(x, y, z))
+        new_angles = self.kinematics.inverse(position=(position[0], position[1], position[2]))
         self.robotarm.set_arm(new_angles=new_angles)
 
     def go_to_location(self, location: Location):
