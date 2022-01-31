@@ -142,6 +142,11 @@ class ObjectRecognizer():
         # get HSV mask
         masked_image = get_HSV_mask(preprocessed_image)
 
+        # Mask everything but center
+        mask = np.zeros(image.shape[:2], dtype="uint8")
+        cv2.circle(mask, (1920//2, 1088//2), 300, 255, -1)
+        mask = mask & masked_image
+
         # find contours
         contours, centers = find_contours(masked_image)
 

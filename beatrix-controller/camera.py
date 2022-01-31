@@ -9,9 +9,9 @@ class Camera():
         self.cap = cv2.VideoCapture(0)
         self.cap.set(cv2.CAP_PROP_FPS, 2)
 
-        # self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-        # self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1088)
-        # self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1088)
+        self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
         self.running = False
 
@@ -33,8 +33,10 @@ class Camera():
             while self.running:
                 okay, frame = self.cap.read()
                 if okay:
+                    self.__frame = frame.copy()
+                    frame = cv2.resize(frame, dsize=(int(640), int(480)),interpolation=cv2.INTER_AREA)
                     self.debug_server.send_video_frame(frame)
-                    self.__frame = frame
+
         finally:
             self.cap.release()
 
