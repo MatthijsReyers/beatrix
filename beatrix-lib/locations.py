@@ -30,6 +30,8 @@ INPUT_AREA_CAM_VIEW  = Location(85, 94, 62, 107, 90, "Input area cam view")
 INPUT_AREA_GRAB_CENTER = Location(84, 117, 82, 55, 90, "Input area grab center")
 PUZZLE_AREA_CAM_VIEW = Location(172, 94, 60, 107, 90, "Puzzle area cam view")
 
+HOVER_ABOVE_PUZZLES = Location(172, 95, 58, 25, 90, "Hover above puzzle")
+
 # ---- Puzzle locations
 OCTAGON = Location(175, 114, 88, 60, 90, "Octagon")
 ELLIPSE = Location(156, 126, 60, 41, 69, "Ellipse")

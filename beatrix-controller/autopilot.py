@@ -1,6 +1,6 @@
 from threading import Thread, Lock
 from objectrecognition import RecognizedObject
-from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, PUZZLE_LOCATIONS, INPUT_AREA_GRAB_CENTER
+from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, PUZZLE_LOCATIONS, INPUT_AREA_GRAB_CENTER, HOVER_ABOVE_PUZZLES
 from lib.shapes import Shape
 from enum import Enum
 import time
@@ -114,7 +114,8 @@ class AutoPilot:
 
     def __move_object(self, shape: Shape):
         print('[@] Moving object')
-        self.controller.hover_above_location(PUZZLE_LOCATIONS[shape])
+        # self.controller.hover_above_location(PUZZLE_LOCATIONS[shape]) # resulted in illegal positions
+        self.controller.go_to_location(HOVER_ABOVE_PUZZLES)
 
     def __place_down_object(self, shape: Shape):
         print('[@] Placing down object')
