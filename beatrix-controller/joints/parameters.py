@@ -16,3 +16,7 @@ class JointParameters:
 \tservo_port={self.servo_port},
 \tactuation_range={self.actuation_range},
 \tmirrored={self.mirrored})"""
+
+    def deepcopy(self):
+        new_obj = JointParameters(self.initial_angle, self.min_angle, self.max_angle, self.servo_port, self.actuation_range, self.mirrored)
+        return new_obj
