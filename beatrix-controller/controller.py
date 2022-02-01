@@ -40,6 +40,14 @@ class Controller:
         angles = location.get_angle_dict()
         self.robotarm.set_arm(angles)
 
+    def hover_above_coordinates(self, coordinates: Tuple[float,float,float]):
+        self._move_arm_to_workspace_coordinate((
+            coordinates[0],
+            coordinates[1],
+            coordinates[2] + HOVER_DIST,
+        ))
+
+
     def hover_above_location(self, location: Location):
         """
 

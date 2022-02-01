@@ -117,7 +117,6 @@ class AutoPilot:
         input()
         if not self.is_running(): return
 
-        # TODO: Actually use RecognizedObject for grab location.
         self.controller.hover_above_location(location)
         input()
         if not self.is_running(): return
