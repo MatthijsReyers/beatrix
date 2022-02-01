@@ -7,3 +7,7 @@ class JointParameters:
         self.servo_port = servo_port
         self.actuation_range = actuation_range
         self.mirrored = mirrored
+
+    def deepcopy(self):
+        new_obj = JointParameters(self.initial_angle, self.min_angle, self.max_angle, self.servo_port, self.actuation_range, self.mirrored)
+        return new_obj
