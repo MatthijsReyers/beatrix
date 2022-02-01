@@ -1,17 +1,18 @@
 from threading import Thread
 import cv2
 import objectrecognition
+import time
 
 class Camera():
     def __init__(self, debug_server):
         self.debug_server = debug_server
 
         self.cap = cv2.VideoCapture(0)
-        self.cap.set(cv2.CAP_PROP_FPS, 2)
+        self.cap.set(cv2.CAP_PROP_FPS, 30)
 
-        # self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-        # self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1088)
-        # self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1088)
+        self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
         self.running = False
 
@@ -32,9 +33,13 @@ class Camera():
         try:
             while self.running:
                 okay, frame = self.cap.read()
+                okay, frame = self.cap.read()
                 if okay:
+                    self.__frame = frame.copy()
+                    frame = cv2.resize(frame, dsize=(int(640), int(480)),interpolation=cv2.INTER_AREA)
                     self.debug_server.send_video_frame(frame)
-                    self.__frame = frame
+                    time.sleep(0.5)
+
         finally:
             self.cap.release()
 

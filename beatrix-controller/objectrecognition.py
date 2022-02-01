@@ -80,7 +80,7 @@ def anomaly_detection(contours, centers):
         rectangle = cv2.boundingRect(contour)
         x,y,w,h = rectangle
         if w > 800 or h > 800:
-            object = RecognicedObject(contour, center, Shape.Unknown, 1)
+            object = RecognizedObject(contour, center, Shape.Unknown, 1)
             anomolous_objects.append(object)
         else:
             normal_contours.append(contour)
@@ -142,6 +142,11 @@ class ObjectRecognizer():
         # get HSV mask
         masked_image = get_HSV_mask(preprocessed_image)
 
+        # Mask everything but center
+        mask = np.zeros(image.shape[:2], dtype="uint8")
+        cv2.circle(mask, (1920//2, 1088//2), 300, 255, -1)
+        mask = mask & masked_image
+
         # find contours
         contours, centers = find_contours(masked_image)
 
@@ -202,9 +207,9 @@ class ObjectRecognizer():
 
 # if __name__ == "__main__":
 #     image = cv2.imread("sixObjects_22.jpeg")
-#     recognicer = ObjectRecognicer("int8-model_3.lite")
+#     recognizer = ObjectRecognizer("int8-model_3.lite")
 #     start = time.time()
-#     objects = recognicer.object_recognition(image)
+#     objects = recognizer.object_recognition(image)
 #     end = time.time()
 #     print("Total: ", end-start)
 #     start_draw = time.time()

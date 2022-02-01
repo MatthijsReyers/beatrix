@@ -1,6 +1,6 @@
 from joints.parameters import JointParameters
 from joints.singleservo import SingleServo
-
+from lib.constants import SHOULDER_OFFSET
 class DualServo:
     """
         Class to control dual-servos/shoulder, same functionality as single servo
@@ -16,23 +16,28 @@ class DualServo:
         self.min_angle = parameters.min_angle
         self.max_angle = parameters.max_angle
         self.actuation_range = parameters.actuation_range
-        self.mirrored_left = parameters.mirrored[0]
-        self.mirrored_right = parameters.mirrored[1]
+        self.mirrored_left = parameters.mirrored[0] # i.e. mirrored = True
+        self.mirrored_right = parameters.mirrored[1]    # * = False
 
         self.port_left = parameters.servo_port[0]
         self.port_right = parameters.servo_port[1]
 
-        parameters_left = parameters
+        parameters_left = parameters.deepcopy()
         parameters_left.mirrored = self.mirrored_left
         parameters_left.servo_port = self.port_left
 
-        parameters_right = parameters
+        parameters_right = parameters.deepcopy()
         parameters_right.mirrored = self.mirrored_right
         parameters_right.servo_port = self.port_right
 
         self.pca = pca9685
-        self.SingleServo_left = SingleServo(parameters_left, pca9685, angle, debug_mode)
-        self.SingleServo_right = SingleServo(parameters_right, pca9685, angle, debug_mode)
+        # self.SingleServo_left = SingleServo(parameters_left, pca9685, angle, debug_mode)
+        # self.SingleServo_right = SingleServo(parameters_right, pca9685, angle, debug_mode)
+
+        self.SingleServo_left = SingleServo(parameters_left, pca9685, angle, debug_mode,
+                                            offset=SHOULDER_OFFSET[self.port_left])
+        self.SingleServo_right = SingleServo(parameters_right, pca9685, angle, debug_mode,
+                                             offset=SHOULDER_OFFSET[self.port_right])
 
     def set_angle(self, angle, new_angle):
         self.new_angle = self.bound_angle(new_angle)
