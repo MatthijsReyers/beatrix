@@ -97,6 +97,7 @@ class AutoPilot:
 
     def __identify_object(self) -> RecognizedObject:
         self.controller.go_to_location(location=INPUT_AREA_CAM_VIEW)
+        time.sleep(2)
         result = None
         while (result is None and self.is_running()):
             print('[@] Identifying object')
