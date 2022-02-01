@@ -157,7 +157,7 @@ class MainWindow(QMainWindow):
     
     def __on_take_picture(self):
         print('[*] Sending take picture command.')
-        self.client.send_set_autopilot()
+        self.client.send_take_picture()
 
     def __on_get_angles(self):
         self.client.send_get_update()
