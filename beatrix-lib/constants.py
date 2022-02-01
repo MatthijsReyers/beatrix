@@ -43,7 +43,7 @@ GRABBER_PARAMETERS = {
 "Initial angles of all the joints so that the arm stands vertically"
 INITIAL_ANGLES = {
     BASE_JOINT_ID: 0,  # TODO
-    SHOULDER_JOINT_ID: 84,
+    SHOULDER_JOINT_ID: 94,
     ELBOW_JOINT_ID: 10,
     WRIST_JOINT_ID: 131,
     WRIST_TURN_JOINT_ID: 90  # TODO
