@@ -3,6 +3,7 @@ from objectrecognition import RecognizedObject
 from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, PUZZLE_LOCATIONS, INPUT_AREA_GRAB_CENTER, HOVER_ABOVE_PUZZLES
 from lib.shapes import Shape
 from lib.transform import camera_to_board, board_to_world
+from lib.kinematics import WristOrientation
 from enum import Enum
 import time
 
@@ -117,7 +118,7 @@ class AutoPilot:
         input()
         if not self.is_running(): return
 
-        self.controller.hover_above_location(location)
+        self.controller.hover_above_location(location, wrist_orientation=WristOrientation.VERTICAL)
         input()
         if not self.is_running(): return
         self.controller.go_to_location(location)
@@ -125,7 +126,7 @@ class AutoPilot:
 
     def __move_object(self, shape: Shape):
         print('[@] Moving object')
-        # self.controller.hover_above_location(PUZZLE_LOCATIONS[shape]) # resulted in illegal positions
+        self.controller.hover_above_location(PUZZLE_LOCATIONS[shape], wrist_orientation=WristOrientation.VERTICAL)
         self.controller.go_to_location(HOVER_ABOVE_PUZZLES)
 
     def __place_down_object(self, shape: Shape):
