@@ -22,11 +22,11 @@ class DualServo:
         self.port_left = parameters.servo_port[0]
         self.port_right = parameters.servo_port[1]
 
-        parameters_left = parameters.copy()
+        parameters_left = parameters.deepcopy()
         parameters_left.mirrored = self.mirrored_left
         parameters_left.servo_port = self.port_left
 
-        parameters_right = parameters.copy()
+        parameters_right = parameters.deepcopy()
         parameters_right.mirrored = self.mirrored_right
         parameters_right.servo_port = self.port_right
 
