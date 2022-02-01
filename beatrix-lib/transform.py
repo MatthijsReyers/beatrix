@@ -5,10 +5,10 @@ import math
 BOARD_WIDTH = 30 # cm
 BOARD_DEPTH = 21 # cm
 
-wd_tl = np.array([ 10.73, -35.11, 4.90])
-wd_tr = np.array([-13.11, -35.73, 5.67])
-wd_bl = np.array([ 13.03, -16.67, 2.16])
-wd_br = np.array([-18.22, -15.84, 2.86])
+wd_tl = np.array([ 9.43, -35.2, 4.54])
+wd_tr = np.array([-18.52, -33.42, 5.09])
+wd_bl = np.array([ 11.02, -15.73, 1.02])
+wd_br = np.array([-16.58, -15.46, 2.15])
 board = [wd_tl,wd_tr,wd_bl,wd_br]
 
 of_1 = (wd_tl - wd_tr) 
