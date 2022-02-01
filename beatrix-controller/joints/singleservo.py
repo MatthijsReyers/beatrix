@@ -34,6 +34,7 @@ class SingleServo:
         self.old_angle = angle
         self.new_angle = angle
 
+        print(str(parameters))
         self.port = parameters.servo_port
         self.min_angle = parameters.min_angle
         self.max_angle = parameters.max_angle
@@ -58,6 +59,7 @@ class SingleServo:
             if not self.mirrored:
                 self.servo.angle = self.__hard_actuation_bound(self.current_angle + self.offset)
             if self.mirrored:
+                print('Ima mirror')
                 self.servo.angle = self.actuation_range - self.__hard_actuation_bound(self.current_angle + self.offset)
         # else:
         #     print('Servo',self.port,'going to',self.new_angle)

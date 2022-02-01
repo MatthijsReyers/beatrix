@@ -27,7 +27,7 @@ class Location:
 TABLE_Z_COORDINATE = 5  # TODO
 
 INPUT_AREA_CAM_VIEW  = Location(90, 90, 64, 107, 90, "Input area cam view")
-INPUT_AREA_GRAB_CENTER = Location(97, 118, 68, 38, 90, "Input area grab center")
+INPUT_AREA_GRAB_CENTER = Location(95.0, 108, 77, 46, 90, "Input area grab center")
 PUZZLE_AREA_CAM_VIEW = Location(180, 90, 64, 107, 90, "Puzzle area cam view")
 
 # ---- Puzzle locations
