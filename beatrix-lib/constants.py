@@ -75,7 +75,7 @@ JOINT_TYPE = {
     BASE_JOINT_ID: {'duality': 'single',
                     'mirrored': False},
     SHOULDER_JOINT_ID: {'duality': 'dual',
-                        'mirrored': (True, False)},  # True, False
+                        'mirrored': (True, False)},
     ELBOW_JOINT_ID: {'duality': 'single',
                      'mirrored': False},
     WRIST_JOINT_ID: {'duality': 'single',
