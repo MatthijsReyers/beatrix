@@ -13,9 +13,8 @@ class CommandHandler:
         self.server = server
 
         self.command_funcs = {
-            # cmd.GO_HOME: self._cmd_home,
+            cmd.TAKE_PICTURE: self._cmd_take_picture,
             cmd.GET_UPDATE: self._cmd_get_update,
-            # cmd.SET_POSITION: self._cmd_set_pos,
             cmd.SET_ANGLES: self._cmd_set_ang,
             cmd.SET_GRABBER: self._cmd_grabber,
             cmd.SET_AUTOPILOT: self._cmd_autopilot,
@@ -45,6 +44,10 @@ class CommandHandler:
                 func(*args, **kwargs)
         return decorator
 
+    def _cmd_take_picture(self):
+        print('[CMD] Take picture')
+        self.controller.camera.save_frame()
+
     @NoRunningAutopilot
     def _cmd_home(self):
         print('[CMD] Go home')
@@ -56,11 +59,6 @@ class CommandHandler:
             autopilot_state=self.autopilot.state,
             # grabber=self.controller.robotarm
         )
-
-    # @NoRunningAutopilot
-    # def _cmd_set_pos(self, position: Tuple[float, float, float]):
-    #     print('[CMD] Set position:', list(position))
-    #     self.controller._move_arm_to_workspace_coordinate(position)
 
     @NoRunningAutopilot
     def _cmd_set_ang(self, angles: dict):
