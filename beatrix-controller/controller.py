@@ -7,6 +7,7 @@ from objectrecognition import ObjectRecognizer
 from lib.shapes import Shape
 from lib.locations import PUZZLE_LOCATIONS
 from objectrecognition import draw_on_image
+from lib.kinematics import WristOrientation
 import cv2
 
 HOVER_DIST = 10
@@ -20,7 +21,8 @@ class Controller:
         self.camera = camera
         self.object_recognizer = object_recognizer
 
-    def _move_arm_to_workspace_coordinate(self, position: Tuple[float, float, float]):
+    def _move_arm_to_workspace_coordinate(self, position: Tuple[float, float, float],
+                                          wrist_orientation: WristOrientation = WristOrientation.UNSET):
         """
             Moves the robot arm to a 3d point in space
         Args:
@@ -28,7 +30,7 @@ class Controller:
             y: coordinate
             z: height coordinate
         """
-        new_angles = self.kinematics.inverse(position=(position[0], position[1], position[2]))
+        new_angles = self.kinematics.inverse(position=(position[0], position[1], position[2]), wrist_orientation=wrist_orientation)
         self.robotarm.set_arm(new_angles=new_angles)
 
     def go_to_location(self, location: Location):
@@ -40,10 +42,11 @@ class Controller:
         angles = location.get_angle_dict()
         self.robotarm.set_arm(angles)
 
-    def hover_above_location(self, location: Location):
+    def hover_above_location(self, location: Location, wrist_orientation: WristOrientation = WristOrientation.UNSET):
         """
 
         Args:
+            wrist_orientation:
             location:
         """
         angles = location.get_angle_dict()
@@ -52,7 +55,7 @@ class Controller:
             coordinates[0],
             coordinates[1],
             coordinates[2] + HOVER_DIST,
-        ))
+        ), wrist_orientation=wrist_orientation)
 
     def classify_current_view(self) -> 'RecognizedObject':
         """
