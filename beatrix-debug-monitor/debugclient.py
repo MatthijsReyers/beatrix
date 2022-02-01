@@ -113,12 +113,18 @@ class DebugClient():
         })
 
     def send_set_autopilot(self, enabled: bool):
-        print('[@] Setting autopilot:', enabled)
+        """ Sets the state of the autopilot. """
         self._send_cmd({
             'type': cmd.SET_AUTOPILOT,
             'data': {
                 'enabled':enabled
             }
+        })
+
+    def send_take_picture(self):
+        self._send_cmd({
+            'type': cmd.TAKE_PICTURE,
+            'data': {}
         })
 
     def _send_cmd(self, cmd):

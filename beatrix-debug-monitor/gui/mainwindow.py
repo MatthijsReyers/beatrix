@@ -67,6 +67,10 @@ class MainWindow(QMainWindow):
         btn.clicked.connect(self.__on_go_home)
         layout.addWidget(btn)
 
+        btn = QPushButton("Take picture")
+        btn.clicked.connect(self.__on_take_picture)
+        layout.addWidget(btn)
+
         btn = QPushButton("Close grabber")
         btn.clicked.connect(self.__on_set_grabber(closed=True))
         layout.addWidget(btn)
@@ -151,6 +155,10 @@ class MainWindow(QMainWindow):
         angles = self.position_manager.angles
         self.client.send_set_angles(angles)
     
+    def __on_take_picture(self):
+        print('[*] Sending take picture command.')
+        self.client.send_take_picture()
+
     def __on_get_angles(self):
         self.client.send_get_update()
         angles = self.real_visualizer.angles
