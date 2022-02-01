@@ -69,7 +69,8 @@ class IkPyKinematics(Kinematics):
             SHOULDER_JOINT_ID: degrees(solution_angles[2]),
             ELBOW_JOINT_ID: degrees(solution_angles[3]),
             WRIST_JOINT_ID: degrees(solution_angles[4]),
-            WRIST_TURN_JOINT_ID: degrees(solution_angles[5])
+            # WRIST_TURN_JOINT_ID: degrees(solution_angles[5]),
+            WRIST_TURN_JOINT_ID: 90
         }
         return new_angles
 
