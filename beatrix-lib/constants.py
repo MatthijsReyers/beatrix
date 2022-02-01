@@ -63,7 +63,7 @@ ANGLE_BOUNDS = {
 "The servo ports for each joint, note that the shoulder has two ports as it consists of two servo motors"
 SERVO_PORTS = {
     BASE_JOINT_ID: 0,
-    SHOULDER_JOINT_ID: (15, 2),
+    SHOULDER_JOINT_ID: (1, 2),
     ELBOW_JOINT_ID: 3,
     WRIST_JOINT_ID: 4,
     WRIST_TURN_JOINT_ID: 5
@@ -99,5 +99,5 @@ ACTUATION_RANGE = {
 
 SHOULDER_OFFSET = {
     SERVO_PORTS[SHOULDER_JOINT_ID][0]: 0,
-    SERVO_PORTS[SHOULDER_JOINT_ID][1]: -5,
+    SERVO_PORTS[SHOULDER_JOINT_ID][1]: 0,
 }
