@@ -6,11 +6,14 @@ import math
 BOARD_WIDTH = 30
 BOARD_DEPTH = 21
 
-# Coordinates of the topleft/topright/bottomleft/bottomright of the board in world space.
-wd_tl = np.array([ 10.73, -35.11, 4.90])
-wd_tr = np.array([-13.11, -35.73, 5.67])
-wd_bl = np.array([ 13.03, -16.67, 2.16])
-wd_br = np.array([-18.22, -15.84, 2.86])
+wd_tl = np.array([ 9.43, -35.2, 4.54])
+wd_tr = np.array([-18.52, -33.42, 5.09])
+wd_bl = np.array([ 11.02, -15.73, 1.02])
+wd_br = np.array([-16.58, -15.46, 2.15])
+board = [wd_tl,wd_tr,wd_bl,wd_br]
+
+of_1 = (wd_tl - wd_tr) 
+of_2 = (wd_bl - wd_br)
 
 # Coordinates of the bottom/top/left/right center of the board (in world space).
 wd_tc = (wd_tl + wd_tr) / 2
@@ -52,14 +55,6 @@ def board_to_world(p: Tuple[float,float]) -> Tuple[float, float, float]:
     basis = wd_tl*y + wd_bl*(1-y)
     offset = of_1*y + of_2*(1-y)
     return basis - offset*x
-
-def plot_line_p(p1, p2, ax):
-    ax.plot(
-        [p1[0], p2[0]], 
-        [p1[1], p2[1]], 
-        [p1[2], p2[2]], 
-        color='#0000ff');
-
 
 if __name__ == '__main__':
     def test(point, expected, title:str=None):

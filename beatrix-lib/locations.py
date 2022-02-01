@@ -26,18 +26,22 @@ class Location:
 
 TABLE_Z_COORDINATE = 5  # TODO
 
-INPUT_AREA_CAM_VIEW  = Location(90, 90, 64, 107, 90, "Input area cam view")
-INPUT_AREA_GRAB_CENTER = Location(95.0, 108, 77, 46, 90, "Input area grab center")
-PUZZLE_AREA_CAM_VIEW = Location(180, 90, 64, 107, 90, "Puzzle area cam view")
+INPUT_AREA_CAM_VIEW  = Location(85, 101, 60, 106, 90, "Input area cam view")
+INPUT_AREA_GRAB_CENTER = Location(84, 117, 82, 55, 90, "Input area grab center")
+PUZZLE_AREA_CAM_VIEW = Location(172, 94, 60, 107, 90, "Puzzle area cam view")
+
+HOVER_ABOVE_PUZZLES = Location(172, 95, 58, 25, 90, "Hover above puzzle")
 
 # ---- Puzzle locations
-OCTAGON = Location(186.0, 108, 77.47, 48.27, 0, "Octagon")
-ELLIPSE = Location(168.0, 121.31, 54.63, 36, 165, "Ellipse")
-SQUARE  = Location(156.9, 108, 83, 45, 146, "Square")
-CIRCLE  = Location(201, 135.36, 18.5955905287035, 23, 74, "Circle")
-SEMICIRCLE = Location(185.71, 96, 99, 51.0, 0.0, "Semicircle")
-TRIANGLE   = Location(215.28, 98, 100, 58, 30, "Triangle")
-RECTANLGE  = Location(205.0, 119, 62, 41, 151, "Rectangle")
+OCTAGON = Location(175, 114, 88, 60, 90, "Octagon")
+ELLIPSE = Location(156, 126, 60, 41, 69, "Ellipse")
+SQUARE  = Location(148, 113, 79, 43, 68, "Square")
+CIRCLE  = Location(194.7, 142, 25.7, 31.7, 120, "Circle")
+SEMICIRCLE = Location(175, 102, 105, 60, 90, "Semicircle")
+TRIANGLE   = Location(206.8, 106, 89, 50, 120, "Triangle")
+RECTANLGE  = Location(198.4, 126, 59, 40, 115, "Rectangle")
+DIAMOND = Location(175, 130, 52, 48, 90, "Diamond")
+PENTAGON = Location(161, 138, 30, 34, 80, "Pentagon")
 
 PUZZLE_LOCATIONS = {
     Shape.Octagon: OCTAGON,
@@ -46,7 +50,9 @@ PUZZLE_LOCATIONS = {
     Shape.Circle:  CIRCLE,
     Shape.Semicircle: SEMICIRCLE,
     Shape.Triangle:   TRIANGLE,
-    Shape.Rectangle:  RECTANLGE
+    Shape.Rectangle:  RECTANLGE,
+    Shape.Diamond: DIAMOND,
+    Shape.Pentagon: PENTAGON,
 }
 
 LOCATIONS_FOR_GUI = [

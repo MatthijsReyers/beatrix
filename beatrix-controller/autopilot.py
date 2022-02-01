@@ -1,7 +1,8 @@
 from threading import Thread, Lock
 from objectrecognition import RecognizedObject
-from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, PUZZLE_LOCATIONS, INPUT_AREA_GRAB_CENTER
+from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, PUZZLE_LOCATIONS, INPUT_AREA_GRAB_CENTER, HOVER_ABOVE_PUZZLES
 from lib.shapes import Shape
+from lib.transform import camera_to_board, board_to_world
 from enum import Enum
 import time
 
@@ -97,6 +98,7 @@ class AutoPilot:
 
     def __identify_object(self) -> RecognizedObject:
         self.controller.go_to_location(location=INPUT_AREA_CAM_VIEW)
+        time.sleep(2)
         result = None
         while (result is None and self.is_running()):
             print('[@] Identifying object')
@@ -106,15 +108,26 @@ class AutoPilot:
 
     def __pickup_object(self, obj: RecognizedObject):
         print('[@] Picking up', obj.label, 'object')
-        # TODO: Actually use RecognizedObject for grab location.
-        self.controller.hover_above_location(INPUT_AREA_GRAB_CENTER)
+
+        location = camera_to_board(obj.center)
+        print('I wanna go to: ', location)
+
+        location = board_to_world(location)
+        print('Or in world space: ', location)
+        input()
         if not self.is_running(): return
-        self.controller.go_to_location(INPUT_AREA_GRAB_CENTER)
+
+        # TODO: Actually use RecognizedObject for grab location.
+        self.controller.hover_above_location(location)
+        input()
+        if not self.is_running(): return
+        self.controller.go_to_location(location)
         self.controller.robotarm.set_grabber(closed=True)
 
     def __move_object(self, shape: Shape):
         print('[@] Moving object')
-        self.controller.hover_above_location(PUZZLE_LOCATIONS[shape])
+        # self.controller.hover_above_location(PUZZLE_LOCATIONS[shape]) # resulted in illegal positions
+        self.controller.go_to_location(HOVER_ABOVE_PUZZLES)
 
     def __place_down_object(self, shape: Shape):
         print('[@] Placing down object')
