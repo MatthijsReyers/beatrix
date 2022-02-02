@@ -76,25 +76,25 @@ class AutoPilot:
             obj = self.__identify_object()
             if not self.is_running(): break
 
-            time.sleep(4)
+            time.sleep(0)
             if not self.is_running(): break
 
             self.__pickup_object(obj)
             if not self.is_running(): break
 
-            time.sleep(4)
+            time.sleep(1)
             if not self.is_running(): break
 
             self.__move_object(obj.label)
             if not self.is_running(): break
 
-            time.sleep(4)
+            time.sleep(0)
             if not self.is_running(): break
 
             self.__place_down_object(obj.label)
             if not self.is_running(): break
 
-            time.sleep(4)
+            time.sleep(0)
             if not self.is_running(): break
 
     def __identify_object(self) -> RecognizedObject:
