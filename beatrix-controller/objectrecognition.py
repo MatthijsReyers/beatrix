@@ -24,7 +24,7 @@ def gamma_correction(image, gamma):
 def get_HSV_mask(image):
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     # minimum saturation is 40
-    masked_image = cv2.inRange(hsv_image, (0,80,60), (179,255,255)) # CHANGE ACCORDINGLY
+    masked_image = cv2.inRange(hsv_image, (0,90,60), (179,255,255)) # CHANGE ACCORDINGLY
     return masked_image
 
 def find_contours(image):
@@ -137,7 +137,8 @@ class ObjectRecognizer():
         copy_image = image.copy()
 
         # preprocess image
-        preprocessed_image = gamma_correction(copy_image, 0.62)
+        # preprocessed_image = gamma_correction(copy_image, 0.62)
+        preprocessed_image = image
 
         # get HSV mask
         masked_image = get_HSV_mask(preprocessed_image)
