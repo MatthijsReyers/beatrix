@@ -42,6 +42,14 @@ class Controller:
         angles = location.get_angle_dict()
         self.robotarm.set_arm(angles)
 
+    def hover_above_coordinates(self, coordinates: Tuple[float,float,float], 
+            wrist_orientation: WristOrientation = WristOrientation.UNSET):
+        self._move_arm_to_workspace_coordinate((
+            coordinates[0],
+            coordinates[1],
+            coordinates[2] + HOVER_DIST,
+        ), wrist_orientation=wrist_orientation)
+
     def hover_above_location(self, location: Location, wrist_orientation: WristOrientation = WristOrientation.UNSET):
         """
 
@@ -51,11 +59,7 @@ class Controller:
         """
         angles = location.get_angle_dict()
         coordinates = self.kinematics.get_forward_cartesian(angles)
-        self._move_arm_to_workspace_coordinate((
-            coordinates[0],
-            coordinates[1],
-            coordinates[2] + HOVER_DIST,
-        ), wrist_orientation=wrist_orientation)
+        self.hover_above_coordinates(coordinates, wrist_orientation)
 
     def classify_current_view(self) -> 'RecognizedObject':
         """

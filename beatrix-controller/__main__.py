@@ -28,7 +28,7 @@ from objectrecognition import ObjectRecognizer
 server     = DebugServer()
 camera     = Camera(debug_server=server)
 robotarm   = RobotArm(server, debug_mode=args.no_io)
-recognizer = ObjectRecognizer('./beatrix-controller/int8-model_3.lite')
+recognizer = ObjectRecognizer('./beatrix-controller/int8-model_2.lite')
 controller = Controller(robotarm, camera, recognizer)
 autopilot  = AutoPilot(server, controller, camera)
 handler    = CommandHandler(server, controller, autopilot)

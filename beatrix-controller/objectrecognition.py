@@ -24,7 +24,7 @@ def gamma_correction(image, gamma):
 def get_HSV_mask(image):
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     # minimum saturation is 40
-    masked_image = cv2.inRange(hsv_image, (0,80,0), (179,255,255)) 
+    masked_image = cv2.inRange(hsv_image, (0,80,0), (179,255,255)) # CHANGE ACCORDINGLY
     return masked_image
 
 def find_contours(image):
@@ -193,12 +193,15 @@ class ObjectRecognizer():
             # The function `get_tensor()` returns a copy of the tensor data.
             # Use `tensor()` in order to get a pointer to the tensor.
             output_data = self.interpreter.get_tensor(output_details[0]['index'])
-            label = Shape.Unknown
-            confidence = 1
+            label = None
+            confidence = 0
             for index in range(len(output_data[0])):
-                if (output_data[0][index]+128)/256 > 0.3:
+                if (output_data[0][index]+128)/256 > 0.3 and (output_data[0][index]+128)/256 > confidence:
                     label = Shape(index)
                     confidence = (output_data[0][index]+128)/256
+            if label is None:
+                label = Shape.Unknown
+                confidence = 1
             labels.append(label)
             confidences.append(confidence)
             print(label, confidence)
