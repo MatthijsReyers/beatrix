@@ -118,15 +118,17 @@ class AutoPilot:
         print("**With lowered Z coordinate**")
         location = adjusted_location
         print('Or in world space: ', location)
-        input()
+        #input()
         if not self.is_running(): return
 
         self.controller.hover_above_coordinates(location, wrist_orientation=WristOrientation.VERTICAL)
+        print("****** Press Enter for OKAY *******")
         input()
+
         if not self.is_running(): return
         self.controller._move_arm_to_workspace_coordinate(location, wrist_orientation=WristOrientation.VERTICAL)
         self.controller.robotarm.set_grabber(closed=True)
-
+        time.sleep(1)
         self.controller.go_to_location(HOVER_ABOVE_INPUT)
 
     def __move_object(self, shape: Shape):
