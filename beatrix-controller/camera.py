@@ -14,7 +14,7 @@ class Camera():
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1088)
         self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         # self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 3)
-        self.cap.set(cv2.CAP_PROP_EXPOSURE, 150)
+        self.cap.set(cv2.CAP_PROP_EXPOSURE, 200)
 
         self.running = False
 
