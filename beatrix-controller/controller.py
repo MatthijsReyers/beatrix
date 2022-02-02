@@ -9,6 +9,8 @@ from lib.locations import PUZZLE_LOCATIONS
 from objectrecognition import draw_on_image
 from lib.kinematics import WristOrientation
 import cv2
+from datetime import datetime
+from time import process_time
 
 HOVER_DIST = 10
 
@@ -67,13 +69,18 @@ class Controller:
         Returns:
 
         """
+
+        start_time = process_time()
+
         latest_frame = self.camera.get_latest_frame()
         if latest_frame is None:
             return None
 
         classified_shapes = self.object_recognizer.object_recognition(latest_frame)
         draw_on_image(latest_frame, classified_shapes)
-        cv2.imwrite('LatestClassify.jpg', latest_frame)
+        file_string = "classify-" + datetime.now() + ".jpg"
+
+        cv2.imwrite(file_string, latest_frame)
         classified_shapes = list(filter(lambda y: y.label != Shape.Unknown, classified_shapes))
         if len(classified_shapes) == 0:
             return None
@@ -83,6 +90,12 @@ class Controller:
         if classified_shapes[-1].label not in PUZZLE_LOCATIONS.keys():
             print('Did not find puzzle shape!')
             classified_shapes[-1].label = Shape.Octagon
+
+        end_time = process_time()
+        total_time = end_time - start_time
+
+        print("*** Classifying image took {} seconds(?)".format(total_time))
+
         return classified_shapes[-1]
 
 
