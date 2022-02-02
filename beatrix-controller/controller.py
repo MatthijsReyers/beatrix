@@ -78,7 +78,7 @@ class Controller:
 
         classified_shapes = self.object_recognizer.object_recognition(latest_frame)
         draw_on_image(latest_frame, classified_shapes)
-        file_string = "classify-" + time() + ".jpg"
+        file_string = f"classify-{time()}.jpg"
 
         cv2.imwrite(file_string, latest_frame)
         classified_shapes = list(filter(lambda y: y.label != Shape.Unknown, classified_shapes))
