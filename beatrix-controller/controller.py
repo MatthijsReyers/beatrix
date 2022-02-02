@@ -9,6 +9,7 @@ from lib.locations import PUZZLE_LOCATIONS
 from objectrecognition import draw_on_image
 from lib.kinematics import WristOrientation
 import cv2
+import datetime
 
 HOVER_DIST = 10
 
@@ -73,7 +74,9 @@ class Controller:
 
         classified_shapes = self.object_recognizer.object_recognition(latest_frame)
         draw_on_image(latest_frame, classified_shapes)
-        cv2.imwrite('LatestClassify.jpg', latest_frame)
+        file_string = "classify-" + datetime.datetime.now() + ".jpg"
+
+        cv2.imwrite(file_string, latest_frame)
         classified_shapes = list(filter(lambda y: y.label != Shape.Unknown, classified_shapes))
         if len(classified_shapes) == 0:
             return None
