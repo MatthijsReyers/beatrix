@@ -2,6 +2,7 @@ from threading import Thread, Lock
 from objectrecognition import RecognizedObject
 from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, PUZZLE_LOCATIONS, INPUT_AREA_GRAB_CENTER, HOVER_ABOVE_PUZZLES, HOVER_ABOVE_INPUT
 from lib.shapes import Shape
+from lib.constants import BASE_JOINT_ID
 from lib.transform import camera_to_board, board_to_world
 from lib.kinematics import WristOrientation
 from enum import Enum
@@ -98,6 +99,9 @@ class AutoPilot:
             if not self.is_running(): break
 
     def __identify_object(self) -> RecognizedObject:
+        location_offset_angles = INPUT_AREA_CAM_VIEW.get_angle_dict()
+        location_offset_angles[BASE_JOINT_ID] = location_offset_angles[BASE_JOINT_ID] - 10
+        self.controller.robotarm.set_arm(location_offset_angles)
         self.controller.go_to_location(location=INPUT_AREA_CAM_VIEW)
         time.sleep(2)
         result = None
