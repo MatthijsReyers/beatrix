@@ -114,7 +114,7 @@ class AutoPilot:
         print('I wanna go to: ', location)
 
         location = board_to_world(location)
-        adjusted_location = (location[0], location[1], location[2] - 1)
+        adjusted_location = (location[0], location[1], location[2] - 2)
         print("**With lowered Z coordinate**")
         location = adjusted_location
         print('Or in world space: ', location)
