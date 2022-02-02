@@ -123,8 +123,9 @@ class RobotArm:
                 self.debug_server.send_update(
                     angles=self.get_current_angles())
             if time_elapsed >= dtime:
-                print("!!!! Process took longer than control loop time !!!!")
-                print("time elapsed = {}".format(time_elapsed))
+                # print("!!!! Process took longer than control loop time !!!!")
+                # print("time elapsed = {}".format(time_elapsed))
+                pass
             else:
                 time.sleep(dtime - time_elapsed)
 

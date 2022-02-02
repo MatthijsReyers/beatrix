@@ -1,6 +1,6 @@
 from threading import Thread, Lock
 from objectrecognition import RecognizedObject
-from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, PUZZLE_LOCATIONS, INPUT_AREA_GRAB_CENTER, HOVER_ABOVE_PUZZLES
+from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, PUZZLE_LOCATIONS, INPUT_AREA_GRAB_CENTER, HOVER_ABOVE_PUZZLES, HOVER_ABOVE_INPUT
 from lib.shapes import Shape
 from lib.transform import camera_to_board, board_to_world
 from lib.kinematics import WristOrientation
@@ -76,25 +76,25 @@ class AutoPilot:
             obj = self.__identify_object()
             if not self.is_running(): break
 
-            time.sleep(4)
+            time.sleep(0)
             if not self.is_running(): break
 
             self.__pickup_object(obj)
             if not self.is_running(): break
 
-            time.sleep(4)
+            time.sleep(1)
             if not self.is_running(): break
 
             self.__move_object(obj.label)
             if not self.is_running(): break
 
-            time.sleep(4)
+            time.sleep(0)
             if not self.is_running(): break
 
             self.__place_down_object(obj.label)
             if not self.is_running(): break
 
-            time.sleep(4)
+            time.sleep(0)
             if not self.is_running(): break
 
     def __identify_object(self) -> RecognizedObject:
@@ -118,14 +118,18 @@ class AutoPilot:
         print("**With lowered Z coordinate**")
         location = adjusted_location
         print('Or in world space: ', location)
-        input()
+        #input()
         if not self.is_running(): return
 
         self.controller.hover_above_coordinates(location, wrist_orientation=WristOrientation.VERTICAL)
+        print("****** Press Enter for OKAY *******")
         input()
+
         if not self.is_running(): return
         self.controller._move_arm_to_workspace_coordinate(location, wrist_orientation=WristOrientation.VERTICAL)
         self.controller.robotarm.set_grabber(closed=True)
+        time.sleep(1)
+        self.controller.go_to_location(HOVER_ABOVE_INPUT)
 
     def __move_object(self, shape: Shape):
         print('[@] Moving object')
