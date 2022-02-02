@@ -1,6 +1,6 @@
 from threading import Thread, Lock
 from objectrecognition import RecognizedObject
-from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, PUZZLE_LOCATIONS, INPUT_AREA_GRAB_CENTER, HOVER_ABOVE_PUZZLES
+from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, PUZZLE_LOCATIONS, INPUT_AREA_GRAB_CENTER, HOVER_ABOVE_PUZZLES, HOVER_ABOVE_INPUT
 from lib.shapes import Shape
 from lib.transform import camera_to_board, board_to_world
 from lib.kinematics import WristOrientation
@@ -126,6 +126,8 @@ class AutoPilot:
         if not self.is_running(): return
         self.controller._move_arm_to_workspace_coordinate(location, wrist_orientation=WristOrientation.VERTICAL)
         self.controller.robotarm.set_grabber(closed=True)
+
+        self.controller.go_to_location(HOVER_ABOVE_INPUT)
 
     def __move_object(self, shape: Shape):
         print('[@] Moving object')
