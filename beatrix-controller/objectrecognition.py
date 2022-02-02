@@ -24,7 +24,7 @@ def gamma_correction(image, gamma):
 def get_HSV_mask(image):
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     # minimum saturation is 40
-    masked_image = cv2.inRange(hsv_image, (0,80,0), (179,255,255)) # CHANGE ACCORDINGLY
+    masked_image = cv2.inRange(hsv_image, (0,140,60), (179,255,255)) # CHANGE ACCORDINGLY
     return masked_image
 
 def find_contours(image):
@@ -52,13 +52,13 @@ def find_contours(image):
     thresh_gray = cv2.morphologyEx(thresh_gray, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_RECT, (7,7)))
 
     # Find contours in thresh_gray after closing the gaps
-    contours, _ = cv2.findContours(thresh_gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(thresh_gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
     result_contours = list()
     result_centers = list()
 
     for contour in contours:
-        if cv2.contourArea(contour) < 10000:
+        if cv2.contourArea(contour) < 60000:
             continue
         result_contours.append(contour)
 
