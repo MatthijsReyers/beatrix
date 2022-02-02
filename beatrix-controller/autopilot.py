@@ -118,15 +118,14 @@ class AutoPilot:
         input()
         if not self.is_running(): return
 
-        self.controller.hover_above_location(location, wrist_orientation=WristOrientation.VERTICAL)
+        self.controller.hover_above_coordinates(location, wrist_orientation=WristOrientation.VERTICAL)
         input()
         if not self.is_running(): return
-        self.controller.go_to_location(location)
+        self.controller._move_arm_to_workspace_coordinate(location, wrist_orientation=WristOrientation.VERTICAL)
         self.controller.robotarm.set_grabber(closed=True)
 
     def __move_object(self, shape: Shape):
         print('[@] Moving object')
-        self.controller.hover_above_location(PUZZLE_LOCATIONS[shape], wrist_orientation=WristOrientation.VERTICAL)
         self.controller.go_to_location(HOVER_ABOVE_PUZZLES)
 
     def __place_down_object(self, shape: Shape):
