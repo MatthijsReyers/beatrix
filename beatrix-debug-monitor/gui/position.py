@@ -11,7 +11,6 @@ POSITION_LIMIT = 50
 class PositionManager(QSplitter):
     def __init__(self, kinematics: Kinematics):
         super(QSplitter, self).__init__()
-        # self.setOrientation(Qt.Orientation.Vertical)
         self.kinematics = kinematics
 
         self.wrist_orientation = WristOrientation.UNSET
@@ -46,9 +45,6 @@ class PositionManager(QSplitter):
         """ Registers a callback function to be called whenever the user manually changes the position 
         goal via this GUI menu. """
         self.position_callbacks.append(callback)
-
-    def set_home(self):
-        self.set_angles(INITIAL_ANGLES)
 
     def set_position(self, pos:Tuple[float,float,float], update_kin:bool=True):
         """ Sets the position while updating all of the GUI elements and calling the registered callback
