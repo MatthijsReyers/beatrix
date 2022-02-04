@@ -10,15 +10,18 @@ class DebugServer():
         self.control_socket = ServerSocket(CONTROL_PORT)
 
     def start(self, command_handler):
+        """ Starts all threads required for debug server and opens required sockets. """
         self.video_socket.start()
         self.control_socket.start()
         self.control_socket.on_receive(command_handler.exec_cmd)
 
     def stop(self):
+        """ Stops and joins all debug server threads and gracefully closes all sockets. """
         self.video_socket.stop()
         self.control_socket.stop()
 
     def send_video_frame(self, frame):
+        """ Encodes and sends a cv2 image frame back to all connected clients' video feeds. """
         try:
             _, frame = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 30])
             frame_bytes = pickle.dumps(frame)
@@ -30,6 +33,7 @@ class DebugServer():
             print(e)
 
     def send_command(self, cmd):
+        """ Sends a command back to all the connected debug clients. """
         try:
             data = json.dumps(cmd).encode('utf-8')
             length = struct.pack('>I', len(data))
@@ -39,7 +43,14 @@ class DebugServer():
             print(e)
 
     def send_update(self, angles:dict=None, autopilot_state:str=None, grabber:bool=None):
-        """  """
+        """ Sends an update of the current controller state to all the connected debug clients, all 
+        parameters are optional and only for the provided parameters an update will be sent.
+
+        Args:
+            angles: Angle ID to degrees dictionary as used everywhere else in the codebase
+            autopilot_state: String representing the current state of the autopilot (on,off,etc.)
+            grabber: Boolean representing the open/closed state of the grabber, True for closed
+         """
         data = dict()
         if angles != None: 
             data['angles'] = angles
