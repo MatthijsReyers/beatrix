@@ -19,3 +19,5 @@ setuptools-scm==6.4.2
 six==1.16.0
 sympy==1.9
 tomli==2.0.0
+adafruit-io==2.6.0
+tflite-runtime==2.7.0

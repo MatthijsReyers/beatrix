@@ -3,7 +3,6 @@ from enum import Enum
 import numpy as np
 from lib.shapes import Shape
 from tflite_runtime.interpreter import Interpreter 
-import time
 
 class RecognizedObject:
     """
