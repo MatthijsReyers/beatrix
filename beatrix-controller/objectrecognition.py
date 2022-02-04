@@ -1,12 +1,19 @@
 import cv2
 from enum import Enum
 import numpy as np
-# from tflite_runtime.interpreter import Interpreter
 from lib.shapes import Shape
 from tflite_runtime.interpreter import Interpreter 
 import time
 
 class RecognizedObject:
+    """
+        Object to store information about a recogniced object. 
+        Attributes:
+            contour: the contour of the object
+            center: the center of the object
+            label: the classified label of the object
+            confidence: the certainty of the classification
+    """
 
     def __init__(self, contour, center, label, confidence):
         self.contour = contour
@@ -15,6 +22,12 @@ class RecognizedObject:
         self.confidence = confidence
 
 def gamma_correction(image, gamma):
+    """
+        Gamma correction function to brighten/darken the image.
+        Parameters:
+            image: the image to brighten / darken
+            gamma: the gamma value, <1 means brighten the image, >1 means darken the image
+    """
     look_up_table = np.empty((1,256), np.uint8)
     for i in range(256):
         look_up_table[0,i] = np.clip(pow(i / 255.0, gamma) * 255.0, 0, 255)
@@ -22,12 +35,22 @@ def gamma_correction(image, gamma):
     return result_image
 
 def get_HSV_mask(image):
+    """
+        Get a mask of the image that only keeps the pixels that lay in the predetermined bounds
+        parameters:
+            image: the image to create a mask for
+    """
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     # minimum saturation is 40
     masked_image = cv2.inRange(hsv_image, (0,90,60), (179,255,255)) # CHANGE ACCORDINGLY
     return masked_image
 
 def find_contours(image):
+    """
+        Find the contours of an image from its mask. It uses functions such as blurring, eliminating noise and combining contours to find the correct contours.
+        parameters:
+            image: a masked image to find contours in
+    """
     # try to eliminate noise
     thresh_gray = cv2.GaussianBlur(image, (9, 9), 0)
     thresh_gray = cv2.dilate(thresh_gray, None, iterations=2)
@@ -57,18 +80,25 @@ def find_contours(image):
     result_contours = list()
     result_centers = list()
 
+    # only keep contours that are large enough
     for contour in contours:
         if cv2.contourArea(contour) < 60000:
             continue
         result_contours.append(contour)
 
-
+        # get the centers of the contours
         moments = cv2.moments(contour)
         result_centers.append((int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00'])))
 
     return result_contours, result_centers
 
 def anomaly_detection(contours, centers):
+    """
+        Try to detect the contours / centers that are anomolous. It currently only detects if an "object" is too big for a puzzle pieces.
+        paramters:
+            contours: the contours of the objects
+            centers: the centers of the bojects
+    """
 
     normal_contours = list()
     normal_centers = list()
@@ -79,6 +109,7 @@ def anomaly_detection(contours, centers):
         center = centers[index]
         rectangle = cv2.boundingRect(contour)
         x,y,w,h = rectangle
+        # object too long or wide for a puzzle piece? Then anomaly, else fine
         if w > 800 or h > 800:
             object = RecognizedObject(contour, center, Shape.Unknown, 1)
             anomolous_objects.append(object)
@@ -89,6 +120,12 @@ def anomaly_detection(contours, centers):
     return normal_contours, normal_centers, anomolous_objects
 
 def contour_image(image, contours):
+    """
+        Get white and black contour images for each contour. 
+        parameters:
+            image: the original image where the contours originate from
+            contours: the contours of the objects
+    """
     gray_image = np.zeros((image.shape[0], image.shape[1]), dtype=np.uint8)
     cv2.drawContours(gray_image, contours, -1, (255), 3)
     
@@ -98,9 +135,11 @@ def contour_image(image, contours):
         contour = contours[index]
         rectangle = cv2.boundingRect(contour)
         x,y,w,h = rectangle
+        # only get the part of the image which contains the contour we are after
         cropped_image = gray_image[y: y+h, x: x+w]
         dh = 800
         dw = 800
+        # pad the image to an 800x800 size, done twice to avoid some inexplicable bugs.
         result_image = cv2.copyMakeBorder(cropped_image, (dh-h)//2, dh-h-(dh-h)//2, (dw-w)//2, dw-w-(dw-w)//2, cv2.BORDER_ISOLATED, value=(0,0,0))
         heigth, width = result_image.shape
         result_image = cv2.copyMakeBorder(result_image, (dh-heigth)//2, dh-heigth-(dh-heigth)//2, (dw-width)//2, dw-width-(dw-width)//2, cv2.BORDER_ISOLATED, value=(0,0,0))
@@ -109,6 +148,12 @@ def contour_image(image, contours):
     return contour_images
 
 def scale_images(images, scale):
+    """
+        Scale the list of images using a scalar. Mainly used to resize the contour images found to the size used by the classification model.
+        parameters:
+            images: the contour images
+            scale: the scalar to resize the images by
+    """
     scaled_images = list()
     for image in images:
         height, width = image.shape
@@ -117,6 +162,12 @@ def scale_images(images, scale):
     return scaled_images
 
 def draw_on_image(image, objects):
+    """
+        Method to draw the found objects on an image, mainly used for debugging.
+        parameters:
+            image: image to draw the objects on
+            objects: the objects to draw
+    """
     for obj in objects:
         contour = obj.contour
         center = obj.center
@@ -126,13 +177,25 @@ def draw_on_image(image, objects):
         cv2.putText(image,text,center, 0, 1,(0,255,0),2,cv2.LINE_AA)
         
 class ObjectRecognizer():
+    """
+        Object recognizer that detects and recognizes objects in an image using its given model
+    """
     
     def __init__(self, model_path_string):
+        """
+            Instantate the object recognizer using the model given:
+            model_path_string: path to the model
+        """
         self.interpreter = Interpreter(model_path = model_path_string)
         self.interpreter.allocate_tensors()
         
         
     def object_recognition(self, image):
+        """
+            Object detection and classification and returns the recognized objects.
+            parameters:
+                image: the image to use object recognition on
+        """
         # nothing here should influence the image
         copy_image = image.copy()
 
@@ -143,10 +206,10 @@ class ObjectRecognizer():
         # get HSV mask
         masked_image = get_HSV_mask(preprocessed_image)
 
-        # Mask everything but center
+        # Hide everything but center
         # mask = np.zeros(image.shape[:2], dtype="uint8")
         # cv2.circle(mask, (1920//2, 1088//2), 300, 255, -1)
-        # mask = mask & masked_image
+        # masked_image = mask & masked_image
 
         # find contours
         contours, centers = find_contours(masked_image)
@@ -173,6 +236,11 @@ class ObjectRecognizer():
         return objects
     
     def label_images(self, images):
+        """
+        Method to label contour images.
+        parameters:
+            images: contour images.
+        """
 
         # Get input and output tensors.
         input_details = self.interpreter.get_input_details()
@@ -182,6 +250,7 @@ class ObjectRecognizer():
         confidences = list()
         for image in images:
             
+            # convert type of image, since image is unsigned 8 bit integer, but model wants signed 8 bit integer.
             # image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
             c =  np.int16(image)
             c = cv2.subtract(c, 128)
@@ -196,6 +265,7 @@ class ObjectRecognizer():
             output_data = self.interpreter.get_tensor(output_details[0]['index'])
             label = None
             confidence = 0
+            # get label with highest confidence, assuming they meet the threshold confidence level of 30%
             for index in range(len(output_data[0])):
                 if (output_data[0][index]+128)/256 > 0.3 and (output_data[0][index]+128)/256 > confidence:
                     label = Shape(index)
@@ -208,16 +278,3 @@ class ObjectRecognizer():
             print(label, confidence)
 
         return labels, confidences
-
-# if __name__ == "__main__":
-#     image = cv2.imread("sixObjects_22.jpeg")
-#     recognizer = ObjectRecognizer("int8-model_3.lite")
-#     start = time.time()
-#     objects = recognizer.object_recognition(image)
-#     end = time.time()
-#     print("Total: ", end-start)
-#     start_draw = time.time()
-#     draw_on_image(image, objects)
-#     end_draw = time.time()
-#     print("Draw: ", end_draw - start_draw)
-#     cv2.imwrite("test2.jpeg", image)
