@@ -127,22 +127,20 @@ class MainWindow(QMainWindow):
         print('[*] Started command thread.')
         while self.running:
             (okay, cmd) = self.client.receive_command()
-            if okay:
-                cmd_type = cmd['type']
-                if cmd_type == GET_UPDATE:
-                    self.__handle_update(cmd['data'])
+            # No other server->client commands were implemented then GET_UPDATE.
+            if okay and cmd['type'] == GET_UPDATE:
+                update = cmd['data']
+                if 'angles' in update:
+                    self.real_visualizer.update_angles(update['angles'])
+                    pos = self.position_manager.kinematics.get_forward_cartesian(update['angles'])
+                    self.real_visualizer.update_position(pos)
+                if 'autopilot' in update:
+                    self.autopilot_state.setText(update['autopilot'])
             else:
                 time.sleep(0.1)
 
-    def __handle_update(self, update):
-        if 'angles' in update:
-            self.real_visualizer.update_angles(update['angles'])
-            pos = self.position_manager.kinematics.get_forward_cartesian(update['angles'])
-            self.real_visualizer.update_position(pos)
-        if 'autopilot' in update:
-            self.autopilot_state.setText(update['autopilot'])
-
     def __on_move_location(self, location):
+        """ Generates a event handler function for goto location type buttons. """
         def move():
             print('[*] Sending goto:', location.name)
             angles = location.get_angle_dict()
@@ -151,32 +149,39 @@ class MainWindow(QMainWindow):
         return move
 
     def __on_send_angles(self):
+        """ Event handler for the send position/angles button. """
         print('[*] Sending set angles')
         angles = self.position_manager.angles
         self.client.send_set_angles(angles)
     
     def __on_take_picture(self):
+        """ Event handler for the take picture button. """
         print('[*] Sending take picture command.')
         self.client.send_take_picture()
 
     def __on_get_angles(self):
+        """ Event handler for the get position button: get the currently known location from the real
+        visualizer and sets the local visualizer to it. """
         self.client.send_get_update()
         angles = self.real_visualizer.angles
         self.position_manager.set_angles(angles.copy())
         self.local_visualizer.update_angles(angles.copy())
 
     def __on_go_home(self):
+        """ Event handler for the go home button. """
         print('[*] Sending go home')
         self.position_manager.set_angles(INITIAL_ANGLES.copy())
         self.local_visualizer.update_angles(INITIAL_ANGLES.copy())
         self.client.send_set_angles(INITIAL_ANGLES)
 
     def __on_set_grabber(self, closed):
+        """ Generates an event handler for the set grabber open/closed buttons. """
         def send():
             self.client.send_set_grabber(closed=closed)
         return send
 
     def __on_set_autopilot(self, enabled):
+        """ Generates an event handler for the enable/disable autopilot buttons. """
         def send():
             self.client.send_set_autopilot(enabled=enabled)
         return send
