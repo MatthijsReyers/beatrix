@@ -45,6 +45,8 @@ class CommandHandler:
         return decorator
 
     def _cmd_take_picture(self):
+        """ Called to execute a TAKE_PICTURE command, saves the latest camera frame to the /pix folder as a 
+        jpg encoded file. """
         print('[CMD] Take picture')
         self.controller.camera.save_frame()
 
