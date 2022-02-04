@@ -1,10 +1,10 @@
-from threading import Thread, Lock
-from objectrecognition import RecognizedObject
-from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_AREA_CAM_VIEW, PUZZLE_LOCATIONS, INPUT_AREA_GRAB_CENTER, HOVER_ABOVE_PUZZLES, HOVER_ABOVE_INPUT
+from lib.locations import INPUT_AREA_CAM_VIEW, PUZZLE_LOCATIONS, HOVER_ABOVE_PUZZLES, HOVER_ABOVE_INPUT
 from lib.shapes import Shape
 from lib.constants import BASE_JOINT_ID
 from lib.transform import camera_to_board, board_to_world
 from lib.kinematics import WristOrientation
+from objectrecognition import RecognizedObject
+from threading import Thread, Lock
 from enum import Enum
 import time
 
@@ -26,14 +26,16 @@ class AutoPilot:
         self._pilot_thread = None
 
     def is_running(self):
-        """ Checks if the autopilot is currently running. (May block if the autopilot thread is just 
-        being started). """
+        """ Checks if the autopilot is currently running. (Needs to acquire the state mutex and so may 
+        block for a few ms if the autopilot thread is just being started/stopped). """
         self._state_mutex.acquire()
         running = (self.state == AutoPilotState.STARTED or self.state == AutoPilotState.STARTING)
         self._state_mutex.release()
         return running
 
     def start(self):
+        """ Starts the autopilot thread and sets the autopilot state to STARTING. Will stop and restart
+        the autopilot if it is already running. """
         self._state_mutex.acquire()
         # CHECK: Is the thread already running/still alive?
         if self._pilot_thread and self._pilot_thread.is_alive():
@@ -50,6 +52,7 @@ class AutoPilot:
         self._state_mutex.release()
 
     def stop(self):
+        """ Stops the autopilot thread and blocks until the autopilot state has been set to STOPPED. """
         if self.is_running():
             self._state_mutex.acquire()
             self.__set_state(AutoPilotState.STOPPING)
@@ -77,9 +80,6 @@ class AutoPilot:
             obj = self.__identify_object()
             if not self.is_running(): break
 
-            time.sleep(0)
-            if not self.is_running(): break
-
             self.__pickup_object(obj)
             if not self.is_running(): break
 
@@ -89,13 +89,7 @@ class AutoPilot:
             self.__move_object(obj.label)
             if not self.is_running(): break
 
-            time.sleep(0)
-            if not self.is_running(): break
-
             self.__place_down_object(obj.label)
-            if not self.is_running(): break
-
-            time.sleep(0)
             if not self.is_running(): break
 
     def __identify_object(self) -> RecognizedObject:
@@ -115,19 +109,14 @@ class AutoPilot:
         print('[@] Picking up', obj.label, 'object')
 
         location = camera_to_board(obj.center)
-        print('I wanna go to: ', location)
+        print('[@] I wanna go to: ', location)
 
         location = board_to_world(location)
         adjusted_location = (location[0], location[1], location[2] - 2)
-        print("**With lowered Z coordinate**")
         location = adjusted_location
-        print('Or in world space: ', location)
-        #input()
         if not self.is_running(): return
 
         self.controller.hover_above_coordinates(location, wrist_orientation=WristOrientation.VERTICAL)
-        print("****** Press Enter for OKAY *******")
-        input()
 
         if not self.is_running(): return
         self.controller._move_arm_to_workspace_coordinate(location, wrist_orientation=WristOrientation.VERTICAL)
