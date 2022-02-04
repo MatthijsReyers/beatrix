@@ -15,4 +15,5 @@ SET_GRABBER = 'SET_GRB'
 """ Enable/disable the autopilot. """
 SET_AUTOPILOT = 'SET_AUT'
 
+""" Save the latest camera frame to filesystem. """
 TAKE_PICTURE = 'TAK_PIC'
