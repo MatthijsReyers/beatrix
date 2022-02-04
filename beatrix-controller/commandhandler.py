@@ -2,16 +2,14 @@ from typing import Tuple
 from controller import Controller
 from autopilot import AutoPilot
 from debugserver import DebugServer
-from lib.constants import INITIAL_ANGLES
 import lib.commands as cmd
 import json
 
 class CommandHandler:
-    def __init__(self, server, controller: Controller, autopilot: AutoPilot):
+    def __init__(self, server: DebugServer, controller: Controller, autopilot: AutoPilot):
         self.controller = controller
         self.autopilot = autopilot
         self.server = server
-
         self.command_funcs = {
             cmd.TAKE_PICTURE: self._cmd_take_picture,
             cmd.GET_UPDATE: self._cmd_get_update,
@@ -51,6 +49,9 @@ class CommandHandler:
         self.controller.camera.save_frame()
 
     def _cmd_get_update(self):
+        """ Called to execute a GET_UPDATE command, gets the current controller state and sends it back 
+        to all connected debug clients. """
+        print('[CMD] Get update. ')
         self.server.send_update(
             angles=self.controller.robotarm.get_current_angles(),
             autopilot_state=self.autopilot.state,
@@ -59,15 +60,19 @@ class CommandHandler:
 
     @NoRunningAutopilot
     def _cmd_set_ang(self, angles: dict):
+        """ Called to execute a SET_ANGLES command, sets the angles of the servo motors. """
         print('[CMD] Set angles:', list(angles.values()))
         self.controller.robotarm.set_arm(angles, 30)
 
     @NoRunningAutopilot
     def _cmd_grabber(self, closed: bool):
+        """" Called to execute a SET_GRABBER command, opens or closes the grabber. """
         print('[CMD] Grabber', 'closed' if closed else 'open')
         self.controller.robotarm.set_grabber(closed)
 
     def _cmd_autopilot(self, enabled: bool):
+        """ Called to execute a SET_AUTOPILOT command, enabled or disabled the autopilot and blocks 
+        until the state change has finished. """
         print('[CMD]', 'Start' if enabled else 'Stop', 'autopilot')
         if enabled: self.autopilot.start()
         else: self.autopilot.stop()
