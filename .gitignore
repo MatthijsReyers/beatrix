@@ -13,6 +13,8 @@ beatrix-controller/lib
 
 beatrix-debug-monitor/guus tests
 
+beatrix-data/processed-dataset
+
 test.py
 tests
 
