@@ -144,6 +144,14 @@ class RobotArm:
             grabber=closed)
 
     def bound_angles(self, angles: dict):
+        """
+        Returns a list of angles such that all the angles lie within the bounds as defined in constants
+        Args:
+            angles: dictionary of angles that should be bounded
+
+        Returns: dictionary of bound angles
+
+        """
         for angle_id, angle in angles.items():
             if self.joints[angle_id].min_angle > angle:
                 angles[angle_id] = self.joints[angle_id].min_angle
@@ -153,6 +161,14 @@ class RobotArm:
         return angles
 
     def get_current_angles(self, requested_angles=None):
+        """
+        Returns dictionary of angles the joints are currently in
+        Args:
+            requested_angles: angles of which the angles are required, if None returns angles of all joints
+
+        Returns: dictionary of current angles of the requested joints
+
+        """
         if requested_angles is None:
             to_be_retrieved_angles = self.joints
         else:
@@ -168,7 +184,7 @@ class RobotArm:
 
 def get_angle_smooth(start_angle, end_angle, seconds, elapsed):
     """
-        Go to a different angle in a smooth motion
+        Determines angles for different phases in a move such that a smooth motion is achieved
         Arguments:
             start_angle: the angle of the servo before this function was called
             end_angle: the angle we want the servo to go too

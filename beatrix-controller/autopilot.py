@@ -72,6 +72,9 @@ class AutoPilot:
         print('[@] Setting autopilot to:', state)
 
     def __pilot_thread(self):
+        """ Main control loop that determines the order of actions that should be performed
+
+        """
         self._state_mutex.acquire()
         self.__set_state(AutoPilotState.STARTED)
         self._state_mutex.release()
@@ -93,6 +96,11 @@ class AutoPilot:
             if not self.is_running(): break
 
     def __identify_object(self) -> RecognizedObject:
+        """
+        Accesses the camera through the controller and does so until a valid object is recognised
+        Returns: object that was recognised and should be picked up
+
+        """
         location_offset_angles = INPUT_AREA_CAM_VIEW.get_angle_dict()
         location_offset_angles[BASE_JOINT_ID] = location_offset_angles[BASE_JOINT_ID] - 10
         self.controller.robotarm.set_arm(location_offset_angles)
@@ -106,6 +114,12 @@ class AutoPilot:
         return result
 
     def __pickup_object(self, obj: RecognizedObject):
+        """
+        Determines the 3d location of the object to be picked up, moves the arm towards the object,
+        and closes grabber
+
+        Args: obj: object to be picked up
+        """
         print('[@] Picking up', obj.label, 'object')
 
         location = camera_to_board(obj.center)
@@ -125,10 +139,21 @@ class AutoPilot:
         self.controller.go_to_location(HOVER_ABOVE_INPUT)
 
     def __move_object(self, shape: Shape):
+        """
+        Moves the object above the puzzle area
+        Args:
+            shape: was previously used to hover above the exact puzzle piece location
+            Removed because rare but quirky problems with inversed kinematics
+        """
         print('[@] Moving object')
         self.controller.go_to_location(HOVER_ABOVE_PUZZLES)
 
     def __place_down_object(self, shape: Shape):
+        """
+        Places down object in the correct locations according to the location defined in PUZZLE_LOCATIONS constant
+        Args:
+            shape: label of the object currently in the gripper
+        """
         print('[@] Placing down object')
         self.controller.go_to_location(PUZZLE_LOCATIONS[shape])
         self.controller.robotarm.set_grabber(closed=False)
