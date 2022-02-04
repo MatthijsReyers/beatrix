@@ -1,5 +1,5 @@
 from sys import platform
-import os, math
+import os
 
 def safe_import_cv():
     """ On Linux PyQt5 will try to use shared libraries built by opencv when opencv is imported, even 
