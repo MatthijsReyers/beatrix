@@ -23,9 +23,6 @@ class Location:
     def get_name(self):
         return self.name
 
-
-TABLE_Z_COORDINATE = 5  # TODO
-
 INPUT_AREA_CAM_VIEW  = Location(85, 101, 60, 106, 90, "Input area cam view")
 INPUT_AREA_GRAB_CENTER = Location(84, 119, 82, 53, 90, "Input area grab center")
 PUZZLE_AREA_CAM_VIEW = Location(172, 94, 60, 107, 90, "Puzzle area cam view")
