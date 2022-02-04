@@ -16,6 +16,11 @@ HOVER_DIST = 10
 
 
 class Controller:
+    """
+    Contains pre defined operations to be executed by the robot arm
+
+    """
+
 
     def __init__(self, robotarm: 'RobotArm', camera: 'Camera', object_recognizer: ObjectRecognizer):
         self.kinematics = IkPyKinematics(chain=beatrix_rep)
@@ -28,9 +33,8 @@ class Controller:
         """
             Moves the robot arm to a 3d point in space
         Args:
-            x: coordinate
-            y: coordinate
-            z: height coordinate
+            position: Tuple of (X, Y, Z) coordinates
+            wrist_orientation: Desired orientation of the end effector (z-axial locked with wrist)
         """
         new_angles = self.kinematics.inverse(position=(position[0], position[1], position[2]), wrist_orientation=wrist_orientation)
         self.robotarm.set_arm(new_angles=new_angles)
@@ -46,6 +50,12 @@ class Controller:
 
     def hover_above_coordinates(self, coordinates: Tuple[float,float,float], 
             wrist_orientation: WristOrientation = WristOrientation.UNSET):
+        """
+        Moves the robot arm to a location HOVER_DIST above the given coordinates
+        Args:
+            coordinates: coordinates that should be hovered above
+            wrist_orientation: Desired orientation of the end effector (z-axial locked with wrist)
+        """
         self._move_arm_to_workspace_coordinate((
             coordinates[0],
             coordinates[1],
@@ -54,10 +64,10 @@ class Controller:
 
     def hover_above_location(self, location: Location, wrist_orientation: WristOrientation = WristOrientation.UNSET):
         """
-
+        Moves the robot arm to a location HOVER_DIST above the given location
         Args:
-            wrist_orientation:
-            location:
+            location: location that should be hovered above
+            wrist_orientation: Desired orientation of the end effector (z-axial locked with wrist)
         """
         angles = location.get_angle_dict()
         coordinates = self.kinematics.get_forward_cartesian(angles)
@@ -65,8 +75,11 @@ class Controller:
 
     def classify_current_view(self) -> 'RecognizedObject':
         """
+        Retrieves view from camera and classifies the image according to the object classifier of this
+        control class
 
-        Returns:
+        Returns: RecognizedObject of which the object classifier is most certain it is correct
+                None if no classification was produced (or unknown classification)
 
         """
 
