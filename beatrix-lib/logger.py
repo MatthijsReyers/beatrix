@@ -41,13 +41,3 @@ class Logger():
 
     def okay(self, message:str):
         print('[*]')
-
-
-
-if __name__ == '__main__':
-    logger = Logger()
-
-    try:
-        raise Exception
-    except Exception as e:
-        logger.exception(e,'test.location')
